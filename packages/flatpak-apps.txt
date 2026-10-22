@@ -1,0 +1,26 @@
+# ==============================================================================
+# Lista de aplicaciones Flatpak (Flathub) - Actualizada automáticamente
+# ==============================================================================
+# Las líneas que empiezan por '#' son comentarios.
+# Puedes añadir nuevos IDs de Flathub directamente aquí.
+# ==============================================================================
+# Fecha de última exportación: Thu Oct 22 05:20:10 AM CST 2026
+
+com.brave.Browser                    # Navegador Brave
+com.github.Matoking.protontricks     # Protontricks
+com.github.tchx84.Flatseal           # Gestor de permisos Flatseal
+com.google.Chrome                    # Google Chrome
+com.onepassword.OnePassword          # 1Password
+com.spotify.Client                   # Spotify
+com.visualstudio.code                # Visual Studio Code
+com.vysp3r.ProtonPlus                # ProtonPlus
+io.github.DenysMb.Kontainer          # GUI de contenedores Kontainer
+io.github.flattool.Warehouse         # Gestor de Flatpaks Warehouse
+org.apache.netbeans                  # Apache NetBeans IDE
+org.gnome.Firmware                   # Actualizador de Firmware
+org.kde.gwenview                     # Visor de imágenes Gwenview
+org.kde.haruna                       # Haruna Video Player
+org.kde.kcalc                        # Calculadora KCalc
+org.kde.okular                       # Lector de PDF Okular
+org.mozilla.firefox                  # Mozilla Firefox
+org.videolan.VLC                     # VLC Media Player
