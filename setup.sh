@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# setup.sh - Instalador Universal de Software y Entorno para Cualquier Linux
+# setup.sh - Instalador Universal y Modular para Cualquier Distribución Linux
 # ==============================================================================
-# Autor: Luis (Generado y optimizado por Antigravity)
 # Soporta: Ubuntu/Debian, Fedora, Arch/Manjaro, openSUSE, Bazzite, SteamOS, etc.
 # ==============================================================================
 
@@ -14,13 +13,14 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m' # No Color
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PACKAGES_FILE="${SCRIPT_DIR}/packages/flatpak-apps.txt"
 CLI_HELPER="${SCRIPT_DIR}/packages/cli-packages.sh"
-TAILSCALE_HELPER="${SCRIPT_DIR}/scripts/install-tailscale.sh"
+SCRIPTS_DIR="${SCRIPT_DIR}/scripts"
 
 print_header() {
     clear 2>/dev/null || true
@@ -42,154 +42,158 @@ EOF
 show_help() {
     echo -e "${BOLD}Uso:${NC} ./setup.sh [OPCIONES]"
     echo ""
-    echo "Opciones:"
-    echo "  --all             Instala todo (Paquetes CLI + Flatpaks GUI + Tailscale) [Por defecto]"
-    echo "  --flatpaks        Instala únicamente las aplicaciones gráficas (Flatpaks)"
-    echo "  --cli             Instala únicamente las herramientas CLI del sistema"
-    echo "  --tailscale       Instala y configura únicamente Tailscale"
-    echo "  --dry-run         Muestra qué se instalaría sin realizar cambios"
+    echo "Opciones principales:"
+    echo "  --native          Instala programas en versión NATIVA (Brave Origin, VS Code nativo,"
+    echo "                    Steam, Tailscale, Grok Bot, Craft Suite, CLI + Flatpaks complementarios) [Recomendado]"
+    echo "  --flatpak-only    Instala todo exclusivamente mediante Flatpak (Ideal para Bazzite/SteamOS)"
+    echo "  --cli             Instala solo herramientas de terminal y paquetes esenciales del sistema"
+    echo "  --brave           Instala solo Brave Origin (repositorio nativo oficial)"
+    echo "  --vscode          Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
+    echo "  --steam           Instala solo Steam"
+    echo "  --tailscale       Instala y configura solo Tailscale"
+    echo "  --grokbot         Instala y configura solo Grok Bot (AppImage)"
+    echo "  --craft           Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
+    echo "  --dry-run         Simula las acciones sin modificar el sistema"
     echo "  -h, --help        Muestra esta ayuda"
     echo ""
 }
 
-# Comprobar e instalar Flatpak si no existe en el sistema
 ensure_flatpak_installed() {
     if ! command -v flatpak >/dev/null 2>&1; then
-        echo -e "${YELLOW}[!] Flatpak no está instalado. Instalándolo...${NC}"
-        if command -v apt >/dev/null 2>&1; then
-            sudo apt update && sudo apt install -y flatpak
+        echo -e "${YELLOW}[!] Flatpak no está instalado. Instalándolo mediante el gestor del sistema...${NC}"
+        if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update && sudo apt-get install -y flatpak
         elif command -v dnf >/dev/null 2>&1; then
             sudo dnf install -y flatpak
         elif command -v pacman >/dev/null 2>&1; then
             sudo pacman -S --noconfirm --needed flatpak
         elif command -v zypper >/dev/null 2>&1; then
             sudo zypper --non-interactive install flatpak
-        else
-            echo -e "${RED}[ERROR] No se pudo instalar Flatpak automáticamente. Instálalo manualmente.${NC}"
-            return 1
         fi
     fi
 
-    # Asegurar el repositorio Flathub
     echo -e "${BLUE}[+] Verificando repositorio Flathub...${NC}"
     flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
-    echo -e "${GREEN}[✓] Flatpak y Flathub listos.${NC}"
+    echo -e "${GREEN}[✓] Flatpak y Flathub configurados.${NC}"
 }
 
-# Instalación de aplicaciones Flatpak
 install_flatpaks() {
-    echo -e "\n${BOLD}${CYAN}=== 1. INSTALACIÓN DE APLICACIONES GUI (FLATPAK) ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== APLICACIONES FLATPAK COMPLEMENTARIAS ===${NC}"
     ensure_flatpak_installed
 
     if [ ! -f "${PACKAGES_FILE}" ]; then
-        echo -e "${RED}[ERROR] No se encontró el archivo: ${PACKAGES_FILE}${NC}"
+        echo -e "${RED}[ERROR] No se encontró ${PACKAGES_FILE}${NC}"
         return 1
     fi
 
     local apps=()
     while IFS= read -r line || [ -n "$line" ]; do
-        # Eliminar comentarios y espacios en blanco
         cleaned=$(echo "$line" | sed 's/#.*//' | xargs)
         if [ -n "$cleaned" ]; then
             apps+=("$cleaned")
         fi
     done < "${PACKAGES_FILE}"
 
-    echo -e "${BLUE}[i] Total de aplicaciones a verificar/instalar: ${#apps[@]}${NC}\n"
-
-    local installed_count=0
-    local failed_count=0
-
     for app in "${apps[@]}"; do
+        # Evitar duplicados si el usuario instaló la versión nativa de Brave, VS Code o Steam
+        if [ "$app" = "com.brave.Browser" ] && (command -v brave-origin >/dev/null 2>&1 || command -v brave-browser >/dev/null 2>&1); then
+            echo -e "  ${MAGENTA}[* Omitido]${NC} com.brave.Browser (Ya tienes instalado Brave Origin nativo)"
+            continue
+        fi
+
+        if [ "$app" = "com.visualstudio.code" ] && command -v code >/dev/null 2>&1; then
+            echo -e "  ${MAGENTA}[* Omitido]${NC} com.visualstudio.code (Ya tienes instalado VS Code nativo 'code')"
+            continue
+        fi
+
+        if [ "$app" = "com.valvesoftware.Steam" ] && command -v steam >/dev/null 2>&1; then
+            echo -e "  ${MAGENTA}[* Omitido]${NC} com.valvesoftware.Steam (Ya tienes instalado Steam nativo)"
+            continue
+        fi
+
         if flatpak info "$app" >/dev/null 2>&1; then
             echo -e "  ${GREEN}[✓ Ya instalado]${NC} $app"
-            ((installed_count++))
         else
-            echo -e "  ${YELLOW}[+] Instalando:${NC} $app..."
-            if flatpak install -y --noninteractive flathub "$app"; then
-                echo -e "  ${GREEN}[✓ Completado]${NC} $app"
-                ((installed_count++))
-            else
-                echo -e "  ${RED}[✗ Falló]${NC} $app"
-                ((failed_count++))
-            fi
+            echo -e "  ${YELLOW}[+] Instalando Flatpak:${NC} $app..."
+            flatpak install -y --noninteractive flathub "$app" || echo -e "  ${RED}[✗ Error]${NC} $app"
         fi
     done
-
-    echo -e "\n${GREEN}[✓] Proceso de Flatpaks terminado: ${installed_count} listos, ${failed_count} con error.${NC}"
 }
 
-# Instalación de CLI esencial
 install_cli() {
-    echo -e "\n${BOLD}${CYAN}=== 2. INSTALACIÓN DE PAQUETES CLI ESENCIALES ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS CLI ESENCIALES ===${NC}"
     if [ -f "${CLI_HELPER}" ]; then
         # shellcheck source=/dev/null
         source "${CLI_HELPER}"
         install_essential_cli
-    else
-        echo -e "${RED}[ERROR] No se encontró ${CLI_HELPER}${NC}"
-        return 1
     fi
 }
 
-# Instalación de Tailscale
+install_brave_origin() {
+    echo -e "\n${BOLD}${CYAN}=== BRAVE ORIGIN (NATIVO) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-brave.sh"
+}
+
+install_vscode() {
+    echo -e "\n${BOLD}${CYAN}=== VISUAL STUDIO CODE ===${NC}"
+    bash "${SCRIPTS_DIR}/install-vscode.sh" "${1:-false}"
+}
+
+install_steam() {
+    echo -e "\n${BOLD}${CYAN}=== STEAM ===${NC}"
+    bash "${SCRIPTS_DIR}/install-steam.sh" "${1:-false}"
+}
+
 install_tailscale() {
-    echo -e "\n${BOLD}${CYAN}=== 3. INSTALACIÓN DE TAILSCALE ===${NC}"
-    if [ -f "${TAILSCALE_HELPER}" ]; then
-        bash "${TAILSCALE_HELPER}"
-    else
-        echo -e "${RED}[ERROR] No se encontró ${TAILSCALE_HELPER}${NC}"
-        return 1
-    fi
+    echo -e "\n${BOLD}${CYAN}=== TAILSCALE ===${NC}"
+    bash "${SCRIPTS_DIR}/install-tailscale.sh"
 }
 
-# Modo simulación
+install_grokbot() {
+    echo -e "\n${BOLD}${CYAN}=== GROK BOT ===${NC}"
+    bash "${SCRIPTS_DIR}/install-grokbot.sh"
+}
+
+install_craft_suite() {
+    echo -e "\n${BOLD}${CYAN}=== SUITE CRAFT (ARTCRAFT, GRIDCRAFT, DECKCRAFT...) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-craft-suite.sh"
+}
+
 dry_run() {
     echo -e "${YELLOW}${BOLD}--- MODO SIMULACIÓN (DRY-RUN) ---${NC}"
-    echo "1. Aplicaciones Flatpak en ${PACKAGES_FILE}:"
+    echo "1. Programas Nativos / Especiales:"
+    echo "   - Brave: Se instalará Brave Origin mediante script oficial (FLAVOR=origin)."
+    echo "   - VS Code: Se configurará el repositorio oficial de Microsoft (APT/DNF/Pacman)."
+    echo "   - Steam: Se instalará el paquete nativo de la distro o Steam Flatpak."
+    echo "   - Tailscale: Script oficial universal + activación de systemd."
+    echo "   - Grok Bot: Integración de AppImage en ~/.local/share/grok-bot + .desktop."
+    echo "   - Suite Craft: ArtCraft Launcher (bundle) para GridCraft, DeckCraft, WordCraft y PdfCraft."
+    echo ""
+    echo "2. Herramientas CLI del sistema:"
+    echo "   - git, gh, curl, wget, jq, ripgrep, tree, rsync, htop, btop, tmux, zsh, build tools."
+    echo ""
+    echo "3. Aplicaciones Flatpak complementarias (Flathub):"
     grep -v '^#' "${PACKAGES_FILE}" | grep -v '^$' | while read -r line; do
         echo "   - $line"
     done
-
-    echo ""
-    echo "2. Paquetes CLI esenciales a instalar según tu distribución:"
-    echo "   - git, gh, curl, wget, jq, ripgrep, tree, rsync"
-    echo "   - htop, btop, tmux, zsh, fastfetch, zip/unzip/p7zip"
-    echo "   - Compiladores y herramientas base (gcc, make, etc.)"
-    echo ""
-    echo "3. Tailscale:"
-    echo "   - Descarga del script oficial, activación del servicio tailscaled y soporte multi-distro."
 }
 
-# Procesar argumentos de línea de comandos
 ACTION="interactive"
 
 if [ $# -gt 0 ]; then
     case "$1" in
-        --all)
-            ACTION="all"
-            ;;
-        --flatpaks)
-            ACTION="flatpaks"
-            ;;
-        --cli)
-            ACTION="cli"
-            ;;
-        --tailscale)
-            ACTION="tailscale"
-            ;;
-        --dry-run)
-            ACTION="dry-run"
-            ;;
-        -h|--help)
-            show_help
-            exit 0
-            ;;
-        *)
-            echo -e "${RED}[!] Opción desconocida: $1${NC}"
-            show_help
-            exit 1
-            ;;
+        --native|--all) ACTION="native" ;;
+        --flatpak-only) ACTION="flatpak_only" ;;
+        --cli) ACTION="cli" ;;
+        --brave) ACTION="brave" ;;
+        --vscode) ACTION="vscode" ;;
+        --steam) ACTION="steam" ;;
+        --tailscale) ACTION="tailscale" ;;
+        --grokbot) ACTION="grokbot" ;;
+        --craft) ACTION="craft" ;;
+        --dry-run) ACTION="dry-run" ;;
+        -h|--help) show_help; exit 0 ;;
+        *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
     esac
 fi
 
@@ -201,42 +205,75 @@ if [ "$ACTION" = "dry-run" ]; then
 fi
 
 if [ "$ACTION" = "interactive" ]; then
-    echo "Elige qué deseas hacer:"
-    echo "  1) Instalar TODO (CLI + Flatpaks [VS Code, NetBeans, etc.] + Tailscale) [Recomendado]"
-    echo "  2) Instalar solo aplicaciones gráficas (Flatpaks)"
-    echo "  3) Instalar solo herramientas CLI esenciales"
-    echo "  4) Instalar y configurar solo Tailscale"
-    echo "  5) Solo ver qué se instalaría (Dry run)"
-    echo "  6) Salir"
+    echo -e "${BOLD}¿Cómo deseas instalar tus programas?${NC}"
+    echo "  1) Modo Híbrido / Nativo (Recomendado para distros tradicionales):"
+    echo "     - Brave Origin nativo, VS Code nativo, Steam, Tailscale,"
+    echo "     - Grok Bot (AppImage), Suite Craft (ArtCraft/GridCraft),"
+    echo "     - Herramientas CLI + Flatpaks complementarios (1Password, NetBeans, Spotify, VLC...)"
     echo ""
-    read -rp "Selecciona una opción [1-6] (por defecto 1): " choice
+    echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o sistemas inmutables)"
+    echo "  3) Solo Brave Origin (Nativo)"
+    echo "  4) Solo VS Code y NetBeans"
+    echo "  5) Solo Steam, Grok Bot y Suite Craft"
+    echo "  6) Solo Tailscale"
+    echo "  7) Solo herramientas de terminal (CLI)"
+    echo "  8) Simulación (Dry run)"
+    echo "  9) Salir"
+    echo ""
+    read -rp "Selecciona una opción [1-9] (por defecto 1): " choice
     choice=${choice:-1}
 
     case "$choice" in
-        1) ACTION="all" ;;
-        2) ACTION="flatpaks" ;;
-        3) ACTION="cli" ;;
-        4) ACTION="tailscale" ;;
-        5) ACTION="dry-run" ;;
-        6) echo "Operación cancelada."; exit 0 ;;
+        1) ACTION="native" ;;
+        2) ACTION="flatpak_only" ;;
+        3) ACTION="brave" ;;
+        4) ACTION="dev_tools" ;;
+        5) ACTION="custom_apps" ;;
+        6) ACTION="tailscale" ;;
+        7) ACTION="cli" ;;
+        8) ACTION="dry-run" ;;
+        9) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
     esac
 fi
 
 case "$ACTION" in
-    all)
+    native)
         install_cli
-        install_flatpaks
+        install_brave_origin
+        install_vscode "false"
+        install_steam "false"
         install_tailscale
-        ;;
-    flatpaks)
+        install_grokbot
+        install_craft_suite
         install_flatpaks
         ;;
-    cli)
+    flatpak_only)
         install_cli
+        install_vscode "true"
+        install_steam "true"
+        install_tailscale
+        install_grokbot
+        install_craft_suite
+        install_flatpaks
+        ;;
+    brave)
+        install_brave_origin
+        ;;
+    dev_tools)
+        install_vscode "false"
+        flatpak install -y flathub org.apache.netbeans
+        ;;
+    custom_apps)
+        install_steam "false"
+        install_grokbot
+        install_craft_suite
         ;;
     tailscale)
         install_tailscale
+        ;;
+    cli)
+        install_cli
         ;;
     dry-run)
         dry_run
@@ -244,9 +281,9 @@ case "$ACTION" in
 esac
 
 echo -e "\n${GREEN}${BOLD}======================================================================${NC}"
-echo -e "${GREEN}${BOLD}  ¡Configuración completada con éxito!${NC}"
+echo -e "${GREEN}${BOLD}  ¡Proceso finalizado con éxito!${NC}"
 echo -e "${GREEN}${BOLD}======================================================================${NC}"
-echo -e "Consejos:"
-echo -e " - Si instalaste Tailscale por primera vez, conéctate con: ${CYAN}sudo tailscale up${NC}"
-echo -e " - En algunas distros, si instalaste Flatpak por primera vez, puede ser necesario reiniciar sesión para que aparezcan todos los iconos en el menú de aplicaciones."
+echo -e "Recomendaciones:"
+echo -e " - Conecta Tailscale: ${CYAN}sudo tailscale up${NC}"
+echo -e " - Si instalaste aplicaciones nuevas, puedes verlas en tu menú de aplicaciones."
 echo ""

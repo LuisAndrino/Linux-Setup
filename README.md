@@ -4,106 +4,69 @@ Script modular y universal para replicar y reinstalar automáticamente todos tus
 
 ---
 
-## 📦 ¿Qué incluye este instalador?
+## 📦 Software Incluido y Métodos de Instalación
 
-### 1. Aplicaciones Gráficas (GUI vía Flatpak/Flathub)
-Garantizan **exactamente la misma versión y comportamiento** sin importar qué distribución uses:
-* **Desarrollo y Programación:**
-  * **Visual Studio Code** (`com.visualstudio.code`)
-  * **Apache NetBeans IDE** (`org.apache.netbeans`)
-* **Navegadores:**
-  * Brave Browser (`com.brave.Browser`)
-  * Google Chrome (`com.google.Chrome`)
-  * Mozilla Firefox (`org.mozilla.firefox`)
-* **Seguridad y Productividad:**
-  * 1Password (`com.onepassword.OnePassword`)
-  * Okular (Visor PDF / Documentos)
-  * KCalc (Calculadora)
-  * GNOME Firmware (Actualización de periféricos y hardware)
-* **Multimedia y Entretenimiento:**
-  * Spotify (`com.spotify.Client`)
-  * VLC Media Player (`org.videolan.VLC`)
-  * Haruna Video Player (`org.kde.haruna`)
-  * Gwenview (Visor de imágenes)
-* **Gestión de Flatpaks y Contenedores:**
-  * Flatseal (Gestor visual de permisos de apps)
-  * Warehouse (Gestión, actualización y limpieza de Flatpaks)
-  * Kontainer (GUI para Docker / Podman)
-  * Protontricks y ProtonPlus (Gestión de capas de compatibilidad Wine/Proton)
+### 1. Aplicaciones Nativas / Especiales
+* **Brave Origin (Nativo Oficial):**
+  Instalado mediante el script oficial de Brave con `FLAVOR=origin` (añade los repositorios oficiales de Brave Software).
+* **Visual Studio Code (Nativo Oficial):**
+  Configura el repositorio oficial de Microsoft (`code`) con soporte para APT, DNF, Pacman y Zypper.
+* **Steam:**
+  Instala la versión nativa de la distro (con soporte multilib/RPM Fusion) o Flatpak según convenga.
+* **Tailscale:**
+  VPN mesh con instalación nativa universal y servicio `tailscaled` activado en `systemd`.
+* **Grok Bot (AppImage):**
+  Integración automática del AppImage en `~/.local/share/grok-bot/appimage` y acceso directo `.desktop` con icono.
+* **Suite Craft (ArtCraft Launcher, GridCraft, DeckCraft, WordCraft, PdfCraft):**
+  Incluye el bundle de instalación de ArtCraft Launcher en `bundles/`, desde el cual se gestionan y actualizan todas las aplicaciones de la suite Craft.
 
-### 2. Red y Conectividad
-* **Tailscale**: VPN mesh segura y acceso remoto entre tus equipos.
-  * Instalado mediante el script oficial universal o soporte nativo.
-  * Servicio `tailscaled` habilitado automáticamente en `systemd`.
+### 2. Aplicaciones Gráficas Complementarias (Flathub / Flatpak)
+Garantizan idénticas versiones y configuración en cualquier distribución:
+* **Desarrollo:** Apache NetBeans IDE (`org.apache.netbeans`).
+* **Navegadores:** Google Chrome (`com.google.Chrome`), Mozilla Firefox (`org.mozilla.firefox`).
+* **Seguridad y Productividad:** 1Password, Okular (PDFs), KCalc, Firmware Updater.
+* **Multimedia:** Spotify, VLC Media Player, Haruna, Gwenview.
+* **Gestión de Sistema y Gaming:** Flatseal, Warehouse, Kontainer (Podman/Docker), Protontricks, ProtonPlus.
 
-### 3. Herramientas CLI Esenciales de Linux
-Detección automática del gestor nativo (`apt`, `dnf`, `pacman`, `zypper` o `brew` en inmutables):
-* **Control de versiones & Dev:** `git`, `gh` (GitHub CLI), `build-essential` / `base-devel` (`gcc`, `make`).
-* **Utilidades del sistema:** `curl`, `wget`, `jq`, `ripgrep`, `tree`, `rsync`, `zip`, `unzip`, `p7zip`.
-* **Monitoreo & Productividad:** `htop`, `btop`, `fastfetch`, `tmux`, `zsh`.
+### 3. Herramientas CLI Esenciales
+Detección automática de gestor nativo (`apt`, `dnf`, `pacman`, `zypper` o `brew`):
+* `git`, `gh` (GitHub CLI), `curl`, `wget`, `jq`, `ripgrep`, `tree`, `rsync`.
+* `htop`, `btop`, `fastfetch`, `tmux`, `zsh`, compresores (`zip`, `unzip`, `p7zip`).
+* Compiladores y herramientas base (`gcc`, `make`, `build-essential` / `base-devel`).
 
 ---
 
-## ⚡ Instalación Rápida en una Nueva Máquina
+## ⚡ Modos de Instalación
 
-### Opción A: Clonando este repositorio (Recomendado)
 ```bash
-git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup
-cd ~/linux-setup
-chmod +x setup.sh scripts/*.sh packages/*.sh
-./setup.sh
-```
+# Modo 1: Híbrido / Nativo (Recomendado para Ubuntu, Debian, Fedora, Arch...)
+# Instala Brave Origin, VS Code nativo, Steam nativo, Grok Bot, Craft Suite, CLI y Flatpaks
+./setup.sh --native
 
-### Opción B: Ejecución por partes o con parámetros
-```bash
-# Instalar todo de forma automática sin preguntas:
-./setup.sh --all
+# Modo 2: 100% Flatpak (Ideal para Bazzite, SteamOS o sistemas inmutables)
+./setup.sh --flatpak-only
 
-# Instalar solo las aplicaciones gráficas (Flatpaks):
-./setup.sh --flatpaks
+# Instalaciones individuales o específicas:
+./setup.sh --brave       # Solo Brave Origin
+./setup.sh --vscode      # Solo VS Code
+./setup.sh --steam       # Solo Steam
+./setup.sh --grokbot     # Solo Grok Bot
+./setup.sh --craft       # Solo Suite Craft
+./setup.sh --tailscale   # Solo Tailscale
+./setup.sh --cli         # Solo herramientas de terminal
 
-# Instalar solo herramientas de terminal (CLI):
-./setup.sh --cli
-
-# Instalar y activar solo Tailscale:
-./setup.sh --tailscale
-
-# Probar qué haría sin hacer cambios:
+# Simulación (sin tocar el sistema):
 ./setup.sh --dry-run
 ```
 
 ---
 
-## 🔄 Cómo Mantener Tu Lista de Programas Sincronizada
+## 🔄 Cómo Mantener Tus Paquetes Actualizados
 
-Cuando instales nuevas aplicaciones en tu máquina y quieras que se incluyan para el futuro:
-
-1. Ejecuta el script de exportación:
-   ```bash
-   ./scripts/export-my-apps.sh
-   ```
-2. Este script leerá automáticamente tus Flatpaks instalados y actualizará `packages/flatpak-apps.txt`.
-3. Sube los cambios a tu repositorio Git:
-   ```bash
-   git add packages/
-   git commit -m "Actualizar lista de aplicaciones instaladas"
-   git push
-   ```
-
----
-
-## 🛠️ Personalización Fácil
-* Para **añadir** una nueva aplicación gráfica:
-  Abre [Flathub](https://flathub.org), busca el programa, copia su ID (ej. `org.flameshot.Flameshot`) y pégalo en una línea de `packages/flatpak-apps.txt`.
-* Para **quitar** un programa:
-  Simplemente borra o comenta la línea con `#` en `packages/flatpak-apps.txt`.
-
----
-
-## 🔐 Primeros Pasos Post-Instalación
-1. **Tailscale:** Conéctate a tu red ejecutando:
-   ```bash
-   sudo tailscale up
-   ```
-2. **VS Code:** Inicia sesión con tu cuenta de GitHub o Microsoft para sincronizar automáticamente extensiones, temas y atajos (`Settings Sync`).
-3. **1Password:** Inicia sesión para recuperar todas tus credenciales y llaves SSH.
+Cuando instales aplicaciones nuevas en el futuro:
+```bash
+./scripts/export-my-apps.sh
+git add packages/
+git commit -m "Actualizar lista de programas"
+git push
+```

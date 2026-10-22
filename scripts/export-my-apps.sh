@@ -14,11 +14,11 @@ echo "=========================================================="
 echo "      Exportador de Paquetes y Aplicaciones de Usuario    "
 echo "=========================================================="
 
-# Función para añadir etiquetas legibles a IDs populares
 get_app_description() {
     case "$1" in
         "com.visualstudio.code") echo "Visual Studio Code" ;;
         "org.apache.netbeans") echo "Apache NetBeans IDE" ;;
+        "com.valvesoftware.Steam") echo "Steam" ;;
         "com.brave.Browser") echo "Navegador Brave" ;;
         "com.google.Chrome") echo "Google Chrome" ;;
         "org.mozilla.firefox") echo "Mozilla Firefox" ;;
@@ -35,6 +35,11 @@ get_app_description() {
         "com.github.Matoking.protontricks") echo "Protontricks" ;;
         "com.vysp3r.ProtonPlus") echo "ProtonPlus" ;;
         "org.gnome.Firmware") echo "Actualizador de Firmware" ;;
+        "ai.storyteller.artcraft-launcher") echo "ArtCraft Launcher (Suite Craft)" ;;
+        "ai.storyteller.gridcraft") echo "GridCraft (Hojas de cálculo)" ;;
+        "ai.storyteller.deckcraft") echo "DeckCraft (Presentaciones)" ;;
+        "ai.storyteller.pdfcraft") echo "PdfCraft (PDFs)" ;;
+        "ai.storyteller.wordcraft") echo "WordCraft (Documentos)" ;;
         *) echo "" ;;
     esac
 }
@@ -44,8 +49,8 @@ if command -v flatpak >/dev/null 2>&1; then
     echo "[+] Extrayendo Flatpaks instalados desde Flathub..."
     INSTALLED_FLATPAKS=$(flatpak list --app --columns=application,origin | awk '$2=="flathub" {print $1}' | sort -u)
 
-    # Asegurar que VS Code y NetBeans se mantengan si el usuario los quiere siempre
-    MUST_HAVE=("com.visualstudio.code" "org.apache.netbeans")
+    # Asegurar que las aplicaciones clave siempre estén consideradas
+    MUST_HAVE=("com.visualstudio.code" "org.apache.netbeans" "com.valvesoftware.Steam")
 
     TEMP_FILE=$(mktemp)
     cat << 'EOF' > "${TEMP_FILE}"
@@ -75,11 +80,9 @@ EOF
     mv "${TEMP_FILE}" "${OUTPUT_FLATPAK}"
     echo "[✓] Lista Flatpak actualizada en: ${OUTPUT_FLATPAK}"
     echo "    Total de aplicaciones Flatpak registradas: $(grep -v '^#' "${OUTPUT_FLATPAK}" | grep -v '^$' | wc -l)"
-else
-    echo "[!] Flatpak no está instalado en este sistema."
 fi
 
-# 2. Exportar paquetes según el gestor nativo de la máquina actual (referencia)
+# 2. Exportar paquetes nativos según gestor
 echo "[+] Exportando lista de paquetes nativos del sistema..."
 
 if command -v pacman >/dev/null 2>&1; then
@@ -106,8 +109,4 @@ fi
 echo ""
 echo "=========================================================="
 echo " ¡Exportación completada exitosamente!"
-echo " Puedes sincronizar estos cambios con tu repositorio Git:"
-echo "   git add packages/"
-echo "   git commit -m 'Actualizar lista de programas instalados'"
-echo "   git push"
 echo "=========================================================="
