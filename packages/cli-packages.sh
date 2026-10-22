@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# cli-packages.sh - Mapeo y funciones de instalación para paquetes CLI esenciales
+# cli-packages.sh - Mapeo y funciones de instalación para paquetes CLI y Gaming
 # ==============================================================================
 
 detect_distro() {
@@ -24,39 +24,46 @@ detect_distro() {
 install_cli_debian() {
     echo "==> [APT] Actualizando índices de paquetes..."
     sudo apt update -y
-    echo "==> [APT] Instalando paquetes CLI y terminal esenciales..."
+    echo "==> [APT] Instalando paquetes CLI, terminal y optimizaciones de gaming..."
     sudo apt install -y \
         curl wget git gh jq ripgrep tree rsync \
         htop btop tmux zsh zip unzip p7zip-full \
         build-essential ca-certificates gnupg \
-        openssh-client openssh-server alacritty || true
+        openssh-client openssh-server alacritty \
+        gamemode mangohud || true
 
     sudo apt install -y fastfetch 2>/dev/null || sudo apt install -y neofetch 2>/dev/null || true
 }
 
 install_cli_fedora() {
-    echo "==> [DNF] Instalando paquetes CLI y terminal esenciales..."
+    echo "==> [DNF] Instalando paquetes CLI, terminal y optimizaciones de gaming..."
     sudo dnf install -y \
         curl wget git gh jq ripgrep tree rsync \
         htop btop tmux zsh zip unzip p7zip p7zip-plugins \
         gcc gcc-c++ make automake autoconf \
-        openssh-clients openssh-server fastfetch alacritty || true
+        openssh-clients openssh-server fastfetch alacritty \
+        gamemode mangohud || true
 }
 
 install_cli_arch() {
-    echo "==> [PACMAN] Actualizando e instalando paquetes CLI y terminal esenciales..."
+    echo "==> [PACMAN] Actualizando e instalando paquetes CLI, terminal y gaming..."
     sudo pacman -Syu --noconfirm --needed \
         curl wget git github-cli jq ripgrep tree rsync \
         htop btop tmux zsh zip unzip p7zip \
-        base-devel openssh fastfetch alacritty || true
+        base-devel openssh fastfetch alacritty \
+        gamemode mangohud || true
+
+    # Si multilib está habilitado, instalar versiones de 32 bits para juegos clásicos
+    sudo pacman -S --needed --noconfirm lib32-gamemode lib32-mangohud 2>/dev/null || true
 }
 
 install_cli_zypper() {
-    echo "==> [ZYPPER] Instalando paquetes CLI y terminal esenciales..."
+    echo "==> [ZYPPER] Instalando paquetes CLI, terminal y gaming..."
     sudo zypper --non-interactive install \
         curl wget git gh jq ripgrep tree rsync \
         htop btop tmux zsh zip unzip p7zip \
-        gcc gcc-c++ make openssh fastfetch alacritty || true
+        gcc gcc-c++ make openssh fastfetch alacritty \
+        gamemode mangohud || true
 }
 
 install_cli_immutable() {

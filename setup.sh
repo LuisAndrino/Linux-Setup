@@ -42,11 +42,16 @@ EOF
 show_help() {
     echo -e "${BOLD}Uso:${NC} ./setup.sh [OPCIONES]"
     echo ""
+    echo "Comando para instalar TODO desatendido:"
+    echo "  ${CYAN}./setup.sh --yes${NC}   o   ${CYAN}./setup.sh --all${NC}"
+    echo ""
     echo "Opciones principales:"
+    echo "  -y, --yes, --all  Instala TODO de forma automática y desatendida [Recomendado]"
     echo "  --native          Instala programas en versión NATIVA (Brave Origin, VS Code nativo,"
     echo "                    Steam, Tailscale, Antigravity, PowerShell, Terminal rápida (Alacritty),"
     echo "                    Grok Bot, Craft Suite, CLI + Flatpaks complementarios) [Recomendado]"
     echo "  --flatpak-only    Instala todo mediante Flatpak (Ideal para Bazzite/SteamOS inmutables)"
+    echo "  --gaming          Instala solo herramientas y launchers de Gaming (Lutris, Heroic, Prism, etc.)"
     echo "  --cli             Instala solo herramientas de terminal y paquetes esenciales"
     echo "  --brave           Instala solo Brave Origin (repositorio nativo oficial)"
     echo "  --vscode          Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
@@ -125,7 +130,7 @@ install_flatpaks() {
 }
 
 install_cli() {
-    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS CLI ESENCIALES ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS CLI Y OPTIMIZACIONES DE SISTEMA ===${NC}"
     if [ -f "${CLI_HELPER}" ]; then
         # shellcheck source=/dev/null
         source "${CLI_HELPER}"
@@ -178,23 +183,52 @@ install_craft_suite() {
     bash "${SCRIPTS_DIR}/install-craft-suite.sh"
 }
 
+install_gaming_suite() {
+    echo -e "\n${BOLD}${CYAN}=== LAUNCHERS Y HERRAMIENTAS DE GAMING ===${NC}"
+    install_steam "false"
+    ensure_flatpak_installed
+    echo "[+] Instalando Launchers y compatibilidad (Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Bottles)..."
+    flatpak install -y --noninteractive flathub \
+        net.lutris.Lutris \
+        com.heroicgameslauncher.hgl \
+        org.prismlauncher.PrismLauncher \
+        net.davidotek.pupgui2 \
+        io.github.benjamimgois.goverlay \
+        com.usebottles.bottles \
+        com.github.Matoking.protontricks \
+        com.vysp3r.ProtonPlus || true
+}
+
 dry_run() {
     echo -e "${YELLOW}${BOLD}--- MODO SIMULACIÓN (DRY-RUN) ---${NC}"
     echo "1. Programas Nativos / Especiales:"
-    echo "   - Brave: Se instalará Brave Origin mediante script oficial (FLAVOR=origin)."
-    echo "   - VS Code: Repositorio oficial de Microsoft (APT/DNF/Pacman)."
+    echo "   - Brave: Brave Origin (FLAVOR=origin)."
+    echo "   - VS Code: Repositorio oficial Microsoft (code)."
     echo "   - Steam: Paquete nativo de la distro o Steam Flatpak."
-    echo "   - Tailscale: Script oficial universal + activación de systemd."
-    echo "   - Antigravity: Instalador oficial de Google Antigravity (AppImage / Homebrew)."
+    echo "   - Tailscale: Script oficial universal + activación systemd."
+    echo "   - Antigravity: Instalador oficial de Google Antigravity."
     echo "   - PowerShell: Microsoft PowerShell (pwsh)."
     echo "   - Terminal rápida: Alacritty / Ghostty (GPU accelerated - estilo Omarchy)."
-    echo "   - Grok Bot: Integración de AppImage en ~/.local/share/grok-bot + .desktop."
+    echo "   - Grok Bot: AppImage en ~/.local/share/grok-bot + .desktop."
     echo "   - Suite Craft: ArtCraft Launcher (bundle) para GridCraft, DeckCraft, WordCraft y PdfCraft."
     echo ""
-    echo "2. Herramientas CLI del sistema:"
+    echo "2. Gaming & Optimización:"
+    echo "   - GameMode (optimizador de CPU/Kernel), MangoHud (FPS/Overlay), Vulkan 32/64 bits."
+    echo "   - Lutris, Heroic Games Launcher, Prism Launcher (Minecraft)."
+    echo "   - ProtonUp-Qt, Goverlay, Bottles, Protontricks, ProtonPlus."
+    echo ""
+    echo "3. Música y Audio:"
+    echo "   - ncspot (Cliente ligero de Spotify en Rust)."
+    echo "   - Strawberry Music Player (Reproductor audiófilo de alta fidelidad FLAC)."
+    echo "   - Amberol (Reproductor minimalista FLAC/local)."
+    echo ""
+    echo "4. Mensajería y Redes:"
+    echo "   - WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack."
+    echo ""
+    echo "5. Herramientas CLI del sistema:"
     echo "   - git, gh, curl, wget, jq, ripgrep, tree, rsync, htop, btop, tmux, zsh, build tools."
     echo ""
-    echo "3. Aplicaciones Flatpak complementarias (Flathub):"
+    echo "6. Productividad & Flatpaks complementarios:"
     grep -v '^#' "${PACKAGES_FILE}" | grep -v '^$' | while read -r line; do
         echo "   - $line"
     done
@@ -204,8 +238,9 @@ ACTION="interactive"
 
 if [ $# -gt 0 ]; then
     case "$1" in
-        --native|--all) ACTION="native" ;;
+        -y|--yes|--all|--install-all|--native) ACTION="native" ;;
         --flatpak-only) ACTION="flatpak_only" ;;
+        --gaming) ACTION="gaming" ;;
         --cli) ACTION="cli" ;;
         --brave) ACTION="brave" ;;
         --vscode) ACTION="vscode" ;;
@@ -231,34 +266,31 @@ fi
 
 if [ "$ACTION" = "interactive" ]; then
     echo -e "${BOLD}¿Cómo deseas instalar tus programas?${NC}"
-    echo "  1) Modo Híbrido / Nativo (Recomendado para distros tradicionales):"
-    echo "     - Brave Origin nativo, VS Code nativo, Steam, Tailscale,"
-    echo "     - Google Antigravity, PowerShell (pwsh), Terminal rápida estilo Omarchy (Alacritty),"
-    echo "     - Grok Bot (AppImage), Suite Craft (ArtCraft/GridCraft),"
-    echo "     - Herramientas CLI + Flatpaks (WhatsApp ZapZap, Telegram, Discord, Slack, Bottles...)"
-    echo ""
+    echo "  1) Instalar TODO automáticamente (Modo Nativo + Gaming + Comunicación + CLI) [Recomendado]"
     echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o sistemas inmutables)"
-    echo "  3) Solo Navegadores y Dev (Brave Origin, VS Code, NetBeans, PowerShell, Antigravity)"
-    echo "  4) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Slack)"
-    echo "  5) Solo Gaming & Utilidades (Steam, Bottles, Grok Bot, Suite Craft)"
-    echo "  6) Solo Tailscale"
-    echo "  7) Solo herramientas CLI y Terminal rápida"
-    echo "  8) Simulación (Dry run)"
-    echo "  9) Salir"
+    echo "  3) Solo Suite de Gaming (Lutris, Heroic, Prism, Steam, ProtonUp-Qt, Goverlay, Bottles)"
+    echo "  4) Solo Desarrollo (Brave Origin, VS Code, NetBeans, PowerShell, Antigravity)"
+    echo "  5) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
+    echo "  6) Solo Música (ncspot [Rust], Strawberry FLAC, Amberol)"
+    echo "  7) Solo Terminal rápida estilo Omarchy (Alacritty) y CLI"
+    echo "  8) Solo Tailscale"
+    echo "  9) Simulación (Dry run)"
+    echo "  10) Salir"
     echo ""
-    read -rp "Selecciona una opción [1-9] (por defecto 1): " choice
+    read -rp "Selecciona una opción [1-10] (por defecto 1): " choice
     choice=${choice:-1}
 
     case "$choice" in
         1) ACTION="native" ;;
         2) ACTION="flatpak_only" ;;
-        3) ACTION="dev_tools" ;;
-        4) ACTION="communication" ;;
-        5) ACTION="gaming_custom" ;;
-        6) ACTION="tailscale" ;;
+        3) ACTION="gaming" ;;
+        4) ACTION="dev_tools" ;;
+        5) ACTION="communication" ;;
+        6) ACTION="audio" ;;
         7) ACTION="cli" ;;
-        8) ACTION="dry-run" ;;
-        9) echo "Cancelado."; exit 0 ;;
+        8) ACTION="tailscale" ;;
+        9) ACTION="dry-run" ;;
+        10) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
     esac
 fi
@@ -288,6 +320,9 @@ case "$ACTION" in
         install_grokbot
         install_craft_suite
         install_flatpaks
+        ;;
+    gaming)
+        install_gaming_suite
         ;;
     brave)
         install_brave_origin
@@ -327,11 +362,9 @@ case "$ACTION" in
         ensure_flatpak_installed
         flatpak install -y flathub com.rtosta.zapzap org.telegram.desktop com.discordapp.Discord dev.vencord.Vesktop com.slack.Slack
         ;;
-    gaming_custom)
-        install_steam "false"
-        install_grokbot
-        install_craft_suite
-        flatpak install -y flathub com.usebottles.bottles com.github.Matoking.protontricks com.vysp3r.ProtonPlus
+    audio)
+        ensure_flatpak_installed
+        flatpak install -y flathub io.github.hrkfdn.ncspot org.strawberrymusicplayer.strawberry io.bassi.Amberol
         ;;
     cli)
         install_cli
@@ -349,4 +382,6 @@ echo -e "Recomendaciones:"
 echo -e " - Conecta Tailscale: ${CYAN}sudo tailscale up${NC}"
 echo -e " - Para iniciar PowerShell: ${CYAN}pwsh${NC}"
 echo -e " - Para iniciar tu nueva terminal rápida: ${CYAN}alacritty${NC}"
+echo -e " - Para escuchar Spotify en Rust por terminal: ${CYAN}flatpak run io.github.hrkfdn.ncspot${NC} (o ncspot)"
+echo -e " - Para música FLAC de alta fidelidad: abre ${CYAN}Strawberry Music Player${NC}"
 echo ""

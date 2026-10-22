@@ -19,11 +19,18 @@ get_app_description() {
         "com.visualstudio.code") echo "Visual Studio Code" ;;
         "org.apache.netbeans") echo "Apache NetBeans IDE" ;;
         "com.valvesoftware.Steam") echo "Steam" ;;
+        "net.lutris.Lutris") echo "Lutris (Gestor de juegos)" ;;
+        "com.heroicgameslauncher.hgl") echo "Heroic Games Launcher (Epic/GOG)" ;;
+        "org.prismlauncher.PrismLauncher") echo "Prism Launcher (Minecraft)" ;;
+        "net.davidotek.pupgui2") echo "ProtonUp-Qt (Instalador GE-Proton)" ;;
+        "io.github.benjamimgois.goverlay") echo "Goverlay (Configurador MangoHud/vkBasalt)" ;;
+        "io.github.hrkfdn.ncspot") echo "ncspot (Cliente ligero Spotify en Rust)" ;;
+        "org.strawberrymusicplayer.strawberry") echo "Strawberry Music Player (FLAC/Audiófilo)" ;;
+        "io.bassi.Amberol") echo "Amberol (Reproductor música FLAC)" ;;
         "com.brave.Browser") echo "Navegador Brave" ;;
         "com.google.Chrome") echo "Google Chrome" ;;
         "org.mozilla.firefox") echo "Mozilla Firefox" ;;
         "com.onepassword.OnePassword") echo "1Password" ;;
-        "com.spotify.Client") echo "Spotify" ;;
         "org.videolan.VLC") echo "VLC Media Player" ;;
         "org.kde.haruna") echo "Haruna Video Player" ;;
         "org.kde.gwenview") echo "Visor de imágenes Gwenview" ;;
@@ -56,9 +63,15 @@ if command -v flatpak >/dev/null 2>&1; then
     echo "[+] Extrayendo Flatpaks instalados desde Flathub..."
     INSTALLED_FLATPAKS=$(flatpak list --app --columns=application,origin | awk '$2=="flathub" {print $1}' | sort -u)
 
+    # Filtrar el spotify oficial si el usuario quiso reemplazarlo
+    INSTALLED_FLATPAKS=$(echo "${INSTALLED_FLATPAKS}" | grep -v 'com.spotify.Client' || true)
+
     # Asegurar que las aplicaciones solicitadas se mantengan en la lista
     MUST_HAVE=(
         "com.visualstudio.code" "org.apache.netbeans" "com.valvesoftware.Steam"
+        "net.lutris.Lutris" "com.heroicgameslauncher.hgl" "org.prismlauncher.PrismLauncher"
+        "net.davidotek.pupgui2" "io.github.benjamimgois.goverlay"
+        "io.github.hrkfdn.ncspot" "org.strawberrymusicplayer.strawberry" "io.bassi.Amberol"
         "com.rtosta.zapzap" "org.telegram.desktop" "com.discordapp.Discord"
         "dev.vencord.Vesktop" "com.slack.Slack" "com.usebottles.bottles"
         "org.flameshot.Flameshot" "md.obsidian.Obsidian"

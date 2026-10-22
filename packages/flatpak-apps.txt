@@ -9,7 +9,24 @@
 com.visualstudio.code                # Visual Studio Code (Editor / IDE)
 org.apache.netbeans                  # Apache NetBeans IDE
 
-# --- MENSAJERÍA Y COMUNICACIÓN (NUEVAS ADICIONES) ---
+# --- GAMING Y COMPATIBILIDAD ---
+net.lutris.Lutris                    # Lutris (Gestor integral de juegos)
+com.heroicgameslauncher.hgl          # Heroic Games Launcher (Epic Games, GOG, Amazon)
+org.prismlauncher.PrismLauncher      # Prism Launcher (Minecraft con instancias y mods)
+com.valvesoftware.Steam              # Steam (Omitido automáticamente si se instala Steam nativo)
+net.davidotek.pupgui2                # ProtonUp-Qt (Instala GE-Proton, Wine-GE con 1 clic)
+io.github.benjamimgois.goverlay      # Goverlay (Configuración gráfica de MangoHud y vkBasalt)
+com.usebottles.bottles               # Bottles (Gestor visual de prefijos Wine y juegos Windows)
+com.github.Matoking.protontricks     # Utilidad Wine / Protontricks
+com.vysp3r.ProtonPlus                # Gestor de versiones Wine-GE / Proton-GE
+io.github.DenysMb.Kontainer          # GUI para contenedores Podman / Docker
+
+# --- AUDIO Y MÚSICA (REEMPLAZO SPOTIFY EN RUST + REPRODUCTOR FLAC) ---
+io.github.hrkfdn.ncspot              # ncspot (Cliente ligero de Spotify en RUST)
+org.strawberrymusicplayer.strawberry # Strawberry Music Player (El mejor reproductor audiófilo FLAC)
+io.bassi.Amberol                     # Amberol (Reproductor minimalista de música local / FLAC)
+
+# --- MENSAJERÍA Y COMUNICACIÓN ---
 com.rtosta.zapzap                    # WhatsApp (ZapZap - Cliente con bandeja de sistema y notificaciones)
 org.telegram.desktop                 # Telegram Desktop
 com.discordapp.Discord               # Discord Oficial
@@ -21,13 +38,6 @@ com.brave.Browser                    # Navegador Brave (Omitido automáticamente
 com.google.Chrome                    # Google Chrome
 org.mozilla.firefox                  # Mozilla Firefox
 
-# --- GESTIÓN DE WINE, GAMING Y CONTENEDORES ---
-com.valvesoftware.Steam              # Steam (Omitido automáticamente si se instala Steam nativo)
-com.usebottles.bottles               # Bottles (Gestor visual de prefijos Wine y juegos Windows)
-com.github.Matoking.protontricks     # Utilidad Wine / Protontricks
-com.vysp3r.ProtonPlus                # Gestor de versiones Wine-GE / Proton-GE
-io.github.DenysMb.Kontainer          # GUI para contenedores Podman / Docker
-
 # --- PRODUCTIVIDAD Y UTILIDADES ---
 com.onepassword.OnePassword          # Gestor de contraseñas 1Password
 md.obsidian.Obsidian                 # Obsidian (Notas en Markdown)
@@ -37,7 +47,6 @@ org.kde.kcalc                        # Calculadora
 org.gnome.Firmware                   # Actualizador de firmware de hardware
 
 # --- MULTIMEDIA ---
-com.spotify.Client                   # Reproductor de música Spotify
 org.videolan.VLC                     # Reproductor multimedia VLC
 org.kde.haruna                       # Reproductor de video Haruna
 org.kde.gwenview                     # Visor de imágenes Gwenview
