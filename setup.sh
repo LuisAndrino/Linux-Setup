@@ -44,13 +44,17 @@ show_help() {
     echo ""
     echo "Opciones principales:"
     echo "  --native          Instala programas en versión NATIVA (Brave Origin, VS Code nativo,"
-    echo "                    Steam, Tailscale, Grok Bot, Craft Suite, CLI + Flatpaks complementarios) [Recomendado]"
-    echo "  --flatpak-only    Instala todo exclusivamente mediante Flatpak (Ideal para Bazzite/SteamOS)"
-    echo "  --cli             Instala solo herramientas de terminal y paquetes esenciales del sistema"
+    echo "                    Steam, Tailscale, Antigravity, PowerShell, Terminal rápida (Alacritty),"
+    echo "                    Grok Bot, Craft Suite, CLI + Flatpaks complementarios) [Recomendado]"
+    echo "  --flatpak-only    Instala todo mediante Flatpak (Ideal para Bazzite/SteamOS inmutables)"
+    echo "  --cli             Instala solo herramientas de terminal y paquetes esenciales"
     echo "  --brave           Instala solo Brave Origin (repositorio nativo oficial)"
     echo "  --vscode          Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
     echo "  --steam           Instala solo Steam"
     echo "  --tailscale       Instala y configura solo Tailscale"
+    echo "  --antigravity     Instala Google Antigravity"
+    echo "  --powershell      Instala Microsoft PowerShell (pwsh)"
+    echo "  --terminal        Instala terminal rápida estilo Omarchy (Alacritty/Ghostty)"
     echo "  --grokbot         Instala y configura solo Grok Bot (AppImage)"
     echo "  --craft           Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo "  --dry-run         Simula las acciones sin modificar el sistema"
@@ -95,7 +99,7 @@ install_flatpaks() {
     done < "${PACKAGES_FILE}"
 
     for app in "${apps[@]}"; do
-        # Evitar duplicados si el usuario instaló la versión nativa de Brave, VS Code o Steam
+        # Evitar duplicados si el usuario instaló versión nativa de Brave, VS Code o Steam
         if [ "$app" = "com.brave.Browser" ] && (command -v brave-origin >/dev/null 2>&1 || command -v brave-browser >/dev/null 2>&1); then
             echo -e "  ${MAGENTA}[* Omitido]${NC} com.brave.Browser (Ya tienes instalado Brave Origin nativo)"
             continue
@@ -149,6 +153,21 @@ install_tailscale() {
     bash "${SCRIPTS_DIR}/install-tailscale.sh"
 }
 
+install_antigravity() {
+    echo -e "\n${BOLD}${CYAN}=== GOOGLE ANTIGRAVITY ===${NC}"
+    bash "${SCRIPTS_DIR}/install-antigravity.sh"
+}
+
+install_powershell() {
+    echo -e "\n${BOLD}${CYAN}=== MICROSOFT POWERSHELL ===${NC}"
+    bash "${SCRIPTS_DIR}/install-powershell.sh"
+}
+
+install_terminal() {
+    echo -e "\n${BOLD}${CYAN}=== TERMINAL RÁPIDA (ALACRITTY / GHOSTTY - ESTILO OMARCHY) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-terminal.sh"
+}
+
 install_grokbot() {
     echo -e "\n${BOLD}${CYAN}=== GROK BOT ===${NC}"
     bash "${SCRIPTS_DIR}/install-grokbot.sh"
@@ -163,9 +182,12 @@ dry_run() {
     echo -e "${YELLOW}${BOLD}--- MODO SIMULACIÓN (DRY-RUN) ---${NC}"
     echo "1. Programas Nativos / Especiales:"
     echo "   - Brave: Se instalará Brave Origin mediante script oficial (FLAVOR=origin)."
-    echo "   - VS Code: Se configurará el repositorio oficial de Microsoft (APT/DNF/Pacman)."
-    echo "   - Steam: Se instalará el paquete nativo de la distro o Steam Flatpak."
+    echo "   - VS Code: Repositorio oficial de Microsoft (APT/DNF/Pacman)."
+    echo "   - Steam: Paquete nativo de la distro o Steam Flatpak."
     echo "   - Tailscale: Script oficial universal + activación de systemd."
+    echo "   - Antigravity: Instalador oficial de Google Antigravity (AppImage / Homebrew)."
+    echo "   - PowerShell: Microsoft PowerShell (pwsh)."
+    echo "   - Terminal rápida: Alacritty / Ghostty (GPU accelerated - estilo Omarchy)."
     echo "   - Grok Bot: Integración de AppImage en ~/.local/share/grok-bot + .desktop."
     echo "   - Suite Craft: ArtCraft Launcher (bundle) para GridCraft, DeckCraft, WordCraft y PdfCraft."
     echo ""
@@ -189,6 +211,9 @@ if [ $# -gt 0 ]; then
         --vscode) ACTION="vscode" ;;
         --steam) ACTION="steam" ;;
         --tailscale) ACTION="tailscale" ;;
+        --antigravity) ACTION="antigravity" ;;
+        --powershell) ACTION="powershell" ;;
+        --terminal) ACTION="terminal" ;;
         --grokbot) ACTION="grokbot" ;;
         --craft) ACTION="craft" ;;
         --dry-run) ACTION="dry-run" ;;
@@ -208,15 +233,16 @@ if [ "$ACTION" = "interactive" ]; then
     echo -e "${BOLD}¿Cómo deseas instalar tus programas?${NC}"
     echo "  1) Modo Híbrido / Nativo (Recomendado para distros tradicionales):"
     echo "     - Brave Origin nativo, VS Code nativo, Steam, Tailscale,"
+    echo "     - Google Antigravity, PowerShell (pwsh), Terminal rápida estilo Omarchy (Alacritty),"
     echo "     - Grok Bot (AppImage), Suite Craft (ArtCraft/GridCraft),"
-    echo "     - Herramientas CLI + Flatpaks complementarios (1Password, NetBeans, Spotify, VLC...)"
+    echo "     - Herramientas CLI + Flatpaks (WhatsApp ZapZap, Telegram, Discord, Slack, Bottles...)"
     echo ""
     echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o sistemas inmutables)"
-    echo "  3) Solo Brave Origin (Nativo)"
-    echo "  4) Solo VS Code y NetBeans"
-    echo "  5) Solo Steam, Grok Bot y Suite Craft"
+    echo "  3) Solo Navegadores y Dev (Brave Origin, VS Code, NetBeans, PowerShell, Antigravity)"
+    echo "  4) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Slack)"
+    echo "  5) Solo Gaming & Utilidades (Steam, Bottles, Grok Bot, Suite Craft)"
     echo "  6) Solo Tailscale"
-    echo "  7) Solo herramientas de terminal (CLI)"
+    echo "  7) Solo herramientas CLI y Terminal rápida"
     echo "  8) Simulación (Dry run)"
     echo "  9) Salir"
     echo ""
@@ -226,9 +252,9 @@ if [ "$ACTION" = "interactive" ]; then
     case "$choice" in
         1) ACTION="native" ;;
         2) ACTION="flatpak_only" ;;
-        3) ACTION="brave" ;;
-        4) ACTION="dev_tools" ;;
-        5) ACTION="custom_apps" ;;
+        3) ACTION="dev_tools" ;;
+        4) ACTION="communication" ;;
+        5) ACTION="gaming_custom" ;;
         6) ACTION="tailscale" ;;
         7) ACTION="cli" ;;
         8) ACTION="dry-run" ;;
@@ -244,6 +270,9 @@ case "$ACTION" in
         install_vscode "false"
         install_steam "false"
         install_tailscale
+        install_antigravity
+        install_powershell
+        install_terminal
         install_grokbot
         install_craft_suite
         install_flatpaks
@@ -253,6 +282,9 @@ case "$ACTION" in
         install_vscode "true"
         install_steam "true"
         install_tailscale
+        install_antigravity
+        install_powershell
+        install_terminal
         install_grokbot
         install_craft_suite
         install_flatpaks
@@ -260,20 +292,50 @@ case "$ACTION" in
     brave)
         install_brave_origin
         ;;
-    dev_tools)
+    vscode)
         install_vscode "false"
-        flatpak install -y flathub org.apache.netbeans
         ;;
-    custom_apps)
+    steam)
         install_steam "false"
-        install_grokbot
-        install_craft_suite
         ;;
     tailscale)
         install_tailscale
         ;;
+    antigravity)
+        install_antigravity
+        ;;
+    powershell)
+        install_powershell
+        ;;
+    terminal)
+        install_terminal
+        ;;
+    grokbot)
+        install_grokbot
+        ;;
+    craft)
+        install_craft_suite
+        ;;
+    dev_tools)
+        install_brave_origin
+        install_vscode "false"
+        install_antigravity
+        install_powershell
+        flatpak install -y flathub org.apache.netbeans
+        ;;
+    communication)
+        ensure_flatpak_installed
+        flatpak install -y flathub com.rtosta.zapzap org.telegram.desktop com.discordapp.Discord dev.vencord.Vesktop com.slack.Slack
+        ;;
+    gaming_custom)
+        install_steam "false"
+        install_grokbot
+        install_craft_suite
+        flatpak install -y flathub com.usebottles.bottles com.github.Matoking.protontricks com.vysp3r.ProtonPlus
+        ;;
     cli)
         install_cli
+        install_terminal
         ;;
     dry-run)
         dry_run
@@ -285,5 +347,6 @@ echo -e "${GREEN}${BOLD}  ¡Proceso finalizado con éxito!${NC}"
 echo -e "${GREEN}${BOLD}======================================================================${NC}"
 echo -e "Recomendaciones:"
 echo -e " - Conecta Tailscale: ${CYAN}sudo tailscale up${NC}"
-echo -e " - Si instalaste aplicaciones nuevas, puedes verlas en tu menú de aplicaciones."
+echo -e " - Para iniciar PowerShell: ${CYAN}pwsh${NC}"
+echo -e " - Para iniciar tu nueva terminal rápida: ${CYAN}alacritty${NC}"
 echo ""
