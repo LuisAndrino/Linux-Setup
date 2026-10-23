@@ -20,7 +20,10 @@ echo "=========================================================="
 # 1. Instalar paquetes necesarios según distribución
 echo "[+] Comprobando paquetes de escritorio (Hyprland, Waybar, Rofi, etc.)..."
 
-if command -v pacman >/dev/null 2>&1; then
+if [ -f /run/ostree-booted ]; then
+    echo "[OSTREE] Detectado sistema inmutable (Bazzite/Kinoite). Los paquetes se gestionan mediante rpm-ostree."
+
+elif command -v pacman >/dev/null 2>&1; then
     echo "[PACMAN] Instalando componentes en Arch Linux..."
     sudo pacman -Syu --needed --noconfirm \
         hyprland waybar rofi-wayland swaync alacritty starship \

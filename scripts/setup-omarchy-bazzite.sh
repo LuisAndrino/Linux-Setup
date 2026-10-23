@@ -46,24 +46,27 @@ rm -f /etc/sddm.conf.d/zz-bazzite-autologin.conf /etc/sddm.conf.d/zz-holo-autolo
 echo "  [✓] SDDM configurado: al cerrar sesión aparecerá la pantalla de selección de usuario y entorno."
 
 # -----------------------------------------------------------------------------
-# 2. Habilitar repositorio Copr de Hyprland para Bazzite
+# 2. Habilitar repositorio Copr de Hyprland para Bazzite (ashbuk/Hyprland-Fedora)
 # -----------------------------------------------------------------------------
 echo "[2/4] Configurando repositorio Copr de Hyprland..."
 
-cat << 'EOF' > /etc/yum.repos.d/_copr_solopasha-hyprland.repo
-[copr:copr.fedorainfracloud.org:solopasha:hyprland]
-name=Copr repo for hyprland owned by solopasha
-baseurl=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/fedora-rawhide-$basearch/
+# Limpiar repo antiguo si existía (solopasha tiene problemas de ABI con Fedora 44)
+rm -f /etc/yum.repos.d/_copr_solopasha-hyprland.repo
+
+cat << 'EOF' > /etc/yum.repos.d/_copr_ashbuk-Hyprland-Fedora.repo
+[copr:copr.fedorainfracloud.org:ashbuk:Hyprland-Fedora]
+name=Copr repo for Hyprland-Fedora owned by ashbuk
+baseurl=https://download.copr.fedorainfracloud.org/results/ashbuk/Hyprland-Fedora/fedora-$releasever-$basearch/
 type=rpm-md
 skip_if_unavailable=True
 gpgcheck=1
-gpgkey=https://download.copr.fedorainfracloud.org/results/solopasha/hyprland/pubkey.gpg
+gpgkey=https://download.copr.fedorainfracloud.org/results/ashbuk/Hyprland-Fedora/pubkey.gpg
 repo_gpgcheck=0
 enabled=1
 enabled_metadata=1
 EOF
 
-echo "  [✓] Repositorio de Hyprland configurado en /etc/yum.repos.d/_copr_solopasha-hyprland.repo"
+echo "  [✓] Repositorio de Hyprland configurado en /etc/yum.repos.d/_copr_ashbuk-Hyprland-Fedora.repo"
 
 # -----------------------------------------------------------------------------
 # 3. Desplegar archivos de configuración de Omarchy en el usuario
