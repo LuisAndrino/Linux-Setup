@@ -24,6 +24,12 @@ get_app_description() {
         "org.prismlauncher.PrismLauncher") echo "Prism Launcher (Minecraft)" ;;
         "net.davidotek.pupgui2") echo "ProtonUp-Qt (Instalador GE-Proton)" ;;
         "io.github.benjamimgois.goverlay") echo "Goverlay (Configurador MangoHud/vkBasalt)" ;;
+        "com.github.mtkennerly.ludusavi") echo "Ludusavi (Copia de partidas guardadas)" ;;
+        "io.github.antimicrox.antimicrox") echo "AntiMicroX (Mapeo de mandos)" ;;
+        "com.github.wwmm.easyeffects") echo "Easy Effects (Efectos PipeWire / Ecualizador)" ;;
+        "org.localsend.localsend_app") echo "LocalSend (Transferencia local de archivos)" ;;
+        "org.gnome.World.PikaBackup") echo "Pika Backup (Copias de seguridad)" ;;
+        "io.github.peazip.PeaZip") echo "PeaZip (Gestor de archivos comprimidos)" ;;
         "io.github.hrkfdn.ncspot") echo "ncspot (Cliente ligero Spotify en Rust)" ;;
         "org.strawberrymusicplayer.strawberry") echo "Strawberry Music Player (FLAC/Audiófilo)" ;;
         "io.bassi.Amberol") echo "Amberol (Reproductor música FLAC)" ;;
@@ -71,6 +77,9 @@ if command -v flatpak >/dev/null 2>&1; then
         "com.visualstudio.code" "org.apache.netbeans" "com.valvesoftware.Steam"
         "net.lutris.Lutris" "com.heroicgameslauncher.hgl" "org.prismlauncher.PrismLauncher"
         "net.davidotek.pupgui2" "io.github.benjamimgois.goverlay"
+        "com.github.mtkennerly.ludusavi" "io.github.antimicrox.antimicrox"
+        "com.github.wwmm.easyeffects" "org.localsend.localsend_app"
+        "org.gnome.World.PikaBackup" "io.github.peazip.PeaZip"
         "io.github.hrkfdn.ncspot" "org.strawberrymusicplayer.strawberry" "io.bassi.Amberol"
         "com.rtosta.zapzap" "org.telegram.desktop" "com.discordapp.Discord"
         "dev.vencord.Vesktop" "com.slack.Slack" "com.usebottles.bottles"

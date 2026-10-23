@@ -16,60 +16,59 @@ Si estás en una **máquina completamente nueva desde cero**, clona y ejecuta to
 git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup && cd ~/linux-setup && ./setup.sh --yes
 ```
 
-*(El parámetro `--yes` o `--all` instala todo sin hacer preguntas: herramientas nativas, gaming, comunicación, audio, terminal rápida y Flatpaks).*
+*(El parámetro `--yes` o `--all` instala todo sin hacer preguntas: herramientas nativas, gaming, audio, comunicación, desarrollo y Flatpaks).*
 
 ---
 
-## 🎮 Suite Completa de Gaming y Optimización
+## 🎮 Gaming, Rendimiento y Partidas
 * **Launchers:**
   * **Steam:** Instalación nativa oficial de la distro o Flatpak según convenga.
   * **Lutris:** Gestor universal de juegos (GOG, Ubisoft, Epic, emuladores y scripts de la comunidad).
   * **Heroic Games Launcher:** Cliente nativo para Epic Games, GOG y Amazon Prime Games.
   * **Prism Launcher:** El lanzador de Minecraft por excelencia (instancias aisladas, mods Fabric/Forge/Quilt).
-* **Herramientas de Rendimiento & Compatibilidad:**
-  * **Valve Gamescope (`gamescope`):** El micro-compositor de SteamOS para forzar resoluciones arbitrarias, escalado FSR/NIS de ultra baja latencia, HDR, limitador de FPS y soporte para pantallas ultrapanorámicas o portátiles.
-  * **GameMode (`gamemode`):** Optimizador del kernel y CPU de Feral Interactive para máxima tasa de cuadros.
-  * **MangoHud (`mangohud`):** Overlay en pantalla para FPS, temperaturas, reloj de GPU y consumo de RAM.
-  * **ProtonUp-Qt:** Instala y actualiza GE-Proton, Wine-GE y Luxtorpeda con un solo clic.
+* **Partidas Guardadas y Mandos:**
+  * **Ludusavi:** Respaldo y sincronización automática de partidas guardadas de Steam, Heroic, Lutris, Bottles y emuladores.
+  * **AntiMicroX:** Mapeo de mandos/gamepads a teclado y ratón para juegos sin soporte nativo de mando.
+* **Herramientas de Rendimiento:**
+  * **Valve Gamescope (`gamescope`):** Micro-compositor de SteamOS para forzar resoluciones arbitrarias, escalado FSR/NIS, HDR y limitador de FPS.
+  * **GameMode (`gamemode`):** Optimizador del kernel y CPU para máxima tasa de cuadros.
+  * **MangoHud (`mangohud`):** Overlay en pantalla para FPS, temperaturas y consumo de hardware.
+  * **ProtonUp-Qt:** Instala y actualiza GE-Proton, Wine-GE y Luxtorpeda con 1 clic.
   * **Goverlay:** Interfaz gráfica para calibrar MangoHud y filtros vkBasalt.
-  * **Bottles:** Gestor visual de prefijos de Wine y dependencias de Windows.
-  * **Protontricks y ProtonPlus:** Gestión de versiones y resolución de dependencias DLL.
+  * **Bottles, Protontricks y ProtonPlus:** Gestores de prefijos de Wine y dependencias DLL.
 
 ---
 
-## 🎵 Música y Audio de Alta Fidelidad
-* **Spotify Ligero en RUST (`ncspot`):**
-  Reemplaza el cliente pesado oficial de Spotify por **ncspot**, cliente ultra ligero escrito en Rust con bajo consumo de CPU y memoria.
-* **Reproductor FLAC Audiófilo (Strawberry Music Player):**
-  El reproductor de audio de alta resolución líder en Linux: reproducción bit-perfect, ecualizador avanzado, gestión de metadatos y soporte directo ALSA/PipeWire para archivos FLAC/DSD.
-* **Amberol:**
-  Reproductor minimalista y elegante para escuchar álbumes y archivos FLAC locales al instante.
+## 🎵 Audio, Voz y Música Hi-Res
+* **Easy Effects:** El procesador de audio esencial para PipeWire. Aplica cancelación de ruido por IA (RNNoise) en tu micrófono para Discord/Slack y ecualizadores de alta definición para auriculares.
+* **ncspot (Spotify en RUST):** Cliente ultra ligero escrito en Rust con interfaz ncurses y mínimo consumo de recursos.
+* **Strawberry Music Player:** Reproductor audiófilo con salida bit-perfect directa (ALSA/PipeWire) para archivos FLAC y DSD.
+* **Amberol:** Reproductor minimalista y moderno para reproducción local inmediata.
 
 ---
 
-## 📦 Lista de Software Integrado
-
-### 1. Aplicaciones Nativas Oficiales
-* **Brave Origin:** Script oficial con `FLAVOR=origin`.
-* **VS Code:** Repositorio oficial de Microsoft (`code`).
+## 💻 Desarrollo, Runtimes y Terminal Rápida
+* **Brave Origin (Nativo Oficial):** Repositorio oficial de Brave Software (`FLAVOR=origin`).
+* **Visual Studio Code:** Repositorio oficial de Microsoft (`code`).
+* **Java OpenJDK 21:** JDK esencial para Apache NetBeans y Prism Launcher.
+* **Herramientas Dev en Terminal:**
+  * **Lazygit:** La interfaz de terminal para Git más rápida y productiva.
+  * **Mise (`mise-en-place`):** Gestor políglota de entornos (Node.js, Python, Java, Rust) sin ensuciar el sistema.
 * **Google Antigravity:** Instalación oficial (AppImage / Homebrew Cask con accesos `.desktop`).
 * **PowerShell (`pwsh`):** Microsoft PowerShell para Linux.
 * **Terminal Rápida (Omarchy Style):** Alacritty (renderizado por GPU en Rust) y soporte Ghostty.
+
+---
+
+## 🔄 Sincronización, Mensajería y Red
+* **LocalSend:** Transferencia directa de archivos estilo AirDrop entre PCs y móviles (Android/iOS) en tu red local o Tailscale.
+* **Pika Backup:** Copias de seguridad incrementales cifradas de tus carpetas personales y configuraciones.
+* **PeaZip:** Gestor avanzado de compresión para todos los formatos (ZIP, RAR, 7Z, TAR).
 * **Tailscale:** Red VPN mesh con demonio `tailscaled` habilitado en systemd.
 * **Grok Bot:** AppImage integrado en `~/.local/share/grok-bot/appimage`.
 * **Suite Craft:** ArtCraft Launcher (bundle local) para GridCraft, DeckCraft, WordCraft y PdfCraft.
-
-### 2. Mensajería y Redes
-* **WhatsApp:** ZapZap (`com.rtosta.zapzap`) con bandeja de sistema y notificaciones.
-* **Telegram Desktop:** `org.telegram.desktop` oficial.
-* **Discord Oficial:** `com.discordapp.Discord`.
-* **Vesktop:** `dev.vencord.Vesktop` (Discord con screen audio en Wayland).
-* **Slack:** `com.slack.Slack` oficial.
-
-### 3. Productividad y Navegadores
-* **Desarrollo:** Apache NetBeans IDE (`org.apache.netbeans`).
-* **Navegadores:** Google Chrome, Mozilla Firefox.
-* **Utilidades:** 1Password, Obsidian (notas Markdown), Flameshot (capturas), Okular (PDFs), KCalc, Flatseal, Warehouse, Kontainer.
+* **Mensajería:** WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack.
+* **Navegadores & Utilidades:** Google Chrome, Mozilla Firefox, 1Password, Obsidian, Flameshot, Okular, Flatseal, Warehouse, Kontainer.
 
 ---
 
@@ -77,10 +76,8 @@ git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup && cd ~/linux-setup && ./setup.s
 
 ```bash
 ./setup.sh              # Menú interactivo con selector de categorías
-./setup.sh --gaming     # Instala solo la suite de Gaming (Lutris, Heroic, Prism, Steam...)
-./setup.sh --brave      # Instala solo Brave Origin nativo
-./setup.sh --antigravity # Instala solo Google Antigravity
-./setup.sh --powershell # Instala solo PowerShell
-./setup.sh --terminal   # Instala solo Alacritty
+./setup.sh --gaming     # Instala solo la suite de Gaming (Lutris, Heroic, Prism, Ludusavi...)
+./setup.sh --devtools   # Instala solo Java OpenJDK 21, Lazygit y Mise
+./setup.sh --gamescope  # Instala y optimiza Gamescope
 ./setup.sh --dry-run    # Simula la instalación sin hacer cambios
 ```

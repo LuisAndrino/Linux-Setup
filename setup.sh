@@ -179,6 +179,11 @@ install_grokbot() {
     bash "${SCRIPTS_DIR}/install-grokbot.sh"
 }
 
+install_dev_tools() {
+    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS DEV (JAVA OPENJDK 21, LAZYGIT, MISE) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-dev-tools.sh"
+}
+
 install_craft_suite() {
     echo -e "\n${BOLD}${CYAN}=== SUITE CRAFT (ARTCRAFT, GRIDCRAFT, DECKCRAFT...) ===${NC}"
     bash "${SCRIPTS_DIR}/install-craft-suite.sh"
@@ -189,7 +194,7 @@ install_gaming_suite() {
     install_steam "false"
     bash "${SCRIPTS_DIR}/install-gamescope.sh"
     ensure_flatpak_installed
-    echo "[+] Instalando Launchers y compatibilidad (Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Bottles)..."
+    echo "[+] Instalando Launchers y compatibilidad (Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Bottles, Ludusavi, AntiMicroX)..."
     flatpak install -y --noninteractive flathub \
         net.lutris.Lutris \
         com.heroicgameslauncher.hgl \
@@ -198,7 +203,9 @@ install_gaming_suite() {
         io.github.benjamimgois.goverlay \
         com.usebottles.bottles \
         com.github.Matoking.protontricks \
-        com.vysp3r.ProtonPlus || true
+        com.vysp3r.ProtonPlus \
+        com.github.mtkennerly.ludusavi \
+        io.github.antimicrox.antimicrox || true
 }
 
 dry_run() {
@@ -206,6 +213,8 @@ dry_run() {
     echo "1. Programas Nativos / Especiales:"
     echo "   - Brave: Brave Origin (FLAVOR=origin)."
     echo "   - VS Code: Repositorio oficial Microsoft (code)."
+    echo "   - Java: OpenJDK 21 (Requerido para Apache NetBeans y Prism Launcher)."
+    echo "   - Herramientas Dev: Lazygit (Terminal UI Git), Mise (Gestor de runtimes)."
     echo "   - Steam: Paquete nativo de la distro o Steam Flatpak."
     echo "   - Gamescope: Micro-compositor de Valve con escalado FSR/NIS, HDR y limitador FPS."
     echo "   - Tailscale: Script oficial universal + activación systemd."
@@ -218,20 +227,28 @@ dry_run() {
     echo "2. Gaming & Optimización:"
     echo "   - Gamescope (Micro-compositor Valve con escalado FSR/HDR), GameMode, MangoHud."
     echo "   - Lutris, Heroic Games Launcher, Prism Launcher (Minecraft)."
+    echo "   - Ludusavi (Copia y sincronización de partidas guardadas de PC games)."
+    echo "   - AntiMicroX (Mapeo de mandos a teclado/ratón)."
     echo "   - ProtonUp-Qt, Goverlay, Bottles, Protontricks, ProtonPlus."
     echo ""
-    echo "3. Música y Audio:"
+    echo "3. Música, Audio y Voz:"
+    echo "   - Easy Effects (Filtro IA de ruido para micro en Discord/Slack y ecualizador FLAC)."
     echo "   - ncspot (Cliente ligero de Spotify en Rust)."
     echo "   - Strawberry Music Player (Reproductor audiófilo de alta fidelidad FLAC)."
     echo "   - Amberol (Reproductor minimalista FLAC/local)."
     echo ""
-    echo "4. Mensajería y Redes:"
+    echo "4. Sincronización y Archivos:"
+    echo "   - LocalSend (Transferencia local de archivos estilo AirDrop entre PC y móvil)."
+    echo "   - Pika Backup (Copias de seguridad incrementales cifradas de tus carpetas)."
+    echo "   - PeaZip (Gestor de compresión avanzado)."
+    echo ""
+    echo "5. Mensajería y Redes:"
     echo "   - WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack."
     echo ""
-    echo "5. Herramientas CLI del sistema:"
+    echo "6. Herramientas CLI del sistema:"
     echo "   - git, gh, curl, wget, jq, ripgrep, tree, rsync, htop, btop, tmux, zsh, build tools."
     echo ""
-    echo "6. Productividad & Flatpaks complementarios:"
+    echo "7. Productividad & Flatpaks complementarios:"
     grep -v '^#' "${PACKAGES_FILE}" | grep -v '^$' | while read -r line; do
         echo "   - $line"
     done
@@ -255,6 +272,7 @@ if [ $# -gt 0 ]; then
         --terminal) ACTION="terminal" ;;
         --grokbot) ACTION="grokbot" ;;
         --craft) ACTION="craft" ;;
+        --devtools) ACTION="devtools" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
         *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
@@ -304,6 +322,7 @@ case "$ACTION" in
         install_cli
         install_brave_origin
         install_vscode "false"
+        install_dev_tools
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
         install_tailscale
@@ -359,9 +378,13 @@ case "$ACTION" in
     craft)
         install_craft_suite
         ;;
+    devtools)
+        install_dev_tools
+        ;;
     dev_tools)
         install_brave_origin
         install_vscode "false"
+        install_dev_tools
         install_antigravity
         install_powershell
         flatpak install -y flathub org.apache.netbeans

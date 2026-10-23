@@ -9,7 +9,7 @@
 com.visualstudio.code                # Visual Studio Code (Editor / IDE)
 org.apache.netbeans                  # Apache NetBeans IDE
 
-# --- GAMING Y COMPATIBILIDAD ---
+# --- GAMING, EMULACIÓN Y CONTROLADORES ---
 net.lutris.Lutris                    # Lutris (Gestor integral de juegos)
 com.heroicgameslauncher.hgl          # Heroic Games Launcher (Epic Games, GOG, Amazon)
 org.prismlauncher.PrismLauncher      # Prism Launcher (Minecraft con instancias y mods)
@@ -19,12 +19,20 @@ io.github.benjamimgois.goverlay      # Goverlay (Configuración gráfica de Mang
 com.usebottles.bottles               # Bottles (Gestor visual de prefijos Wine y juegos Windows)
 com.github.Matoking.protontricks     # Utilidad Wine / Protontricks
 com.vysp3r.ProtonPlus                # Gestor de versiones Wine-GE / Proton-GE
+com.github.mtkennerly.ludusavi       # Ludusavi (Copia y sincronización de partidas guardadas)
+io.github.antimicrox.antimicrox      # AntiMicroX (Mapeo de mandos/gamepads a teclado/ratón)
 io.github.DenysMb.Kontainer          # GUI para contenedores Podman / Docker
 
-# --- AUDIO Y MÚSICA (REEMPLAZO SPOTIFY EN RUST + REPRODUCTOR FLAC) ---
+# --- AUDIO, VOZ Y MÚSICA HI-RES ---
+com.github.wwmm.easyeffects          # Easy Effects (Filtro IA de ruido para Discord/Slack y ecualizador FLAC)
 io.github.hrkfdn.ncspot              # ncspot (Cliente ligero de Spotify en RUST)
 org.strawberrymusicplayer.strawberry # Strawberry Music Player (El mejor reproductor audiófilo FLAC)
 io.bassi.Amberol                     # Amberol (Reproductor minimalista de música local / FLAC)
+
+# --- SINCRONIZACIÓN, RED Y ARCHIVOS ---
+org.localsend.localsend_app          # LocalSend (Transferencia de archivos y texto entre PC y móvil)
+org.gnome.World.PikaBackup           # Pika Backup (Copias de seguridad cifradas de tus carpetas y configs)
+io.github.peazip.PeaZip              # PeaZip (Gestor de archivos comprimidos avanzado)
 
 # --- MENSAJERÍA Y COMUNICACIÓN ---
 com.rtosta.zapzap                    # WhatsApp (ZapZap - Cliente con bandeja de sistema y notificaciones)
