@@ -25,7 +25,8 @@ rm -f /usr/local/bin/hyprctl \
       /usr/local/bin/hyprland \
       /usr/local/bin/Hyprland \
       /usr/local/bin/hyprpm \
-      /usr/local/bin/start-hyprland
+      /usr/local/bin/start-hyprland \
+      /usr/local/bin/start-hyprland-session
 rm -rf /usr/local/libexec/hyprland
 rm -f /usr/local/share/wayland-sessions/hyprland.desktop
 rm -rf /usr/local/share/hypr
@@ -50,7 +51,7 @@ echo "  [✓] Repositorios limpiados."
 
 # 4. Revertir capas en rpm-ostree
 echo "[4/4] Revirtiendo capas añadidas en rpm-ostree (rpm-ostree reset)..."
-rpm-ostree reset -y
+rpm-ostree reset
 
 echo ""
 echo "=========================================================="

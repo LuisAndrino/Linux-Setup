@@ -122,6 +122,9 @@ export QT_QPA_PLATFORM="wayland;xcb"
 export SDL_VIDEODRIVER="wayland"
 export CLUTTER_BACKEND="wayland"
 
+# Limpieza de posibles archivos vacíos/corruptos de shaders en Mesa que provocan SIGBUS
+find "${HOME}/.cache/mesa_shader_cache" -size 0 -delete 2>/dev/null || true
+
 # Importar variables al entorno systemd y dbus de usuario
 systemctl --user import-environment WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP 2>/dev/null || true
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP 2>/dev/null || true
