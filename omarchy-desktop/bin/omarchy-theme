@@ -5,7 +5,10 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-THEMES_DIR="${SCRIPT_DIR}/themes"
+THEMES_DIR="${HOME}/.config/omarchy/themes"
+if [ ! -d "$THEMES_DIR" ] && [ -d "${SCRIPT_DIR}/themes" ]; then
+    THEMES_DIR="${SCRIPT_DIR}/themes"
+fi
 CURRENT_THEME_FILE="${HOME}/.config/omarchy/current_theme"
 mkdir -p "${HOME}/.config/omarchy" "${HOME}/.config/hypr" "${HOME}/.config/waybar" "${HOME}/.config/rofi" "${HOME}/.config/alacritty"
 

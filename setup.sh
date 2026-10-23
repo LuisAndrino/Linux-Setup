@@ -433,7 +433,13 @@ case "$ACTION" in
         install_terminal
         ;;
     omarchy_desktop)
-        bash "${SCRIPT_DIR}/omarchy-desktop/install.sh"
+        if [ -f /run/ostree-booted ]; then
+            echo -e "${YELLOW}[i] Detectado sistema inmutable (Bazzite / rpm-ostree).${NC}"
+            echo -e "${YELLOW}[i] Ejecutando instalador especializado para Bazzite...${NC}"
+            sudo bash "${SCRIPT_DIR}/scripts/setup-omarchy-bazzite.sh"
+        else
+            bash "${SCRIPT_DIR}/omarchy-desktop/install.sh"
+        fi
         ;;
     dry-run)
         dry_run
