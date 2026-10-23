@@ -2,10 +2,11 @@
 # ==============================================================================
 # setup-omarchy-bazzite.sh - Instalador completo de Omarchy (Hyprland) en Bazzite
 # ==============================================================================
-# 1. Habilita el repositorio Copr de Hyprland para Fedora/Bazzite
-# 2. Instala Hyprland, Waybar, Rofi-Wayland, SwayNC, Swaybg y utilidades vía rpm-ostree
-# 3. Configura SDDM para permitir cerrar sesión y elegir sesión manualmente (sin autologin forzado)
-# 4. Despliega todas las configuraciones, temas y Modo Agente de Omarchy
+# 1. Configura SDDM para permitir cerrar sesión y elegir sesión manualmente (sin bucle de autologin)
+# 2. Instala dependencias del sistema vía rpm-ostree (Waybar, Rofi, SwayNC, Swaybg, utilidades, muParser, tomlplusplus)
+# 3. Instala el compositor Hyprland optimizado y autocontenido en /usr/local (sin colisiones con la imagen base)
+# 4. Registra la sesión Wayland en SDDM (/usr/local/share/wayland-sessions/hyprland.desktop)
+# 5. Despliega todas las configuraciones, temas y Modo Agente de Omarchy
 # ==============================================================================
 set -euo pipefail
 
@@ -29,7 +30,6 @@ REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
 # -----------------------------------------------------------------------------
 echo "[1/4] Configurando SDDM para permitir desloguear y seleccionar sesión..."
 
-# Desactivar el servicio de autologin forzado de Bazzite
 systemctl mask bazzite-autologin.service 2>/dev/null || true
 
 # Crear drop-in de máxima prioridad para deshabilitar autologin y relogin
@@ -38,68 +38,91 @@ cat << 'EOF' > /etc/sddm.conf.d/zz-zzz-manual-session.conf
 User=
 Session=
 Relogin=false
+
+[Wayland]
+SessionDir=/usr/local/share/wayland-sessions,/usr/share/wayland-sessions
 EOF
 
-# Limpiar archivos de autologin previos
 rm -f /etc/sddm.conf.d/zz-bazzite-autologin.conf /etc/sddm.conf.d/zz-holo-autologin.conf
 
 echo "  [✓] SDDM configurado: al cerrar sesión aparecerá la pantalla de selección de usuario y entorno."
 
 # -----------------------------------------------------------------------------
-# 2. Habilitar repositorio Copr de Hyprland para Bazzite (ashbuk/Hyprland-Fedora)
+# 2. Instalar paquetes de utilidades y librerías vía rpm-ostree
 # -----------------------------------------------------------------------------
-echo "[2/4] Configurando repositorio Copr de Hyprland..."
-
-# Limpiar repo antiguo si existía (solopasha tiene problemas de ABI con Fedora 44)
-rm -f /etc/yum.repos.d/_copr_solopasha-hyprland.repo
-
-cat << 'EOF' > /etc/yum.repos.d/_copr_ashbuk-Hyprland-Fedora.repo
-[copr:copr.fedorainfracloud.org:ashbuk:Hyprland-Fedora]
-name=Copr repo for Hyprland-Fedora owned by ashbuk
-baseurl=https://download.copr.fedorainfracloud.org/results/ashbuk/Hyprland-Fedora/fedora-$releasever-$basearch/
-type=rpm-md
-skip_if_unavailable=True
-gpgcheck=1
-gpgkey=https://download.copr.fedorainfracloud.org/results/ashbuk/Hyprland-Fedora/pubkey.gpg
-repo_gpgcheck=0
-enabled=1
-enabled_metadata=1
-EOF
-
-echo "  [✓] Repositorio de Hyprland configurado en /etc/yum.repos.d/_copr_ashbuk-Hyprland-Fedora.repo"
-
-# -----------------------------------------------------------------------------
-# 3. Desplegar archivos de configuración de Omarchy en el usuario
-# -----------------------------------------------------------------------------
-echo "[3/4] Desplegando configuraciones y temas de Omarchy en el usuario ${REAL_USER}..."
-
-su - "${REAL_USER}" -c "${SCRIPT_DIR}/omarchy-desktop/install.sh"
-
-echo "  [✓] Configuraciones, atajos y temas aplicados para ${REAL_USER}."
-
-# -----------------------------------------------------------------------------
-# 4. Instalar paquetes de Hyprland y entorno en rpm-ostree
-# -----------------------------------------------------------------------------
-echo "[4/4] Instalando paquetes del sistema mediante rpm-ostree..."
-echo "  Paquetes: hyprland, xdg-desktop-portal-hyprland, waybar, rofi-wayland, swaync, swaybg, grim, slurp"
+echo "[2/4] Instalando dependencias del entorno gráfico vía rpm-ostree..."
+echo "  Paquetes: waybar, rofi-wayland, swaync, swaybg, grim, slurp, muParser, tomlplusplus"
 
 PKGS=(
-    hyprland
-    xdg-desktop-portal-hyprland
     waybar
     rofi-wayland
     swaync
     swaybg
     grim
     slurp
+    muParser
+    tomlplusplus
 )
 
-# Limpiar caché de transacciones previas
+# Limpiar cache de transacciones previas
 rpm-ostree cleanup -m 2>/dev/null || true
 
-# Ejecutar instalación con rpm-ostree
-# Nota: Usamos --force-replacefiles para permitir sobrescribir symlinks de desarrollo (como libdrm.so) preexistentes en la imagen base de Bazzite
-rpm-ostree install -y --force-replacefiles "${PKGS[@]}"
+# Instalar paquetes limpios
+rpm-ostree install -y "${PKGS[@]}"
+
+# -----------------------------------------------------------------------------
+# 3. Instalar Hyprland autocontenido en /usr/local (evita colisiones con libdrm de Bazzite)
+# -----------------------------------------------------------------------------
+echo "[3/4] Instalando compositor Hyprland en /usr/local..."
+
+TMP_DIR="/tmp/hypr-bazzite-install"
+mkdir -p "${TMP_DIR}"
+
+HYPR_RPM="${TMP_DIR}/hyprland.rpm"
+if [ ! -f "${HYPR_RPM}" ]; then
+    echo "  -> Descargando Hyprland para Fedora 44..."
+    curl -sLo "${HYPR_RPM}" "https://download.copr.fedorainfracloud.org/results/ashbuk/Hyprland-Fedora/fedora-44-x86_64/Packages/h/hyprland-0.56.2-2.fc44.x86_64.rpm"
+fi
+
+echo "  -> Desempaquetando binarios y librerías vendored en /usr/local..."
+mkdir -p "${TMP_DIR}/extracted"
+cd "${TMP_DIR}/extracted"
+rpm2cpio "${HYPR_RPM}" | cpio -idm 2>/dev/null
+
+mkdir -p /usr/local/bin /usr/local/libexec /usr/local/share/wayland-sessions /usr/local/share/xdg-desktop-portal /usr/local/share/hypr
+
+cp -rf usr/bin/* /usr/local/bin/
+cp -rf usr/libexec/hyprland /usr/local/libexec/
+cp -rf usr/share/hypr/* /usr/local/share/hypr/ 2>/dev/null || true
+cp -rf usr/share/xdg-desktop-portal/* /usr/local/share/xdg-desktop-portal/ 2>/dev/null || true
+
+# Desktop entry para SDDM
+cat << 'EOF' > /usr/local/share/wayland-sessions/hyprland.desktop
+[Desktop Entry]
+Name=Hyprland (Omarchy)
+Comment=An intelligent dynamic tiling Wayland compositor
+Exec=/usr/local/bin/Hyprland
+Type=Application
+DesktopNames=Hyprland
+EOF
+
+chmod +x /usr/local/bin/Hyprland /usr/local/bin/hyprctl /usr/local/bin/hyprpm /usr/local/bin/start-hyprland
+chmod +r /usr/local/share/wayland-sessions/hyprland.desktop
+
+# Limpiar temporales
+rm -rf "${TMP_DIR}"
+
+echo "  [✓] Hyprland instalado en /usr/local/bin/Hyprland"
+echo "  [✓] Sesión registrada en /usr/local/share/wayland-sessions/hyprland.desktop"
+
+# -----------------------------------------------------------------------------
+# 4. Desplegar archivos de configuración de Omarchy en el usuario
+# -----------------------------------------------------------------------------
+echo "[4/4] Desplegando configuraciones y temas de Omarchy en el usuario ${REAL_USER}..."
+
+su - "${REAL_USER}" -c "${SCRIPT_DIR}/omarchy-desktop/install.sh"
+
+echo "  [✓] Configuraciones, atajos y temas aplicados para ${REAL_USER}."
 
 echo ""
 echo "=========================================================="
@@ -108,6 +131,6 @@ echo "=========================================================="
 echo " Para aplicar la nueva capa del sistema y arrancar Hyprland:"
 echo "   sudo systemctl reboot"
 echo ""
-echo " Al reiniciar, SDDM te mostrará la pantalla de inicio de sesión"
-echo " donde podrás elegir 'Hyprland' o 'Plasma' en el selector."
+echo " Al reiniciar, SDDM te mostrará la pantalla de bienvenida"
+echo " donde podrás elegir 'Hyprland (Omarchy)' o 'Plasma'."
 echo "=========================================================="
