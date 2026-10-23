@@ -94,8 +94,12 @@ PKGS=(
     slurp
 )
 
+# Limpiar caché de transacciones previas
+rpm-ostree cleanup -m 2>/dev/null || true
+
 # Ejecutar instalación con rpm-ostree
-rpm-ostree install -y "${PKGS[@]}"
+# Nota: Usamos --force-replacefiles para permitir sobrescribir symlinks de desarrollo (como libdrm.so) preexistentes en la imagen base de Bazzite
+rpm-ostree install -y --force-replacefiles "${PKGS[@]}"
 
 echo ""
 echo "=========================================================="
