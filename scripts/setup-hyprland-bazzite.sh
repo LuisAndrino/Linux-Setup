@@ -62,8 +62,20 @@ PKGS=(
     tomlplusplus
 )
 
-rpm-ostree cleanup -m 2>/dev/null || true
-rpm-ostree install -y "${PKGS[@]}"
+ALREADY_REQUESTED=$(rpm-ostree status --json 2>/dev/null | jq -r '(.deployments[] | select(.booted == true) | .["requested-packages"] // [])[]' 2>/dev/null || true)
+TO_INSTALL=()
+for pkg in "${PKGS[@]}"; do
+    if ! echo "$ALREADY_REQUESTED" | grep -qx "$pkg"; then
+        TO_INSTALL+=("$pkg")
+    fi
+done
+
+if [ ${#TO_INSTALL[@]} -gt 0 ]; then
+    echo "  -> Paquetes a incorporar en el despliegue: ${TO_INSTALL[*]}"
+    rpm-ostree install -y "${TO_INSTALL[@]}"
+else
+    echo "  [✓] Todos los paquetes base ya están presentes en rpm-ostree."
+fi
 
 # -----------------------------------------------------------------------------
 # 3. Instalar Hyprland en /usr/local con wrapper seguro
@@ -139,7 +151,7 @@ echo "  [✓] Hyprland instalado con éxito en /usr/local."
 # 4. Desplegar configuraciones limpias en el usuario
 # -----------------------------------------------------------------------------
 echo "[4/4] Desplegando configuraciones y temas en ${REAL_USER}..."
-su - "${REAL_USER}" -c "${SCRIPT_DIR}/hyprland-desktop/install.sh"
+su - "${REAL_USER}" -c "bash '${SCRIPT_DIR}/hyprland-desktop/install.sh'"
 
 echo ""
 echo "=========================================================="
