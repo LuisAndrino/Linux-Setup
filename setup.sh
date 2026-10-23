@@ -63,6 +63,7 @@ show_help() {
     echo "  --terminal        Instala terminal rápida estilo Omarchy (Alacritty/Ghostty)"
     echo "  --grokbot         Instala y configura solo Grok Bot (AppImage)"
     echo "  --craft           Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
+    echo "  --waydroid        Instala y configura Waydroid (Emulador Android en Linux)"
     echo "  --dry-run         Simula las acciones sin modificar el sistema"
     echo "  -h, --help        Muestra esta ayuda"
     echo ""
@@ -189,6 +190,11 @@ install_craft_suite() {
     bash "${SCRIPTS_DIR}/install-craft-suite.sh"
 }
 
+install_waydroid() {
+    echo -e "\n${BOLD}${CYAN}=== EMULADOR ANDROID (WAYDROID) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-waydroid.sh"
+}
+
 install_gaming_suite() {
     echo -e "\n${BOLD}${CYAN}=== LAUNCHERS Y HERRAMIENTAS DE GAMING ===${NC}"
     install_steam "false"
@@ -223,6 +229,7 @@ dry_run() {
     echo "   - Terminal rápida: Alacritty / Ghostty (GPU accelerated - estilo Omarchy)."
     echo "   - Grok Bot: AppImage en ~/.local/share/grok-bot + .desktop."
     echo "   - Suite Craft: ArtCraft Launcher (bundle) para GridCraft, DeckCraft, WordCraft y PdfCraft."
+    echo "   - Waydroid: Emulador / contenedor Android con aceleración GPU nativa y Wayland."
     echo ""
     echo "2. Gaming & Optimización:"
     echo "   - Gamescope (Micro-compositor Valve con escalado FSR/HDR), GameMode, MangoHud."
@@ -273,6 +280,7 @@ if [ $# -gt 0 ]; then
         --grokbot) ACTION="grokbot" ;;
         --craft) ACTION="craft" ;;
         --devtools) ACTION="devtools" ;;
+        --waydroid) ACTION="waydroid" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
         *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
@@ -331,6 +339,7 @@ case "$ACTION" in
         install_terminal
         install_grokbot
         install_craft_suite
+        install_waydroid
         install_flatpaks
         ;;
     flatpak_only)
@@ -343,6 +352,7 @@ case "$ACTION" in
         install_terminal
         install_grokbot
         install_craft_suite
+        install_waydroid
         install_flatpaks
         ;;
     gaming)
@@ -380,6 +390,9 @@ case "$ACTION" in
         ;;
     devtools)
         install_dev_tools
+        ;;
+    waydroid)
+        install_waydroid
         ;;
     dev_tools)
         install_brave_origin

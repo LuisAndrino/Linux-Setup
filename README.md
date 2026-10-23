@@ -67,6 +67,8 @@ git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup && cd ~/linux-setup && ./setup.s
 * **Tailscale:** Red VPN mesh con demonio `tailscaled` habilitado en systemd.
 * **Grok Bot:** AppImage integrado en `~/.local/share/grok-bot/appimage`.
 * **Suite Craft:** ArtCraft Launcher (bundle local) para GridCraft, DeckCraft, WordCraft y PdfCraft.
+* **Waydroid (Emulador Android):**
+  Ejecuta Android (LineageOS) dentro de un contenedor LXC con renderizado directo en Wayland y aceleración gráfica por GPU nativa. Permite correr aplicaciones y juegos APK de Android con integración directa en tu escritorio. Incluye herramientas de depuración y screen-mirroring (`scrcpy` y `adb`).
 * **Mensajería:** WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack.
 * **Navegadores & Utilidades:** Google Chrome, Mozilla Firefox, 1Password, Obsidian, Flameshot, Okular, Kontainer.
 * **Tienda y Ecosistema Flatpak (Trinidad Esencial):**
