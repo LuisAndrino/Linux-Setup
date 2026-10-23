@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# omarchy-theme - Conmutador dinámico de temas estilo Omarchy
+# ==============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+THEMES_DIR="${SCRIPT_DIR}/themes"
+CURRENT_THEME_FILE="${HOME}/.config/omarchy/current_theme"
+mkdir -p "${HOME}/.config/omarchy" "${HOME}/.config/hypr" "${HOME}/.config/waybar" "${HOME}/.config/rofi" "${HOME}/.config/alacritty"
+
+THEMES=("tokyo-night" "catppuccin" "nord" "gruvbox")
+
+list_themes() {
+    echo "Temas disponibles estilo Omarchy:"
+    for t in "${THEMES[@]}"; do
+        if [ -f "${CURRENT_THEME_FILE}" ] && [ "$(cat "${CURRENT_THEME_FILE}")" = "$t" ]; then
+            echo "  * $t (activo)"
+        else
+            echo "    $t"
+        fi
+    done
+}
+
+get_current_theme() {
+    if [ -f "${CURRENT_THEME_FILE}" ]; then
+        cat "${CURRENT_THEME_FILE}"
+    else
+        echo "tokyo-night"
+    fi
+}
+
+apply_theme() {
+    local target="$1"
+    local conf="${THEMES_DIR}/${target}.conf"
+
+    if [ ! -f "$conf" ]; then
+        echo "[!] Tema '$target' no encontrado."
+        list_themes
+        exit 1
+    fi
+
+    # shellcheck source=/dev/null
+    . "$conf"
+
+    echo "[+] Aplicando tema '$target' estilo Omarchy..."
+
+    # 1. Hyprland theme
+    cat << EOF > "${HOME}/.config/hypr/theme.conf"
+# Tema generado automáticamente: ${THEME_NAME}
+\$col_active_border = rgb(${BORDER_ACTIVE}) rgb(${ACCENT_SECONDARY}) 45deg
+\$col_inactive_border = rgb(${BORDER_INACTIVE})
+EOF
+
+    # 2. Waybar theme
+    cat << EOF > "${HOME}/.config/waybar/theme.css"
+/* Tema generado automáticamente: ${THEME_NAME} */
+@define-color bg ${WAYBAR_BG};
+@define-color fg #${FG};
+@define-color accent #${ACCENT};
+@define-color accent_alt #${ACCENT_SECONDARY};
+@define-color muted #${MUTED};
+@define-color urgent #${URGENT};
+EOF
+
+    # 3. Rofi theme
+    cat << EOF > "${HOME}/.config/rofi/theme.rasi"
+/* Tema generado automáticamente: ${THEME_NAME} */
+* {
+    bg-col: ${ROFI_BG};
+    fg-col: ${ROFI_FG};
+    accent-col: ${ROFI_ACCENT};
+    selected-col: #${ACCENT_SECONDARY}44;
+}
+EOF
+
+    # 4. Alacritty colors
+    cat << EOF > "${HOME}/.config/alacritty/theme.toml"
+# Tema generado automáticamente: ${THEME_NAME}
+[colors.primary]
+background = "#${BG}"
+foreground = "#${FG}"
+
+[colors.cursor]
+text = "#${BG}"
+cursor = "#${ACCENT}"
+
+[colors.normal]
+black   = "#${BG}"
+red     = "#${URGENT}"
+green   = "#${ACCENT_SECONDARY}"
+yellow  = "#${ACCENT}"
+blue    = "#${ACCENT}"
+magenta = "#${ACCENT_SECONDARY}"
+cyan    = "#${ACCENT}"
+white   = "#${FG}"
+EOF
+
+    echo "$target" > "${CURRENT_THEME_FILE}"
+
+    # Recargar componentes activos si se están ejecutando
+    if command -v hyprctl >/dev/null 2>&1 && pidof Hyprland >/dev/null 2>&1; then
+        hyprctl reload >/dev/null 2>&1 || true
+    fi
+
+    if pidof waybar >/dev/null 2>&1; then
+        killall -SIGUSR2 waybar 2>/dev/null || true
+    fi
+
+    echo "[✓] Tema '$target' activado en Hyprland, Waybar, Alacritty y Rofi."
+}
+
+ACTION="${1:-next}"
+
+case "$ACTION" in
+    list)
+        list_themes
+        ;;
+    next)
+        current=$(get_current_theme)
+        next_theme=""
+        for i in "${!THEMES[@]}"; do
+            if [ "${THEMES[$i]}" = "$current" ]; then
+                next_index=$(( (i + 1) % ${#THEMES[@]} ))
+                next_theme="${THEMES[$next_index]}"
+                break
+            fi
+        done
+        next_theme="${next_theme:-tokyo-night}"
+        apply_theme "$next_theme"
+        ;;
+    tokyo-night|catppuccin|nord|gruvbox)
+        apply_theme "$ACTION"
+        ;;
+    *)
+        echo "Uso: omarchy-theme [next | list | tokyo-night | catppuccin | nord | gruvbox]"
+        exit 1
+        ;;
+esac

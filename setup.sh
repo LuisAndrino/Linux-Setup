@@ -65,6 +65,7 @@ show_help() {
     echo "  --craft           Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo "  --waydroid        Instala y configura Waydroid (Emulador Android en Linux)"
     echo "  --mysql           Instala MySQL Workbench (con parche XWayland) y DBeaver"
+    echo "  --omarchy-desktop Instala el entorno gráfico estilo Omarchy (Hyprland, Waybar, temas, modo agentes)"
     echo "  --dry-run         Simula las acciones sin modificar el sistema"
     echo "  -h, --help        Muestra esta ayuda"
     echo ""
@@ -289,6 +290,7 @@ if [ $# -gt 0 ]; then
         --devtools) ACTION="devtools" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
+        --omarchy-desktop) ACTION="omarchy_desktop" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
         *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
@@ -312,10 +314,11 @@ if [ "$ACTION" = "interactive" ]; then
     echo "  6) Solo Música (ncspot [Rust], Strawberry FLAC, Amberol)"
     echo "  7) Solo Terminal rápida estilo Omarchy (Alacritty) y CLI"
     echo "  8) Solo Tailscale"
-    echo "  9) Simulación (Dry run)"
-    echo "  10) Salir"
+    echo "  9) Instalar Entorno Gráfico Completo estilo Omarchy (Hyprland + Waybar + Temas + Agentes)"
+    echo "  10) Simulación (Dry run)"
+    echo "  11) Salir"
     echo ""
-    read -rp "Selecciona una opción [1-10] (por defecto 1): " choice
+    read -rp "Selecciona una opción [1-11] (por defecto 1): " choice
     choice=${choice:-1}
 
     case "$choice" in
@@ -327,8 +330,9 @@ if [ "$ACTION" = "interactive" ]; then
         6) ACTION="audio" ;;
         7) ACTION="cli" ;;
         8) ACTION="tailscale" ;;
-        9) ACTION="dry-run" ;;
-        10) echo "Cancelado."; exit 0 ;;
+        9) ACTION="omarchy_desktop" ;;
+        10) ACTION="dry-run" ;;
+        11) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
     esac
 fi
@@ -427,6 +431,9 @@ case "$ACTION" in
     cli)
         install_cli
         install_terminal
+        ;;
+    omarchy_desktop)
+        bash "${SCRIPT_DIR}/omarchy-desktop/install.sh"
         ;;
     dry-run)
         dry_run

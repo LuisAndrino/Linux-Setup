@@ -16,74 +16,80 @@ Si estás en una **máquina completamente nueva desde cero**, clona y ejecuta to
 git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup && cd ~/linux-setup && ./setup.sh --yes
 ```
 
-*(El parámetro `--yes` o `--all` instala todo sin hacer preguntas: herramientas nativas, gaming, audio, comunicación, desarrollo y Flatpaks).*
+---
+
+## 🎨 Entorno de Escritorio Estilo Omarchy (Cross-Distro)
+
+Incluye una suite de configuración completa en `omarchy-desktop/` que replica la estética, fluidez y modo de agentes de Omarchy:
+
+* **Compositor Hyprland:** Animaciones bezier elásticas, bordes redondeados con sombras suaves y compatibilidad reforzada para **Apache NetBeans** (`_JAVA_AWT_WM_NONREPARENTING=1`) y **MySQL Workbench** (`GDK_BACKEND=x11`).
+* **Barra de Estado Waybar:** Diseño de píldoras/islas con indicadores de espacios de trabajo, ventana activa, CPU/RAM, audio, batería y estado del sistema.
+* **Menú Rofi:** Lanzador de aplicaciones centrado con desenfoque de fondo y búsqueda difusa (*fuzzy*).
+* **Terminal Rápida Alacritty:** Con paletas de colores idénticas a los temas de Omarchy.
+* **Motor Dinámico de Temas (`omarchy-theme`):**
+  Cambia la paleta de colores en tiempo real en Hyprland, Waybar, Alacritty y Rofi con un solo comando o atajo:
+  * `Tokyo Night`
+  * `Catppuccin Mocha`
+  * `Nord`
+  * `Gruvbox Material`
+* **Modo de Agentes Autónomos:**
+  * Atajo `Super + C` para lanzar tu agente de código favorito (**Google Antigravity**, **Claude Code**, **OpenCode**).
+  * Comando rápido de terminal: `c "analiza este proyecto"` o simplemente `agent`.
+
+### Atajos de Teclado Principales
+* `Super + Space`: Lanzador de aplicaciones (Rofi)
+* `Super + Return`: Terminal ultra-rápida (Alacritty)
+* `Super + C`: **Modo Agente de IA**
+* `Super + T`: Cambiar tema en tiempo real
+* `Super + Q`: Cerrar ventana
+* `Super + F`: Pantalla completa
+* `Super + V`: Ventana flotante
+
+### Cómo probar el entorno Omarchy en tu máquina actual:
+```bash
+cd ~/linux-setup
+./setup.sh --omarchy-desktop
+```
+*(Puedes probar la terminal, el conmutador de temas con `omarchy-theme next` y el lanzador de agentes `c` inmediatamente, o iniciar Hyprland en sesión de escritorio completa).*
 
 ---
 
-## 🎮 Gaming, Rendimiento y Partidas
-* **Launchers:**
-  * **Steam:** Instalación nativa oficial de la distro o Flatpak según convenga.
-  * **Lutris:** Gestor universal de juegos (GOG, Ubisoft, Epic, emuladores y scripts de la comunidad).
-  * **Heroic Games Launcher:** Cliente nativo para Epic Games, GOG y Amazon Prime Games.
-  * **Prism Launcher:** El lanzador de Minecraft por excelencia (instancias aisladas, mods Fabric/Forge/Quilt).
-* **Partidas Guardadas y Mandos:**
-  * **Ludusavi:** Respaldo y sincronización automática de partidas guardadas de Steam, Heroic, Lutris, Bottles y emuladores.
-  * **AntiMicroX:** Mapeo de mandos/gamepads a teclado y ratón para juegos sin soporte nativo de mando.
-* **Herramientas de Rendimiento:**
-  * **Valve Gamescope (`gamescope`):** Micro-compositor de SteamOS para forzar resoluciones arbitrarias, escalado FSR/NIS, HDR y limitador de FPS.
-  * **GameMode (`gamemode`):** Optimizador del kernel y CPU para máxima tasa de cuadros.
-  * **MangoHud (`mangohud`):** Overlay en pantalla para FPS, temperaturas y consumo de hardware.
-  * **ProtonUp-Qt:** Instala y actualiza GE-Proton, Wine-GE y Luxtorpeda con 1 clic.
-  * **Goverlay:** Interfaz gráfica para calibrar MangoHud y filtros vkBasalt.
-  * **Bottles, Protontricks y ProtonPlus:** Gestores de prefijos de Wine y dependencias DLL.
+## 🎮 Gaming, Rendimiento y Emuladores
+* **Lutris, Heroic Games Launcher, Prism Launcher y Steam.**
+* **Ludusavi:** Respaldo y sincronización automática de partidas guardadas de PC.
+* **AntiMicroX:** Mapeo de mandos a teclado/ratón.
+* **Valve Gamescope (`gamescope`):** FSR/NIS, HDR, limitador de FPS y aislamiento de resolución.
+* **ProtonUp-Qt, Goverlay, GameMode, MangoHud, Bottles, Protontricks y ProtonPlus.**
+* **Waydroid:** Emulador de Android con aceleración gráfica por GPU nativa en Wayland.
 
 ---
 
 ## 🎵 Audio, Voz y Música Hi-Res
-* **Easy Effects:** El procesador de audio esencial para PipeWire. Aplica cancelación de ruido por IA (RNNoise) en tu micrófono para Discord/Slack y ecualizadores de alta definición para auriculares.
-* **ncspot (Spotify en RUST):** Cliente ultra ligero escrito en Rust con interfaz ncurses y mínimo consumo de recursos.
-* **Strawberry Music Player:** Reproductor audiófilo con salida bit-perfect directa (ALSA/PipeWire) para archivos FLAC y DSD.
-* **Amberol:** Reproductor minimalista y moderno para reproducción local inmediata.
+* **Easy Effects:** Supresión de ruido por IA (RNNoise) para micrófono en Discord/Slack y ecualizador FLAC.
+* **ncspot:** Cliente de Spotify ligero en **Rust**.
+* **Strawberry Music Player:** Reproductor audiófilo bit-perfect para archivos FLAC y DSD.
+* **Amberol:** Reproductor minimalista de música local.
 
 ---
 
-## 💻 Desarrollo, Runtimes y Terminal Rápida
+## 💻 Desarrollo, Base de Datos y CLI
 * **Brave Origin (Nativo Oficial):** Repositorio oficial de Brave Software (`FLAVOR=origin`).
 * **Visual Studio Code:** Repositorio oficial de Microsoft (`code`).
-* **Java OpenJDK 21:** JDK esencial para Apache NetBeans y Prism Launcher.
-* **Herramientas Dev en Terminal:**
-  * **Lazygit:** La interfaz de terminal para Git más rápida y productiva.
-  * **Mise (`mise-en-place`):** Gestor políglota de entornos (Node.js, Python, Java, Rust) sin ensuciar el sistema.
-* **Google Antigravity:** Instalación oficial (AppImage / Homebrew Cask con accesos `.desktop`).
-* **PowerShell (`pwsh`):** Microsoft PowerShell para Linux.
-* **Terminal Rápida (Omarchy Style):** Alacritty (renderizado por GPU en Rust) y soporte Ghostty.
+* **Java OpenJDK 21:** JDK para NetBeans y Prism Launcher.
+* **MySQL Workbench & DBeaver Community:** Clientes SQL con compatibilidad asegurada.
+* **Herramientas Dev:** Lazygit, Mise (gestor de runtimes políglota), PowerShell (`pwsh`), Google Antigravity.
 
 ---
 
-## 🔄 Sincronización, Mensajería y Red
-* **LocalSend:** Transferencia directa de archivos estilo AirDrop entre PCs y móviles (Android/iOS) en tu red local o Tailscale.
-* **Pika Backup:** Copias de seguridad incrementales cifradas de tus carpetas personales y configuraciones.
-* **PeaZip:** Gestor avanzado de compresión para todos los formatos (ZIP, RAR, 7Z, TAR).
+## 🛍️ Tienda y Ecosistema Flatpak
+* **Bazaar (`io.github.kolunmi.Bazaar`):** La mejor tienda gráfica dedicada a Flathub y Flatpaks.
+* **Warehouse (`io.github.flattool.Warehouse`):** Limpiador de restos de apps y gestor de paquetes.
+* **Flatseal (`com.github.tchx84.Flatseal`):** Gestor granular de permisos.
+
+---
+
+## 🔄 Sincronización y Archivos
+* **LocalSend:** Transferencia de archivos estilo AirDrop entre PCs y móviles.
+* **Pika Backup:** Copias de seguridad incrementales cifradas de carpetas y configs.
+* **PeaZip:** Compresor multiformato avanzado.
 * **Tailscale:** Red VPN mesh con demonio `tailscaled` habilitado en systemd.
-* **Grok Bot:** AppImage integrado en `~/.local/share/grok-bot/appimage`.
-* **Suite Craft:** ArtCraft Launcher (bundle local) para GridCraft, DeckCraft, WordCraft y PdfCraft.
-* **Waydroid (Emulador Android):**
-  Ejecuta Android (LineageOS) dentro de un contenedor LXC con renderizado directo en Wayland y aceleración gráfica por GPU nativa. Permite correr aplicaciones y juegos APK de Android con integración directa en tu escritorio. Incluye herramientas de depuración y screen-mirroring (`scrcpy` y `adb`).
-* **Mensajería:** WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack.
-* **Navegadores & Utilidades:** Google Chrome, Mozilla Firefox, 1Password, Obsidian, Flameshot, Okular, Kontainer.
-* **Tienda y Ecosistema Flatpak (Trinidad Esencial):**
-  * **Bazaar (`io.github.kolunmi.Bazaar`):** La mejor tienda gráfica dedicada exclusivamente a Flathub y Flatpaks (moderna, rápida, sin bloatware ni bloqueos).
-  * **Warehouse (`io.github.flattool.Warehouse`):** Administrador avanzado para limpiar datos residuales, desinstalar y hacer downgrade de versiones Flatpak.
-  * **Flatseal (`com.github.tchx84.Flatseal`):** Gestor visual de permisos de aplicaciones (acceso a carpetas, Wayland, X11, red, dispositivos).
-
----
-
-## 🛠️ Comandos por Módulos (Opcionales)
-
-```bash
-./setup.sh              # Menú interactivo con selector de categorías
-./setup.sh --gaming     # Instala solo la suite de Gaming (Lutris, Heroic, Prism, Ludusavi...)
-./setup.sh --devtools   # Instala solo Java OpenJDK 21, Lazygit y Mise
-./setup.sh --gamescope  # Instala y optimiza Gamescope
-./setup.sh --dry-run    # Simula la instalación sin hacer cambios
-```
