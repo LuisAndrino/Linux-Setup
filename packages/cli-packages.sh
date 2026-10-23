@@ -30,7 +30,7 @@ install_cli_debian() {
         htop btop tmux zsh zip unzip p7zip-full \
         build-essential ca-certificates gnupg \
         openssh-client openssh-server alacritty \
-        gamemode mangohud || true
+        gamemode mangohud gamescope || true
 
     sudo apt install -y fastfetch 2>/dev/null || sudo apt install -y neofetch 2>/dev/null || true
 }
@@ -42,7 +42,7 @@ install_cli_fedora() {
         htop btop tmux zsh zip unzip p7zip p7zip-plugins \
         gcc gcc-c++ make automake autoconf \
         openssh-clients openssh-server fastfetch alacritty \
-        gamemode mangohud || true
+        gamemode mangohud gamescope || true
 }
 
 install_cli_arch() {
@@ -51,7 +51,7 @@ install_cli_arch() {
         curl wget git github-cli jq ripgrep tree rsync \
         htop btop tmux zsh zip unzip p7zip \
         base-devel openssh fastfetch alacritty \
-        gamemode mangohud || true
+        gamemode mangohud gamescope || true
 
     # Si multilib está habilitado, instalar versiones de 32 bits para juegos clásicos
     sudo pacman -S --needed --noconfirm lib32-gamemode lib32-mangohud 2>/dev/null || true
@@ -63,7 +63,7 @@ install_cli_zypper() {
         curl wget git gh jq ripgrep tree rsync \
         htop btop tmux zsh zip unzip p7zip \
         gcc gcc-c++ make openssh fastfetch alacritty \
-        gamemode mangohud || true
+        gamemode mangohud gamescope || true
 }
 
 install_cli_immutable() {

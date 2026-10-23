@@ -51,7 +51,8 @@ show_help() {
     echo "                    Steam, Tailscale, Antigravity, PowerShell, Terminal rápida (Alacritty),"
     echo "                    Grok Bot, Craft Suite, CLI + Flatpaks complementarios) [Recomendado]"
     echo "  --flatpak-only    Instala todo mediante Flatpak (Ideal para Bazzite/SteamOS inmutables)"
-    echo "  --gaming          Instala solo herramientas y launchers de Gaming (Lutris, Heroic, Prism, etc.)"
+    echo "  --gaming          Instala solo herramientas y launchers de Gaming (Lutris, Heroic, Prism, Gamescope, etc.)"
+    echo "  --gamescope       Instala y optimiza Valve Gamescope (micro-compositor FSR/HDR)"
     echo "  --cli             Instala solo herramientas de terminal y paquetes esenciales"
     echo "  --brave           Instala solo Brave Origin (repositorio nativo oficial)"
     echo "  --vscode          Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
@@ -186,6 +187,7 @@ install_craft_suite() {
 install_gaming_suite() {
     echo -e "\n${BOLD}${CYAN}=== LAUNCHERS Y HERRAMIENTAS DE GAMING ===${NC}"
     install_steam "false"
+    bash "${SCRIPTS_DIR}/install-gamescope.sh"
     ensure_flatpak_installed
     echo "[+] Instalando Launchers y compatibilidad (Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Bottles)..."
     flatpak install -y --noninteractive flathub \
@@ -205,6 +207,7 @@ dry_run() {
     echo "   - Brave: Brave Origin (FLAVOR=origin)."
     echo "   - VS Code: Repositorio oficial Microsoft (code)."
     echo "   - Steam: Paquete nativo de la distro o Steam Flatpak."
+    echo "   - Gamescope: Micro-compositor de Valve con escalado FSR/NIS, HDR y limitador FPS."
     echo "   - Tailscale: Script oficial universal + activación systemd."
     echo "   - Antigravity: Instalador oficial de Google Antigravity."
     echo "   - PowerShell: Microsoft PowerShell (pwsh)."
@@ -213,7 +216,7 @@ dry_run() {
     echo "   - Suite Craft: ArtCraft Launcher (bundle) para GridCraft, DeckCraft, WordCraft y PdfCraft."
     echo ""
     echo "2. Gaming & Optimización:"
-    echo "   - GameMode (optimizador de CPU/Kernel), MangoHud (FPS/Overlay), Vulkan 32/64 bits."
+    echo "   - Gamescope (Micro-compositor Valve con escalado FSR/HDR), GameMode, MangoHud."
     echo "   - Lutris, Heroic Games Launcher, Prism Launcher (Minecraft)."
     echo "   - ProtonUp-Qt, Goverlay, Bottles, Protontricks, ProtonPlus."
     echo ""
@@ -241,6 +244,7 @@ if [ $# -gt 0 ]; then
         -y|--yes|--all|--install-all|--native) ACTION="native" ;;
         --flatpak-only) ACTION="flatpak_only" ;;
         --gaming) ACTION="gaming" ;;
+        --gamescope) ACTION="gamescope" ;;
         --cli) ACTION="cli" ;;
         --brave) ACTION="brave" ;;
         --vscode) ACTION="vscode" ;;
@@ -301,6 +305,7 @@ case "$ACTION" in
         install_brave_origin
         install_vscode "false"
         install_steam "false"
+        bash "${SCRIPTS_DIR}/install-gamescope.sh"
         install_tailscale
         install_antigravity
         install_powershell
@@ -323,6 +328,9 @@ case "$ACTION" in
         ;;
     gaming)
         install_gaming_suite
+        ;;
+    gamescope)
+        bash "${SCRIPTS_DIR}/install-gamescope.sh"
         ;;
     brave)
         install_brave_origin

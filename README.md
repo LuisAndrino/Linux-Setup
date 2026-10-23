@@ -27,6 +27,7 @@ git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup && cd ~/linux-setup && ./setup.s
   * **Heroic Games Launcher:** Cliente nativo para Epic Games, GOG y Amazon Prime Games.
   * **Prism Launcher:** El lanzador de Minecraft por excelencia (instancias aisladas, mods Fabric/Forge/Quilt).
 * **Herramientas de Rendimiento & Compatibilidad:**
+  * **Valve Gamescope (`gamescope`):** El micro-compositor de SteamOS para forzar resoluciones arbitrarias, escalado FSR/NIS de ultra baja latencia, HDR, limitador de FPS y soporte para pantallas ultrapanorámicas o portátiles.
   * **GameMode (`gamemode`):** Optimizador del kernel y CPU de Feral Interactive para máxima tasa de cuadros.
   * **MangoHud (`mangohud`):** Overlay en pantalla para FPS, temperaturas, reloj de GPU y consumo de RAM.
   * **ProtonUp-Qt:** Instala y actualiza GE-Proton, Wine-GE y Luxtorpeda con un solo clic.
