@@ -1,45 +1,59 @@
 # ==============================================================================
 # Lista de aplicaciones Flatpak (Flathub) para instalación cross-distro
 # ==============================================================================
+# Compatible con: Ubuntu, Debian, Fedora, Arch Linux, openSUSE, Bazzite, SteamOS
 # Las líneas que comienzan con '#' son comentarios.
-# Puedes añadir o quitar aplicaciones usando su Application ID de Flathub.
 # ==============================================================================
 
-# --- DESARROLLO Y PROGRAMACIÓN ---
-com.visualstudio.code                # Visual Studio Code (Editor / IDE)
+# --- DESARROLLO, PROGRAMACIÓN Y BASE DE DATOS ---
+com.visualstudio.code                # Visual Studio Code (Editor / IDE universal)
 org.apache.netbeans                  # Apache NetBeans IDE
-io.dbeaver.DBeaverCommunity          # DBeaver Community (Gestor SQL Universal y MySQL nativo Wayland)
+io.dbeaver.DBeaverCommunity          # DBeaver Community (Gestor SQL Universal)
+io.github.DenysMb.Kontainer          # GUI para contenedores Podman / Docker
 
-# --- GAMING, EMULACIÓN Y CONTROLADORES ---
-net.lutris.Lutris                    # Lutris (Gestor integral de juegos)
+# --- GAMING, LAUNCHERS Y EMULADORES ---
+com.valvesoftware.Steam              # Steam (Omitido automáticamente si se instala Steam nativo)
+net.lutris.Lutris                    # Lutris (Gestor integral de juegos PC y emuladores)
 com.heroicgameslauncher.hgl          # Heroic Games Launcher (Epic Games, GOG, Amazon)
 org.prismlauncher.PrismLauncher      # Prism Launcher (Minecraft con instancias y mods)
-com.valvesoftware.Steam              # Steam (Omitido automáticamente si se instala Steam nativo)
+com.usebottles.bottles               # Bottles (Gestor visual de prefijos Wine y juegos Windows)
 net.davidotek.pupgui2                # ProtonUp-Qt (Instala GE-Proton, Wine-GE con 1 clic)
 io.github.benjamimgois.goverlay      # Goverlay (Configuración gráfica de MangoHud y vkBasalt)
-com.usebottles.bottles               # Bottles (Gestor visual de prefijos Wine y juegos Windows)
 com.github.Matoking.protontricks     # Utilidad Wine / Protontricks
 com.vysp3r.ProtonPlus                # Gestor de versiones Wine-GE / Proton-GE
 com.github.mtkennerly.ludusavi       # Ludusavi (Copia y sincronización de partidas guardadas)
 io.github.antimicrox.antimicrox      # AntiMicroX (Mapeo de mandos/gamepads a teclado/ratón)
-io.github.DenysMb.Kontainer          # GUI para contenedores Podman / Docker
+org.libretro.RetroArch               # RetroArch (Frontend universal de emulación)
+io.github.streetpea.Chiaki4deck      # Chiaki4deck (PlayStation Remote Play para Steam Deck / Linux)
+com.steamgriddb.SGDBoop              # SGDBoop (Instalación de arte y portadas personalizadas para Steam)
+
+# --- MULTIMEDIA, VIDEO Y STREAMING ---
+org.videolan.VLC                     # Reproductor multimedia VLC
+io.mpv.Mpv                           # Reproductor MPV (Ultra-ligero y de alta fidelidad)
+fr.handbrake.ghb                     # HandBrake (Conversor y transcodificador de video profesional)
+com.obsproject.Studio                # OBS Studio (Grabación de pantalla y streaming)
+org.kde.kdenlive                     # Kdenlive (Editor de video no lineal profesional)
+org.kde.haruna                       # Reproductor de video moderno Haruna (libmpv)
+
+# --- CREACIÓN GRÁFICA, FOTO Y 3D ---
+org.kde.krita                        # Krita (Pintura digital, dibujo e ilustración)
+org.gimp.GIMP                        # GIMP (Edición y retoque de imágenes)
+org.blender.Blender                  # Blender (Suite de modelado 3D, animación y renderizado)
+org.kde.gwenview                     # Gwenview (Visor rápido de imágenes)
 
 # --- AUDIO, VOZ Y MÚSICA HI-RES ---
-com.github.wwmm.easyeffects          # Easy Effects (Filtro IA de ruido para Discord/Slack y ecualizador FLAC)
-io.github.hrkfdn.ncspot              # ncspot (Cliente ligero de Spotify en RUST)
-org.strawberrymusicplayer.strawberry # Strawberry Music Player (El mejor reproductor audiófilo FLAC)
-io.bassi.Amberol                     # Amberol (Reproductor minimalista de música local / FLAC)
-
-# --- SINCRONIZACIÓN, RED Y ARCHIVOS ---
-org.localsend.localsend_app          # LocalSend (Transferencia de archivos y texto entre PC y móvil)
-org.gnome.World.PikaBackup           # Pika Backup (Copias de seguridad cifradas de tus carpetas y configs)
-io.github.peazip.PeaZip              # PeaZip (Gestor de archivos comprimidos avanzado)
+com.github.wwmm.easyeffects          # Easy Effects (Filtro IA de ruido para micrófonos y ecualizador)
+org.audacityteam.Audacity            # Audacity (Grabación y edición de audio multipista)
+org.strawberrymusicplayer.strawberry # Strawberry Music Player (Reproductor audiófilo FLAC)
+io.bassi.Amberol                     # Amberol (Reproductor minimalista de música local)
+io.github.hrkfdn.ncspot              # ncspot (Cliente ligero de Spotify en RUST para terminal)
+com.spotify.Client                   # Spotify cliente oficial
 
 # --- MENSAJERÍA Y COMUNICACIÓN ---
-com.rtosta.zapzap                    # WhatsApp (ZapZap - Cliente con bandeja de sistema y notificaciones)
-org.telegram.desktop                 # Telegram Desktop
 com.discordapp.Discord               # Discord Oficial
 dev.vencord.Vesktop                  # Vesktop (Discord optimizado con audio screen-share en Wayland)
+org.telegram.desktop                 # Telegram Desktop
+com.rtosta.zapzap                    # WhatsApp (ZapZap - Cliente con bandeja de sistema)
 com.slack.Slack                      # Slack
 
 # --- NAVEGADORES WEB ---
@@ -49,18 +63,16 @@ org.mozilla.firefox                  # Mozilla Firefox
 
 # --- PRODUCTIVIDAD Y UTILIDADES ---
 com.onepassword.OnePassword          # Gestor de contraseñas 1Password
-md.obsidian.Obsidian                 # Obsidian (Notas en Markdown)
+md.obsidian.Obsidian                 # Obsidian (Base de conocimiento y notas en Markdown)
 org.flameshot.Flameshot              # Flameshot (Captura de pantalla avanzada)
-org.kde.okular                       # Lector de PDF y documentos
-org.kde.kcalc                        # Calculadora
-org.gnome.Firmware                   # Actualizador de firmware de hardware
-
-# --- MULTIMEDIA ---
-org.videolan.VLC                     # Reproductor multimedia VLC
-org.kde.haruna                       # Reproductor de video Haruna
-org.kde.gwenview                     # Visor de imágenes Gwenview
+org.localsend.localsend_app          # LocalSend (Transferencia local P2P entre PC y móvil)
+org.gnome.World.PikaBackup           # Pika Backup (Copias de seguridad cifradas de carpetas)
+io.github.peazip.PeaZip              # PeaZip (Gestor de compresión y descompresión de archivos)
+org.kde.okular                       # Okular (Lector de documentos PDF, ePub, etc.)
+org.kde.kcalc                        # Calculadora científica
+org.gnome.Firmware                   # Actualizador de firmware del hardware (fwupd)
 
 # --- GESTIÓN Y TIENDA DE FLATPAKS ---
-io.github.kolunmi.Bazaar             # Bazaar (La mejor tienda visual dedicada a Flathub y Flatpaks)
-io.github.flattool.Warehouse         # Warehouse (Gestor avanzado, desinstalador y limpiador de restos)
-com.github.tchx84.Flatseal           # Flatseal (Gestor de permisos para Flatpaks - indispensable)
+io.github.kolunmi.Bazaar             # Bazaar (Tienda visual dedicada a Flathub y Flatpaks)
+io.github.flattool.Warehouse         # Warehouse (Gestor avanzado y limpiador de restos de apps)
+com.github.tchx84.Flatseal           # Flatseal (Gestor visual de permisos de Flatpaks)

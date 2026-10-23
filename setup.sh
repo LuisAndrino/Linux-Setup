@@ -2,7 +2,7 @@
 # ==============================================================================
 # setup.sh - Instalador Universal y Modular para Cualquier Distribución Linux
 # ==============================================================================
-# Soporta: Ubuntu/Debian, Fedora, Arch/Manjaro, openSUSE, Bazzite, SteamOS, etc.
+# Soporta: Debian, Ubuntu, Fedora, Arch Linux, Manjaro, openSUSE, Bazzite, SteamOS
 # ==============================================================================
 
 set -uo pipefail
@@ -33,7 +33,7 @@ print_header() {
  | |___| | | | | |_| |>  <  ___) |  __/ |_| |_| | |_) |
  |_____|_|_| |_|\__,_/_/\_\|____/ \___|\__|\__,_| .__/ 
                                                 |_|    
-   Configurador Universal de Software para Linux
+   Configurador Universal de Software para Linux (Multi-Distro)
 ======================================================================
 EOF
     echo -e "${NC}"
@@ -42,32 +42,32 @@ EOF
 show_help() {
     echo -e "${BOLD}Uso:${NC} ./setup.sh [OPCIONES]"
     echo ""
-    echo "Comando para instalar TODO desatendido:"
-    echo "  ${CYAN}./setup.sh --yes${NC}   o   ${CYAN}./setup.sh --all${NC}"
+    echo -e "Comando para instalar TODO desatendido:"
+    echo -e "  ${CYAN}./setup.sh --yes${NC}   o   ${CYAN}./setup.sh --all${NC}"
     echo ""
-    echo "Opciones principales:"
-    echo "  -y, --yes, --all  Instala TODO de forma automática y desatendida [Recomendado]"
-    echo "  --native          Instala programas en versión NATIVA (Brave Origin, VS Code nativo,"
-    echo "                    Steam, Tailscale, Antigravity, PowerShell, Terminal rápida (Alacritty),"
-    echo "                    Grok Bot, Craft Suite, CLI + Flatpaks complementarios) [Recomendado]"
-    echo "  --flatpak-only    Instala todo mediante Flatpak (Ideal para Bazzite/SteamOS inmutables)"
-    echo "  --gaming          Instala solo herramientas y launchers de Gaming (Lutris, Heroic, Prism, Gamescope, etc.)"
-    echo "  --gamescope       Instala y optimiza Valve Gamescope (micro-compositor FSR/HDR)"
-    echo "  --cli             Instala solo herramientas de terminal y paquetes esenciales"
-    echo "  --brave           Instala solo Brave Origin (repositorio nativo oficial)"
-    echo "  --vscode          Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
-    echo "  --steam           Instala solo Steam"
-    echo "  --tailscale       Instala y configura solo Tailscale"
-    echo "  --antigravity     Instala Google Antigravity"
-    echo "  --powershell      Instala Microsoft PowerShell (pwsh)"
-    echo "  --terminal        Instala terminal rápida (Alacritty/Ghostty)"
-    echo "  --grokbot         Instala y configura solo Grok Bot (AppImage)"
-    echo "  --craft           Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
-    echo "  --waydroid        Instala y configura Waydroid (Emulador Android en Linux)"
-    echo "  --mysql           Instala MySQL Workbench (con parche XWayland) y DBeaver"
-    echo "  --hyprland-desktop Instala el entorno gráfico ligero Hyprland (Waybar en cápsulas, atajos y temas)"
-    echo "  --dry-run         Simula las acciones sin modificar el sistema"
-    echo "  -h, --help        Muestra esta ayuda"
+    echo -e "Opciones principales:"
+    echo -e "  ${CYAN}-y, --yes, --all${NC}   Instala TODO de forma automática (Desarrollo, IA, Gaming, Multimedia, CLI) [Recomendado]"
+    echo -e "  ${CYAN}--native${NC}           Instala herramientas y aplicaciones en modo nativo donde aplique"
+    echo -e "  ${CYAN}--flatpak-only${NC}     Instala todo mediante Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
+    echo -e "  ${CYAN}--dev, --devtools${NC}  Instala la suite completa de desarrollo (Neovim, Lazygit, Mise, uv, Bun, Java, gh)"
+    echo -e "  ${CYAN}--neovim${NC}           Instala Neovim v0.10+ y su configuración moderna en Lua (Lazy.nvim, Treesitter, Telescope)"
+    echo -e "  ${CYAN}--ai, --ai-tools${NC}   Instala la suite de IA (Ollama local, Claude Code CLI, Aider, Antigravity, Grok Bot, agent/c)"
+    echo -e "  ${CYAN}--gaming${NC}           Instala la suite de Gaming (Steam, Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Gamescope)"
+    echo -e "  ${CYAN}--multimedia${NC}       Instala la suite Multimedia (VLC, MPV, HandBrake, OBS Studio, Kdenlive, Krita, Audacity, GIMP, Blender, Spotify)"
+    echo -e "  ${CYAN}--cli${NC}              Instala solo herramientas de terminal y paquetes esenciales cross-distro"
+    echo -e "  ${CYAN}--brave${NC}            Instala solo Brave Origin (repositorio nativo oficial)"
+    echo -e "  ${CYAN}--vscode${NC}           Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
+    echo -e "  ${CYAN}--steam${NC}            Instala solo Steam"
+    echo -e "  ${CYAN}--tailscale${NC}        Instala y configura solo Tailscale"
+    echo -e "  ${CYAN}--antigravity${NC}      Instala Google Antigravity"
+    echo -e "  ${CYAN}--powershell${NC}       Instala Microsoft PowerShell (pwsh)"
+    echo -e "  ${CYAN}--terminal${NC}         Instala terminal rápida (Alacritty/Ghostty)"
+    echo -e "  ${CYAN}--grokbot${NC}          Instala y configura solo Grok Bot (AppImage)"
+    echo -e "  ${CYAN}--craft${NC}            Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
+    echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
+    echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
+    echo -e "  ${CYAN}--dry-run${NC}          Simula las acciones sin modificar el sistema"
+    echo -e "  ${CYAN}-h, --help${NC}         Muestra esta ayuda"
     echo ""
 }
 
@@ -124,26 +124,26 @@ install_flatpaks() {
             continue
         fi
 
-        if flatpak info "$app" >/dev/null 2>&1; then
-            echo -e "  ${GREEN}[✓ Ya instalado]${NC} $app"
-        else
-            echo -e "  ${YELLOW}[+] Instalando Flatpak:${NC} $app..."
-            flatpak install -y --noninteractive flathub "$app" || echo -e "  ${RED}[✗ Error]${NC} $app"
-        fi
+        echo -e "${BLUE}[+] Instalando Flatpak:${NC} ${BOLD}${app}${NC}"
+        flatpak install -y --noninteractive flathub "$app" || true
     done
+
+    echo -e "${GREEN}[✓] Instalación de Flatpaks finalizada.${NC}"
 }
 
 install_cli() {
-    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS CLI Y OPTIMIZACIONES DE SISTEMA ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS CLI, DESARROLLO Y GAMING (MULTI-DISTRO) ===${NC}"
     if [ -f "${CLI_HELPER}" ]; then
         # shellcheck source=/dev/null
         source "${CLI_HELPER}"
         install_essential_cli
+    else
+        echo -e "${RED}[!] Archivo ${CLI_HELPER} no encontrado.${NC}"
     fi
 }
 
 install_brave_origin() {
-    echo -e "\n${BOLD}${CYAN}=== BRAVE ORIGIN (NATIVO) ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== BRAVE BROWSER (ORIGIN) ===${NC}"
     bash "${SCRIPTS_DIR}/install-brave.sh"
 }
 
@@ -173,7 +173,7 @@ install_powershell() {
 }
 
 install_terminal() {
-    echo -e "\n${BOLD}${CYAN}=== TERMINAL RÁPIDA (ALACRITTY / GHOSTTY - ESTILO OMARCHY) ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== TERMINAL RÁPIDA (ALACRITTY / GHOSTTY) ===${NC}"
     bash "${SCRIPTS_DIR}/install-terminal.sh"
 }
 
@@ -183,8 +183,18 @@ install_grokbot() {
 }
 
 install_dev_tools() {
-    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS DEV (JAVA OPENJDK 21, LAZYGIT, MISE) ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== HERRAMIENTAS DEV (NEOVIM, LAZYGIT, MISE, UV, BUN, JAVA) ===${NC}"
     bash "${SCRIPTS_DIR}/install-dev-tools.sh"
+}
+
+install_neovim() {
+    echo -e "\n${BOLD}${CYAN}=== NEOVIM (V0.10+ & LUA) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-neovim.sh"
+}
+
+install_ai_tools() {
+    echo -e "\n${BOLD}${CYAN}=== SUITE DE INTELIGENCIA ARTIFICIAL ===${NC}"
+    bash "${SCRIPTS_DIR}/install-ai-tools.sh"
 }
 
 install_craft_suite() {
@@ -203,11 +213,11 @@ install_mysql_workbench() {
 }
 
 install_gaming_suite() {
-    echo -e "\n${BOLD}${CYAN}=== LAUNCHERS Y HERRAMIENTAS DE GAMING ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== SUITE INTEGRAL DE GAMING ===${NC}"
     install_steam "false"
     bash "${SCRIPTS_DIR}/install-gamescope.sh"
     ensure_flatpak_installed
-    echo "[+] Instalando Launchers y compatibilidad (Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Bottles, Ludusavi, AntiMicroX)..."
+    echo "[+] Instalando Launchers y compatibilidad de gaming..."
     flatpak install -y --noninteractive flathub \
         net.lutris.Lutris \
         com.heroicgameslauncher.hgl \
@@ -218,64 +228,79 @@ install_gaming_suite() {
         com.github.Matoking.protontricks \
         com.vysp3r.ProtonPlus \
         com.github.mtkennerly.ludusavi \
-        io.github.antimicrox.antimicrox || true
+        io.github.antimicrox.antimicrox \
+        org.libretro.RetroArch \
+        io.github.streetpea.Chiaki4deck \
+        com.steamgriddb.SGDBoop || true
+}
+
+install_multimedia_suite() {
+    echo -e "\n${BOLD}${CYAN}=== SUITE MULTIMEDIA Y CREACIÓN DE CONTENIDO ===${NC}"
+    ensure_flatpak_installed
+    echo "[+] Instalando aplicaciones multimedia, audio, video y diseño..."
+    flatpak install -y --noninteractive flathub \
+        org.videolan.VLC \
+        io.mpv.Mpv \
+        fr.handbrake.ghb \
+        com.obsproject.Studio \
+        org.kde.kdenlive \
+        org.audacityteam.Audacity \
+        org.kde.krita \
+        org.gimp.GIMP \
+        org.blender.Blender \
+        org.kde.haruna \
+        org.strawberrymusicplayer.strawberry \
+        io.bassi.Amberol \
+        com.spotify.Client || true
 }
 
 dry_run() {
     echo -e "${YELLOW}${BOLD}--- MODO SIMULACIÓN (DRY-RUN) ---${NC}"
-    echo "1. Programas Nativos / Especiales:"
-    echo "   - Brave: Brave Origin (FLAVOR=origin)."
-    echo "   - VS Code: Repositorio oficial Microsoft (code)."
-    echo "   - Java: OpenJDK 21 (Requerido para Apache NetBeans y Prism Launcher)."
-    echo "   - Herramientas Dev: Lazygit (Terminal UI Git), Mise (Gestor de runtimes)."
-    echo "   - Steam: Paquete nativo de la distro o Steam Flatpak."
-    echo "   - Gamescope: Micro-compositor de Valve con escalado FSR/NIS, HDR y limitador FPS."
-    echo "   - Tailscale: Script oficial universal + activación systemd."
-    echo "   - Antigravity: Instalador oficial de Google Antigravity."
-    echo "   - PowerShell: Microsoft PowerShell (pwsh)."
-    echo "   - Terminal rápida: Alacritty / Ghostty (GPU accelerated - estilo Omarchy)."
-    echo "   - Grok Bot: AppImage en ~/.local/share/grok-bot + .desktop."
-    echo "   - Suite Craft: ArtCraft Launcher (bundle) para GridCraft, DeckCraft, WordCraft y PdfCraft."
-    echo "   - Waydroid: Emulador / contenedor Android con aceleración GPU nativa y Wayland."
-    echo "   - Base de datos: MySQL Workbench (con fix GDK_BACKEND=x11) y DBeaver Community."
+    echo "1. Desarrollo y Programación:"
+    echo "   - Neovim v0.10+ con configuración Lua (Lazy.nvim, Treesitter, Telescope, Which-Key)."
+    echo "   - Lazygit (Terminal UI Git), Mise (Gestor de runtimes Node/Python/Rust/Java/Go)."
+    echo "   - Astral uv (Gestor Python ultra-rápido) y Bun (Runtime JS/TS)."
+    echo "   - Java OpenJDK 21 LTS y GitHub CLI (gh)."
+    echo "   - Visual Studio Code nativo o Flatpak."
     echo ""
-    echo "2. Gaming & Optimización:"
-    echo "   - Gamescope (Micro-compositor Valve con escalado FSR/HDR), GameMode, MangoHud."
+    echo "2. Suite de Inteligencia Artificial:"
+    echo "   - Ollama (Ejecución local de LLMs como Llama 3, DeepSeek, Mistral)."
+    echo "   - Claude Code CLI (@anthropic-ai/claude-code)."
+    echo "   - Aider (AI Pair Programming en terminal con Git)."
+    echo "   - Google Antigravity Agent & Grok Bot."
+    echo "   - Atajos rápidos de terminal: 'c' y 'agent'."
+    echo ""
+    echo "3. Gaming y Emulación:"
+    echo "   - Steam, Gamescope (Micro-compositor Valve con escalado FSR/HDR), GameMode, MangoHud."
     echo "   - Lutris, Heroic Games Launcher, Prism Launcher (Minecraft)."
-    echo "   - Ludusavi (Copia y sincronización de partidas guardadas de PC games)."
-    echo "   - AntiMicroX (Mapeo de mandos a teclado/ratón)."
-    echo "   - ProtonUp-Qt, Goverlay, Bottles, Protontricks, ProtonPlus."
+    echo "   - RetroArch (Emulación retro) y Chiaki4deck (PlayStation Remote Play)."
+    echo "   - Ludusavi (Sincronización de saves), ProtonUp-Qt, Goverlay, Bottles, Protontricks."
     echo ""
-    echo "3. Música, Audio y Voz:"
-    echo "   - Easy Effects (Filtro IA de ruido para micro en Discord/Slack y ecualizador FLAC)."
-    echo "   - ncspot (Cliente ligero de Spotify en Rust)."
-    echo "   - Strawberry Music Player (Reproductor audiófilo de alta fidelidad FLAC)."
-    echo "   - Amberol (Reproductor minimalista FLAC/local)."
+    echo "4. Multimedia y Creación:"
+    echo "   - VLC, MPV (Ultra-ligero), Haruna, HandBrake (Transcodificación de video)."
+    echo "   - OBS Studio (Streaming y grabación), Kdenlive (Edición de video)."
+    echo "   - Krita (Pintura digital), GIMP (Edición fotográfica), Blender (3D y animación)."
+    echo "   - Audacity, Strawberry Music Player (FLAC audiófilo), Amberol, Spotify."
     echo ""
-    echo "4. Sincronización y Archivos:"
-    echo "   - LocalSend (Transferencia local de archivos estilo AirDrop entre PC y móvil)."
-    echo "   - Pika Backup (Copias de seguridad incrementales cifradas de tus carpetas)."
-    echo "   - PeaZip (Gestor de compresión avanzado)."
+    echo "5. Navegación, Sistema y Utilidades:"
+    echo "   - Brave Origin, Tailscale, PowerShell, Terminal Alacritty."
+    echo "   - Base de datos: MySQL Workbench y DBeaver Community."
+    echo "   - Waydroid (Android container) y Suite Craft (ArtCraft)."
+    echo "   - Comunicación: Discord, Vesktop, Telegram, WhatsApp ZapZap, Slack."
     echo ""
-    echo "5. Mensajería y Redes:"
-    echo "   - WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack."
-    echo ""
-    echo "6. Herramientas CLI del sistema:"
-    echo "   - git, gh, curl, wget, jq, ripgrep, tree, rsync, htop, btop, tmux, zsh, build tools."
-    echo ""
-    echo "7. Productividad & Flatpaks complementarios:"
-    grep -v '^#' "${PACKAGES_FILE}" | grep -v '^$' | while read -r line; do
-        echo "   - $line"
-    done
 }
 
+# Comprobar argumentos
 ACTION="interactive"
-
 if [ $# -gt 0 ]; then
     case "$1" in
         -y|--yes|--all|--install-all|--native) ACTION="native" ;;
         --flatpak-only) ACTION="flatpak_only" ;;
+        --dev|--devtools) ACTION="dev_tools" ;;
+        --neovim) ACTION="neovim" ;;
+        --ai|--ai-tools) ACTION="ai" ;;
         --gaming) ACTION="gaming" ;;
+        --multimedia) ACTION="multimedia" ;;
         --gamescope) ACTION="gamescope" ;;
         --cli) ACTION="cli" ;;
         --brave) ACTION="brave" ;;
@@ -287,10 +312,8 @@ if [ $# -gt 0 ]; then
         --terminal) ACTION="terminal" ;;
         --grokbot) ACTION="grokbot" ;;
         --craft) ACTION="craft" ;;
-        --devtools) ACTION="devtools" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
-        --hyprland-desktop|--omarchy-desktop) ACTION="hyprland_desktop" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
         *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
@@ -306,33 +329,35 @@ fi
 
 if [ "$ACTION" = "interactive" ]; then
     echo -e "${BOLD}¿Cómo deseas instalar tus programas?${NC}"
-    echo "  1) Instalar TODO automáticamente (Modo Nativo + Gaming + Comunicación + CLI) [Recomendado]"
-    echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o sistemas inmutables)"
-    echo "  3) Solo Suite de Gaming (Lutris, Heroic, Prism, Steam, ProtonUp-Qt, Goverlay, Bottles)"
-    echo "  4) Solo Desarrollo (Brave Origin, VS Code, NetBeans, PowerShell, Antigravity)"
-    echo "  5) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
-    echo "  6) Solo Música (ncspot [Rust], Strawberry FLAC, Amberol)"
-    echo "  7) Solo Terminal rápida (Alacritty) y CLI"
-    echo "  8) Solo Tailscale"
-    echo "  9) Instalar Entorno Gráfico Hyprland Ligero (Waybar en cápsulas + Temas + Agentes)"
-    echo "  10) Simulación (Dry run)"
-    echo "  11) Salir"
+    echo "  1) Instalar TODO automáticamente (Desarrollo + IA + Gaming + Multimedia + CLI) [Recomendado]"
+    echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
+    echo "  3) Suite de Desarrollo (Neovim, Lazygit, Mise, uv, Bun, Java, GitHub CLI)"
+    echo "  4) Suite de Inteligencia Artificial (Ollama, Claude Code, Aider, Antigravity, Grok Bot)"
+    echo "  5) Suite de Gaming (Steam, Lutris, Heroic, Prism, RetroArch, ProtonUp-Qt, Goverlay)"
+    echo "  6) Suite Multimedia y Creación (OBS Studio, VLC, MPV, HandBrake, Krita, Audacity, GIMP, Blender)"
+    echo "  7) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
+    echo "  8) Solo Música (Spotify, ncspot [Rust], Strawberry FLAC, Amberol)"
+    echo "  9) Solo Terminal rápida (Alacritty) y utilidades CLI"
+    echo "  10) Solo Tailscale"
+    echo "  11) Simulación (Dry run)"
+    echo "  12) Salir"
     echo ""
-    read -rp "Selecciona una opción [1-11] (por defecto 1): " choice
+    read -rp "Selecciona una opción [1-12] (por defecto 1): " choice
     choice=${choice:-1}
 
     case "$choice" in
         1) ACTION="native" ;;
         2) ACTION="flatpak_only" ;;
-        3) ACTION="gaming" ;;
-        4) ACTION="dev_tools" ;;
-        5) ACTION="communication" ;;
-        6) ACTION="audio" ;;
-        7) ACTION="cli" ;;
-        8) ACTION="tailscale" ;;
-        9) ACTION="hyprland_desktop" ;;
-        10) ACTION="dry-run" ;;
-        11) echo "Cancelado."; exit 0 ;;
+        3) ACTION="dev_tools" ;;
+        4) ACTION="ai" ;;
+        5) ACTION="gaming" ;;
+        6) ACTION="multimedia" ;;
+        7) ACTION="communication" ;;
+        8) ACTION="audio" ;;
+        9) ACTION="cli" ;;
+        10) ACTION="tailscale" ;;
+        11) ACTION="dry-run" ;;
+        12) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
     esac
 fi
@@ -340,16 +365,15 @@ fi
 case "$ACTION" in
     native)
         install_cli
+        install_dev_tools
+        install_ai_tools
         install_brave_origin
         install_vscode "false"
-        install_dev_tools
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
         install_tailscale
-        install_antigravity
         install_powershell
         install_terminal
-        install_grokbot
         install_craft_suite
         install_waydroid
         install_mysql_workbench
@@ -357,20 +381,33 @@ case "$ACTION" in
         ;;
     flatpak_only)
         install_cli
+        install_dev_tools
+        install_ai_tools
         install_vscode "true"
         install_steam "true"
         install_tailscale
-        install_antigravity
         install_powershell
         install_terminal
-        install_grokbot
         install_craft_suite
         install_waydroid
         install_mysql_workbench
         install_flatpaks
         ;;
+    dev_tools)
+        install_dev_tools
+        install_vscode "false"
+        ;;
+    neovim)
+        install_neovim
+        ;;
+    ai)
+        install_ai_tools
+        ;;
     gaming)
         install_gaming_suite
+        ;;
+    multimedia)
+        install_multimedia_suite
         ;;
     gamescope)
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
@@ -402,21 +439,10 @@ case "$ACTION" in
     craft)
         install_craft_suite
         ;;
-    devtools)
-        install_dev_tools
-        ;;
     waydroid)
         install_waydroid
         ;;
     mysql)
-        install_mysql_workbench
-        ;;
-    dev_tools)
-        install_brave_origin
-        install_vscode "false"
-        install_dev_tools
-        install_antigravity
-        install_powershell
         install_mysql_workbench
         flatpak install -y flathub org.apache.netbeans
         ;;
@@ -426,20 +452,11 @@ case "$ACTION" in
         ;;
     audio)
         ensure_flatpak_installed
-        flatpak install -y flathub io.github.hrkfdn.ncspot org.strawberrymusicplayer.strawberry io.bassi.Amberol
+        flatpak install -y flathub io.github.hrkfdn.ncspot org.strawberrymusicplayer.strawberry io.bassi.Amberol com.spotify.Client
         ;;
     cli)
         install_cli
         install_terminal
-        ;;
-    hyprland_desktop)
-        if [ -f /run/ostree-booted ]; then
-            echo -e "${YELLOW}[i] Detectado sistema inmutable (Bazzite / rpm-ostree).${NC}"
-            echo -e "${YELLOW}[i] Ejecutando instalador especializado para Bazzite...${NC}"
-            sudo bash "${SCRIPT_DIR}/scripts/setup-hyprland-bazzite.sh"
-        else
-            bash "${SCRIPT_DIR}/hyprland-desktop/install.sh"
-        fi
         ;;
     dry-run)
         dry_run
@@ -449,10 +466,11 @@ esac
 echo -e "\n${GREEN}${BOLD}======================================================================${NC}"
 echo -e "${GREEN}${BOLD}  ¡Proceso finalizado con éxito!${NC}"
 echo -e "${GREEN}${BOLD}======================================================================${NC}"
-echo -e "Recomendaciones:"
-echo -e " - Conecta Tailscale: ${CYAN}sudo tailscale up${NC}"
-echo -e " - Para iniciar PowerShell: ${CYAN}pwsh${NC}"
-echo -e " - Para iniciar tu nueva terminal rápida: ${CYAN}alacritty${NC}"
-echo -e " - Para escuchar Spotify en Rust por terminal: ${CYAN}flatpak run io.github.hrkfdn.ncspot${NC} (o ncspot)"
-echo -e " - Para música FLAC de alta fidelidad: abre ${CYAN}Strawberry Music Player${NC}"
+echo -e "Herramientas listas para usar:"
+echo -e " - Neovim (v0.10+ con Lua & plugins): ${CYAN}nvim${NC}"
+echo -e " - Git UI ultra-rápida: ${CYAN}lazygit${NC}"
+echo -e " - Inteligencia Artificial: ${CYAN}ollama${NC}, ${CYAN}claude${NC}, ${CYAN}aider${NC}, ${CYAN}agent${NC} o ${CYAN}c${NC}"
+echo -e " - Python ultrarrápido: ${CYAN}uv${NC} / JS-TS: ${CYAN}bun${NC}"
+echo -e " - Terminal acelerada: ${CYAN}alacritty${NC}"
+echo -e " - Conectar Tailscale: ${CYAN}sudo tailscale up${NC}"
 echo ""

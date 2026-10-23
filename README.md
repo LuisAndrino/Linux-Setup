@@ -1,68 +1,83 @@
-# 🐧 Sistema de Replicación de Software Cross-Distro & Entorno Hyprland
+# 🐧 Linux Setup Universal - Multi-Distro Software Suite
 
-Este repositorio te permite tener **exactamente los mismos programas, configuraciones y entorno de trabajo** en cualquier distribución basada en **Fedora** (Fedora Workstation clásica o sistemas atómicos como **Bazzite / Silverblue / Kinoite**).
+Este repositorio te permite tener **exactamente los mismos programas, configuraciones y herramientas de trabajo** en cualquier distribución Linux:
+* **Debian / Ubuntu** (y derivados: Pop!_OS, Linux Mint, Zorin OS)
+* **Fedora** (Workstation clásica con DNF y sistemas atómicos como **Bazzite / Silverblue / Kinoite**)
+* **Arch Linux** (y derivados: Manjaro, EndeavourOS, Garuda)
+* **openSUSE** (Tumbleweed y Leap con Zypper)
+* **SteamOS** (Steam Deck)
 
 ---
 
 ## ⚡ Comandos Rápidos
 
-### 1. Replicar todo tu software (Apps, Gaming, Flatpaks, CLI):
+### 1. Instalación Completa y Desatendida (Recomendado)
+Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flatpaks:
 ```bash
 ./setup.sh --yes
 ```
 
-### 2. Instalar el entorno gráfico Hyprland:
+### 2. Suites Modulares por Especialidad
 ```bash
-./setup.sh --hyprland-desktop
+./setup.sh --dev          # Suite Dev (Neovim Lua, Lazygit, Mise, uv, Bun, Java, GitHub CLI)
+./setup.sh --neovim       # Solo Neovim v0.10+ y su configuración Lua moderna
+./setup.sh --ai           # Suite de IA (Ollama local, Claude Code CLI, Aider, Antigravity, Grok)
+./setup.sh --gaming       # Suite Gaming (Steam, Lutris, Heroic, Prism, RetroArch, ProtonUp-Qt, Goverlay)
+./setup.sh --multimedia   # Suite Multimedia (OBS Studio, VLC, MPV, HandBrake, Krita, Audacity, GIMP, Blender, Spotify)
+./setup.sh --flatpak-only # Modo 100% Flatpak (Ideal para Bazzite / SteamOS / distros inmutables)
+./setup.sh --dry-run      # Simulación sin realizar cambios
 ```
-*(Detecta automáticamente si estás en Fedora estándar con DNF o en Bazzite con rpm-ostree).*
 
 ---
 
-## 🪟 Entorno de Escritorio Hyprland Ligero
-
-Configuración moderna, ultra-ligera y minimalista inspirada en la ergonomía de Omarchy pero construida 100% nativa para el ecosistema Fedora/Bazzite:
-
-### Componentes Principales:
-* **Hyprland:** Tiling Wayland compositor con animaciones suaves, desenfoque (*blur* translúcido) y bordes dinámicos.
-* **Waybar en cápsulas:** Barra superior flotante dividida en módulos tipo píldora/isla (workspaces, ventana activa, red, volumen, batería, reloj).
-* **Rofi:** Menú modal centrado de búsqueda rápida.
-* **Alacritty:** Terminal GPU de bajísima latencia con Starship prompt.
-* **Gestor de Temas (`hypr-theme`):**
-  * Compatible con las carpetas y paletas de **Omarchy** (`colors.toml` y fondos de pantalla).
-  * Incluye temas preinstalados: Tokyo Night, Catppuccin, Nord, Gruvbox.
-  * Cambia de tema al instante: `hypr-theme next` o `Super + T`.
-  * Instala cualquier tema de GitHub: `hypr-theme install <git-url>`.
-* **Gestor de Plugins y Extensiones (`hypr-plugin`):**
-  * Permite añadir extensiones y widgets comunitarios: `hypr-plugin add <git-url>`.
-* **Modo Agentes de IA Integrado:**
-  * Atajo global `Super + C` para lanzar agentes (Google Antigravity, Claude Code, etc.).
-  * Comando rápido `c "prompt"` desde cualquier terminal.
-* **Compatibilidad X11/Java Garantizada:**
-  * Parches para NetBeans y MySQL Workbench en Wayland.
+## 🛠️ 1. Suite de Desarrollo y Programación
+* **Neovim Moderno (`nvim` v0.10+):**
+  * Gestor de paquetes `lazy.nvim` con carga diferida ultra-rápida.
+  * Resaltado de sintaxis con `nvim-treesitter`.
+  * Buscador difuso `telescope.nvim` (`<Espacio> + ff` para archivos, `<Espacio> + fg` para búsqueda de texto).
+  * Explorador de archivos lateral `neo-tree` (`<Espacio> + e`).
+  * Indicadores visuales de Git `gitsigns.nvim`, tema `tokyonight` y barra de estado `lualine`.
+* **Lazygit (`lazygit`):** Interfaz visual de terminal para Git de máxima velocidad.
+* **Mise (`mise`):** Gestor políglota de runtimes (Node.js, Python, Java, Rust, Go).
+* **Astral `uv` / `uvx`:** Gestor de paquetes y entornos virtuales de Python hasta 100x más rápido que pip.
+* **Bun (`bun`):** Runtime y gestor de paquetes JavaScript / TypeScript de última generación.
+* **Java OpenJDK 21 LTS:** Requerido para desarrollo empresarial y herramientas como Apache NetBeans.
+* **GitHub CLI (`gh`):** Interacción fluida con repositorios y pull requests desde la terminal.
 
 ---
 
-## ⌨️ Atajos de Teclado Principales
-
-| Atajo | Acción |
-| :--- | :--- |
-| `Super + Space` | **Buscador de aplicaciones (Rofi)** |
-| `Super + Return` | Terminal rápida (Alacritty) |
-| `Super + C` | **Lanzar Agente de IA** |
-| `Super + T` | Cambiar tema en tiempo real |
-| `Super + Q` | Cerrar ventana activa |
-| `Super + F` | Pantalla completa |
-| `Super + V` | Alternar ventana flotante |
-| `Super + 1 .. 9` | Cambiar espacio de trabajo |
-| `Super + SHIFT + 1 .. 9` | Mover ventana a espacio de trabajo |
-| `Super + SHIFT + S` / `Print` | Captura de pantalla interactiva al portapapeles |
+## 🤖 2. Suite de Inteligencia Artificial
+* **Ollama (`ollama`):** Ejecución de LLMs en local sin necesidad de internet (Llama 3, DeepSeek, Mistral, Qwen) con servicio systemd.
+* **Claude Code CLI (`claude`):** Asistente oficial por terminal de Anthropic para desarrollo asistido por agentes.
+* **Aider (`aider`):** Programación por parejas impulsada por IA integrada directamente en tus repositorios Git.
+* **Google Antigravity (`antigravity`):** Plataforma y SDK de IA avanzada de Google DeepMind.
+* **Grok Bot (`grokbot`):** Cliente de IA para escritorio y terminal.
+* **Atajos de Terminal Rápidos:**
+  * `agent`: Selector inteligente que ejecuta tu agente activo disponible.
+  * `c`: Alias de una sola tecla para lanzar el asistente AI en tu carpeta de trabajo.
 
 ---
 
-## 🔄 Restauración / Rollback en Bazzite
+## 🎮 3. Gaming, Emuladores y Optimización
+* **Steam & Valve Gamescope:** Micro-compositor con reescalado FSR/NIS, soporte HDR y limitador de latencia.
+* **GameMode & MangoHud:** Optimización de prioridades del kernel y HUD en pantalla de FPS, temperaturas y consumo.
+* **Launchers:** Lutris, Heroic Games Launcher (Epic/GOG/Amazon), Prism Launcher (Minecraft con mods).
+* **Herramientas de Compatibilidad:** ProtonUp-Qt (instalación con 1 clic de GE-Proton / Wine-GE), Goverlay, Bottles, Protontricks.
+* **Emulación y Consolas:** RetroArch (suite universal de emulación) y Chiaki4deck (PlayStation Remote Play).
+* **Sincronización:** Ludusavi (respaldo automático de partidas guardadas de cualquier juego).
 
-Si deseas revertir cualquier cambio en la capa del sistema de Bazzite y regresar al estado de fábrica de Gaming Mode:
+---
+
+## 🎬 4. Multimedia, Creación y Streaming
+* **Video:** VLC, MPV (reproductor ultraligero de alta fidelidad), Haruna, HandBrake (transcodificación por hardware).
+* **Streaming y Edición:** OBS Studio (grabación y directos), Kdenlive (editor de video no lineal).
+* **Diseño y 3D:** Krita (pintura digital e ilustración), GIMP (retoque fotográfico), Blender (modelado y renderizado 3D).
+* **Audio y Música:** Audacity (edición multipista), Strawberry Music Player (reproductor audiófilo FLAC bit-perfect), Spotify, ncspot (Spotify CLI en Rust).
+
+---
+
+## 🔄 Rollback en Bazzite OS (Opcional)
+Si utilizas Bazzite OS y deseas limpiar paquetes layered y dejar tu sistema en su imagen base:
 ```bash
 sudo ./scripts/rollback-bazzite.sh
 sudo systemctl reboot
