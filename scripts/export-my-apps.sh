@@ -42,6 +42,7 @@ get_app_description() {
         "org.kde.gwenview") echo "Visor de imágenes Gwenview" ;;
         "org.kde.okular") echo "Lector de PDF Okular" ;;
         "org.kde.kcalc") echo "Calculadora KCalc" ;;
+        "io.github.kolunmi.Bazaar") echo "Bazaar (Tienda de Flatpaks)" ;;
         "com.github.tchx84.Flatseal") echo "Gestor de permisos Flatseal" ;;
         "io.github.flattool.Warehouse") echo "Gestor de Flatpaks Warehouse" ;;
         "io.github.DenysMb.Kontainer") echo "GUI de contenedores Kontainer" ;;
@@ -83,6 +84,7 @@ if command -v flatpak >/dev/null 2>&1; then
         "io.github.hrkfdn.ncspot" "org.strawberrymusicplayer.strawberry" "io.bassi.Amberol"
         "com.rtosta.zapzap" "org.telegram.desktop" "com.discordapp.Discord"
         "dev.vencord.Vesktop" "com.slack.Slack" "com.usebottles.bottles"
+        "io.github.kolunmi.Bazaar" "io.github.flattool.Warehouse" "com.github.tchx84.Flatseal"
         "org.flameshot.Flameshot" "md.obsidian.Obsidian"
     )
 

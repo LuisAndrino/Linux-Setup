@@ -59,6 +59,7 @@ org.videolan.VLC                     # Reproductor multimedia VLC
 org.kde.haruna                       # Reproductor de video Haruna
 org.kde.gwenview                     # Visor de imágenes Gwenview
 
-# --- GESTIÓN DE FLATPAKS ---
-com.github.tchx84.Flatseal           # Gestor de permisos para Flatpaks (indispensable)
-io.github.flattool.Warehouse         # Gestor, limpiador e instalador de Flatpaks
+# --- GESTIÓN Y TIENDA DE FLATPAKS ---
+io.github.kolunmi.Bazaar             # Bazaar (La mejor tienda visual dedicada a Flathub y Flatpaks)
+io.github.flattool.Warehouse         # Warehouse (Gestor avanzado, desinstalador y limpiador de restos)
+com.github.tchx84.Flatseal           # Flatseal (Gestor de permisos para Flatpaks - indispensable)

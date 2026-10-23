@@ -68,7 +68,11 @@ git clone <URL_DE_TU_REPOSITORIO> ~/linux-setup && cd ~/linux-setup && ./setup.s
 * **Grok Bot:** AppImage integrado en `~/.local/share/grok-bot/appimage`.
 * **Suite Craft:** ArtCraft Launcher (bundle local) para GridCraft, DeckCraft, WordCraft y PdfCraft.
 * **Mensajería:** WhatsApp (ZapZap), Telegram Desktop, Discord Oficial, Vesktop (Wayland audio), Slack.
-* **Navegadores & Utilidades:** Google Chrome, Mozilla Firefox, 1Password, Obsidian, Flameshot, Okular, Flatseal, Warehouse, Kontainer.
+* **Navegadores & Utilidades:** Google Chrome, Mozilla Firefox, 1Password, Obsidian, Flameshot, Okular, Kontainer.
+* **Tienda y Ecosistema Flatpak (Trinidad Esencial):**
+  * **Bazaar (`io.github.kolunmi.Bazaar`):** La mejor tienda gráfica dedicada exclusivamente a Flathub y Flatpaks (moderna, rápida, sin bloatware ni bloqueos).
+  * **Warehouse (`io.github.flattool.Warehouse`):** Administrador avanzado para limpiar datos residuales, desinstalar y hacer downgrade de versiones Flatpak.
+  * **Flatseal (`com.github.tchx84.Flatseal`):** Gestor visual de permisos de aplicaciones (acceso a carpetas, Wayland, X11, red, dispositivos).
 
 ---
 

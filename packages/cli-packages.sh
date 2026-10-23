@@ -33,6 +33,7 @@ install_cli_debian() {
         gamemode mangohud gamescope || true
 
     sudo apt install -y fastfetch 2>/dev/null || sudo apt install -y neofetch 2>/dev/null || true
+    sudo apt install -y gnome-software-plugin-flatpak 2>/dev/null || true
 }
 
 install_cli_fedora() {
@@ -43,6 +44,8 @@ install_cli_fedora() {
         gcc gcc-c++ make automake autoconf \
         openssh-clients openssh-server fastfetch alacritty \
         gamemode mangohud gamescope || true
+
+    sudo dnf install -y plasma-discover-flatpak-backend 2>/dev/null || true
 }
 
 install_cli_arch() {
@@ -52,6 +55,8 @@ install_cli_arch() {
         htop btop tmux zsh zip unzip p7zip \
         base-devel openssh fastfetch alacritty \
         gamemode mangohud gamescope || true
+
+    sudo pacman -S --needed --noconfirm plasma-discover-flatpak-backend 2>/dev/null || true
 
     # Si multilib está habilitado, instalar versiones de 32 bits para juegos clásicos
     sudo pacman -S --needed --noconfirm lib32-gamemode lib32-mangohud 2>/dev/null || true
