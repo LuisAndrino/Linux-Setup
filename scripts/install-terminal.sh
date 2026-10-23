@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-terminal.sh - Instalador de terminal acelerada por GPU (Estilo Omarchy)
+# install-terminal.sh - Instalador de terminal acelerada por GPU (Alacritty / Ghostty)
 # ==============================================================================
 # Omarchy utiliza Alacritty y Ghostty como terminales por defecto por su
 # extrema velocidad y renderizado por GPU.

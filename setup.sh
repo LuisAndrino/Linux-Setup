@@ -60,12 +60,12 @@ show_help() {
     echo "  --tailscale       Instala y configura solo Tailscale"
     echo "  --antigravity     Instala Google Antigravity"
     echo "  --powershell      Instala Microsoft PowerShell (pwsh)"
-    echo "  --terminal        Instala terminal rápida estilo Omarchy (Alacritty/Ghostty)"
+    echo "  --terminal        Instala terminal rápida (Alacritty/Ghostty)"
     echo "  --grokbot         Instala y configura solo Grok Bot (AppImage)"
     echo "  --craft           Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo "  --waydroid        Instala y configura Waydroid (Emulador Android en Linux)"
     echo "  --mysql           Instala MySQL Workbench (con parche XWayland) y DBeaver"
-    echo "  --omarchy-desktop Instala el entorno gráfico estilo Omarchy (Hyprland, Waybar, temas, modo agentes)"
+    echo "  --hyprland-desktop Instala el entorno gráfico ligero Hyprland (Waybar en cápsulas, atajos y temas)"
     echo "  --dry-run         Simula las acciones sin modificar el sistema"
     echo "  -h, --help        Muestra esta ayuda"
     echo ""
@@ -290,7 +290,7 @@ if [ $# -gt 0 ]; then
         --devtools) ACTION="devtools" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
-        --omarchy-desktop) ACTION="omarchy_desktop" ;;
+        --hyprland-desktop|--omarchy-desktop) ACTION="hyprland_desktop" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
         *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
@@ -312,9 +312,9 @@ if [ "$ACTION" = "interactive" ]; then
     echo "  4) Solo Desarrollo (Brave Origin, VS Code, NetBeans, PowerShell, Antigravity)"
     echo "  5) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
     echo "  6) Solo Música (ncspot [Rust], Strawberry FLAC, Amberol)"
-    echo "  7) Solo Terminal rápida estilo Omarchy (Alacritty) y CLI"
+    echo "  7) Solo Terminal rápida (Alacritty) y CLI"
     echo "  8) Solo Tailscale"
-    echo "  9) Instalar Entorno Gráfico Completo estilo Omarchy (Hyprland + Waybar + Temas + Agentes)"
+    echo "  9) Instalar Entorno Gráfico Hyprland Ligero (Waybar en cápsulas + Temas + Agentes)"
     echo "  10) Simulación (Dry run)"
     echo "  11) Salir"
     echo ""
@@ -330,7 +330,7 @@ if [ "$ACTION" = "interactive" ]; then
         6) ACTION="audio" ;;
         7) ACTION="cli" ;;
         8) ACTION="tailscale" ;;
-        9) ACTION="omarchy_desktop" ;;
+        9) ACTION="hyprland_desktop" ;;
         10) ACTION="dry-run" ;;
         11) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
@@ -432,13 +432,13 @@ case "$ACTION" in
         install_cli
         install_terminal
         ;;
-    omarchy_desktop)
+    hyprland_desktop)
         if [ -f /run/ostree-booted ]; then
             echo -e "${YELLOW}[i] Detectado sistema inmutable (Bazzite / rpm-ostree).${NC}"
             echo -e "${YELLOW}[i] Ejecutando instalador especializado para Bazzite...${NC}"
-            sudo bash "${SCRIPT_DIR}/scripts/setup-omarchy-bazzite.sh"
+            sudo bash "${SCRIPT_DIR}/scripts/setup-hyprland-bazzite.sh"
         else
-            bash "${SCRIPT_DIR}/omarchy-desktop/install.sh"
+            bash "${SCRIPT_DIR}/hyprland-desktop/install.sh"
         fi
         ;;
     dry-run)

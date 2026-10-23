@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# hypr-plugin - Gestor de extensiones y plugins comunitarios para Hyprland
+# ==============================================================================
+# Permite clonar, listar y activar extensiones visuales, widgets o temas
+# desde repositorios de la comunidad (GitHub/GitLab).
+# ==============================================================================
+set -euo pipefail
+
+PLUGINS_DIR="${HOME}/.config/hypr/plugins"
+mkdir -p "${PLUGINS_DIR}"
+
+list_plugins() {
+    echo "=========================================================="
+    echo "            Plugins y Extensiones Instaladas              "
+    echo "=========================================================="
+    local count=0
+    for d in "${PLUGINS_DIR}"/*; do
+        if [ -d "$d" ]; then
+            count=$((count + 1))
+            local name
+            name=$(basename "$d")
+            echo "  * ${name}"
+            if [ -f "$d/README.md" ]; then
+                echo "    Desc: $(head -n 2 "$d/README.md" | tr '\n' ' ')"
+            fi
+        fi
+    done
+    if [ $count -eq 0 ]; then
+        echo "  (No hay extensiones instaladas aún)"
+        echo ""
+        echo "  Puedes instalar una con:"
+        echo "    hypr-plugin add <url-del-repo-git>"
+    fi
+    echo "=========================================================="
+}
+
+add_plugin() {
+    local url="${1:-}"
+    if [ -z "$url" ]; then
+        echo "Uso: hypr-plugin add <git-repo-url>"
+        echo "Ejemplo: hypr-plugin add https://github.com/usuario/mi-widget-hyprland.git"
+        exit 1
+    fi
+
+    local name
+    name=$(basename "$url" .git | tr '[:upper:]' '[:lower:]')
+    local target="${PLUGINS_DIR}/${name}"
+
+    echo "[+] Instalando plugin/extensión '${name}'..."
+    rm -rf "${target}"
+    if git clone --depth 1 "$url" "${target}"; then
+        echo "[✓] Plugin instalado en ${target}"
+        if [ -f "${target}/install.sh" ]; then
+            echo "[+] Ejecutando instalador del plugin..."
+            bash "${target}/install.sh"
+        fi
+    else
+        echo "[!] Error clonando el repositorio."
+        exit 1
+    fi
+}
+
+remove_plugin() {
+    local name="${1:-}"
+    if [ -z "$name" ]; then
+        echo "Uso: hypr-plugin remove <nombre-del-plugin>"
+        exit 1
+    fi
+    local target="${PLUGINS_DIR}/${name}"
+    if [ -d "$target" ]; then
+        rm -rf "$target"
+        echo "[✓] Plugin '${name}' eliminado."
+    else
+        echo "[!] Plugin '${name}' no encontrado."
+    fi
+}
+
+ACTION="${1:-list}"
+
+case "$ACTION" in
+    list)
+        list_plugins
+        ;;
+    add|install)
+        shift
+        add_plugin "${1:-}"
+        ;;
+    remove|rm)
+        shift
+        remove_plugin "${1:-}"
+        ;;
+    *)
+        echo "Uso: hypr-plugin [list | add <git-url> | remove <nombre>]"
+        exit 1
+        ;;
+esac
