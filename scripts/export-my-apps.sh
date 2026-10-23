@@ -18,6 +18,7 @@ get_app_description() {
     case "$1" in
         "com.visualstudio.code") echo "Visual Studio Code" ;;
         "org.apache.netbeans") echo "Apache NetBeans IDE" ;;
+        "io.dbeaver.DBeaverCommunity") echo "DBeaver Community (SQL)" ;;
         "com.valvesoftware.Steam") echo "Steam" ;;
         "net.lutris.Lutris") echo "Lutris (Gestor de juegos)" ;;
         "com.heroicgameslauncher.hgl") echo "Heroic Games Launcher (Epic/GOG)" ;;
@@ -75,7 +76,7 @@ if command -v flatpak >/dev/null 2>&1; then
 
     # Asegurar que las aplicaciones solicitadas se mantengan en la lista
     MUST_HAVE=(
-        "com.visualstudio.code" "org.apache.netbeans" "com.valvesoftware.Steam"
+        "com.visualstudio.code" "org.apache.netbeans" "io.dbeaver.DBeaverCommunity" "com.valvesoftware.Steam"
         "net.lutris.Lutris" "com.heroicgameslauncher.hgl" "org.prismlauncher.PrismLauncher"
         "net.davidotek.pupgui2" "io.github.benjamimgois.goverlay"
         "com.github.mtkennerly.ludusavi" "io.github.antimicrox.antimicrox"

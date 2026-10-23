@@ -8,6 +8,7 @@
 # --- DESARROLLO Y PROGRAMACIÓN ---
 com.visualstudio.code                # Visual Studio Code (Editor / IDE)
 org.apache.netbeans                  # Apache NetBeans IDE
+io.dbeaver.DBeaverCommunity          # DBeaver Community (Gestor SQL Universal y MySQL nativo Wayland)
 
 # --- GAMING, EMULACIÓN Y CONTROLADORES ---
 net.lutris.Lutris                    # Lutris (Gestor integral de juegos)
