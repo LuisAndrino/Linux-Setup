@@ -26,10 +26,12 @@ curl -sSL https://is.gd/andrino_setup | bash -s -- --yes
 
 ## ⚡ Comandos Rápidos (Si ya tienes el repositorio)
 
-### 1. Instalación Completa y Desatendida (Recomendado)
-Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flatpaks:
+### 1. Instalación Completa y Desatendida (Quick Install)
+Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flatpaks con un solo comando:
 ```bash
-./setup.sh --yes
+./quick-install.sh
+# o alternativamente:
+./setup.sh --quick
 ```
 
 ### 2. Suites Modulares por Especialidad

@@ -47,6 +47,7 @@ show_help() {
     echo ""
     echo -e "Opciones principales:"
     echo -e "  ${CYAN}-y, --yes, --all${NC}   Instala TODO de forma automática (Desarrollo, IA, Gaming, Multimedia, CLI) [Recomendado]"
+    echo -e "  ${CYAN}-q, --quick, --quick-install${NC} Instalación rápida automatizada (ejecuta todo sin confirmaciones)"
     echo -e "  ${CYAN}--native${NC}           Instala herramientas y aplicaciones en modo nativo donde aplique"
     echo -e "  ${CYAN}--flatpak-only${NC}     Instala todo mediante Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
     echo -e "  ${CYAN}--dev, --devtools${NC}  Instala la suite completa de desarrollo (Neovim, Lazygit, Mise, uv, Bun, Java, gh)"
@@ -332,7 +333,7 @@ dry_run() {
 ACTION="interactive"
 if [ $# -gt 0 ]; then
     case "$1" in
-        -y|--yes|--all|--install-all|--native) ACTION="native" ;;
+        -y|--yes|--all|--install-all|--native|-q|--quick|--quick-install) ACTION="native" ;;
         --flatpak-only) ACTION="flatpak_only" ;;
         --dev|--devtools) ACTION="dev_tools" ;;
         --neovim) ACTION="neovim" ;;
