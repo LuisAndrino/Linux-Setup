@@ -53,6 +53,7 @@ show_help() {
     echo -e "  ${CYAN}--neovim${NC}           Instala Neovim v0.10+ y su configuración moderna en Lua (Lazy.nvim, Treesitter, Telescope)"
     echo -e "  ${CYAN}--ai, --ai-tools${NC}   Instala la suite de IA (Ollama local, Claude Code CLI, Aider, Antigravity, Grok Bot, agent/c)"
     echo -e "  ${CYAN}--gaming${NC}           Instala la suite de Gaming (Steam, Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Gamescope)"
+    echo -e "  ${CYAN}--gaming-mode${NC}      Configura el modo 'Return to Gaming Mode' universal (SteamOS Gamepad UI en Gamescope)"
     echo -e "  ${CYAN}--multimedia${NC}       Instala la suite Multimedia (VLC, MPV, HandBrake, OBS Studio, Kdenlive, Krita, Audacity, GIMP, Blender, Spotify)"
     echo -e "  ${CYAN}--cli${NC}              Instala solo herramientas de terminal y paquetes esenciales cross-distro"
     echo -e "  ${CYAN}--brave${NC}            Instala solo Brave Origin (repositorio nativo oficial)"
@@ -216,6 +217,7 @@ install_gaming_suite() {
     echo -e "\n${BOLD}${CYAN}=== SUITE INTEGRAL DE GAMING ===${NC}"
     install_steam "false"
     bash "${SCRIPTS_DIR}/install-gamescope.sh"
+    bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
     ensure_flatpak_installed
     echo "[+] Instalando Launchers y compatibilidad de gaming..."
     flatpak install -y --noninteractive flathub \
@@ -300,6 +302,7 @@ if [ $# -gt 0 ]; then
         --neovim) ACTION="neovim" ;;
         --ai|--ai-tools) ACTION="ai" ;;
         --gaming) ACTION="gaming" ;;
+        --gaming-mode) ACTION="gaming_mode" ;;
         --multimedia) ACTION="multimedia" ;;
         --gamescope) ACTION="gamescope" ;;
         --cli) ACTION="cli" ;;
@@ -371,6 +374,7 @@ case "$ACTION" in
         install_vscode "false"
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
+        bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
         install_tailscale
         install_powershell
         install_terminal
@@ -385,6 +389,8 @@ case "$ACTION" in
         install_ai_tools
         install_vscode "true"
         install_steam "true"
+        bash "${SCRIPTS_DIR}/install-gamescope.sh"
+        bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
         install_tailscale
         install_powershell
         install_terminal
@@ -405,6 +411,10 @@ case "$ACTION" in
         ;;
     gaming)
         install_gaming_suite
+        ;;
+    gaming_mode)
+        bash "${SCRIPTS_DIR}/install-gamescope.sh"
+        bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
         ;;
     multimedia)
         install_multimedia_suite

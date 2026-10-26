@@ -59,6 +59,11 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 ---
 
 ## 🎮 3. Gaming, Emuladores y Optimización
+* **Modo "Return to Gaming Mode" Universal (`return-to-gaming-mode`):**
+  * Lanzador universal que abre Steam con interfaz **SteamOS Gamepad UI** dentro de una ventana/pantalla completa optimizada con **Valve Gamescope**.
+  * Funciona idéntico en cualquier distro (Debian, Ubuntu, Fedora, Arch, openSUSE o Bazzite Desktop).
+  * Incluye acceso directo en el Escritorio (`~/Desktop/return-to-gaming-mode.desktop`) y en el menú de aplicaciones.
+  * Al salir de Steam (Apagar -> Salir de Steam), Gamescope se cierra y regresas al escritorio sin cerrar tu sesión.
 * **Steam & Valve Gamescope:** Micro-compositor con reescalado FSR/NIS, soporte HDR y limitador de latencia.
 * **GameMode & MangoHud:** Optimización de prioridades del kernel y HUD en pantalla de FPS, temperaturas y consumo.
 * **Launchers:** Lutris, Heroic Games Launcher (Epic/GOG/Amazon), Prism Launcher (Minecraft con mods).
