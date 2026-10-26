@@ -68,6 +68,7 @@ show_help() {
     echo -e "  ${CYAN}--craft${NC}            Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
     echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
+    echo -e "  ${CYAN}--1password${NC}        Instala 1Password Desktop y 1Password CLI ('op')"
     echo -e "  ${CYAN}--optimize${NC}         Aplica optimizaciones de rendimiento (CPU, memoria, red BBR y AC para laptop)"
     echo -e "  ${CYAN}--dry-run${NC}          Simula las acciones sin modificar el sistema"
     echo -e "  ${CYAN}-h, --help${NC}         Muestra esta ayuda"
@@ -129,6 +130,11 @@ install_flatpaks() {
 
         if [ "$app" = "org.mozilla.firefox" ] && command -v firefox >/dev/null 2>&1; then
             echo -e "  ${MAGENTA}[* Omitido]${NC} org.mozilla.firefox (Ya tienes instalado Firefox nativo)"
+            continue
+        fi
+
+        if [ "$app" = "com.onepassword.OnePassword" ] && command -v 1password >/dev/null 2>&1; then
+            echo -e "  ${MAGENTA}[* Omitido]${NC} com.onepassword.OnePassword (Ya tienes instalado 1Password nativo)"
             continue
         fi
 
@@ -223,6 +229,11 @@ install_waydroid() {
 install_mysql_workbench() {
     echo -e "\n${BOLD}${CYAN}=== MYSQL WORKBENCH & CLIENTES SQL ===${NC}"
     bash "${SCRIPTS_DIR}/install-mysql-workbench.sh"
+}
+
+install_1password() {
+    echo -e "\n${BOLD}${CYAN}=== 1PASSWORD (DESKTOP & CLI 'op') ===${NC}"
+    bash "${SCRIPTS_DIR}/install-1password.sh"
 }
 
 optimize_system() {
@@ -343,6 +354,7 @@ if [ $# -gt 0 ]; then
         --craft) ACTION="craft" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
+        --1password) ACTION="onepassword" ;;
         --optimize|--tuning) ACTION="optimize" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
@@ -409,6 +421,7 @@ case "$ACTION" in
         install_craft_suite
         install_waydroid
         install_mysql_workbench
+        install_1password
         optimize_system
         install_flatpaks
         ;;
@@ -427,6 +440,7 @@ case "$ACTION" in
         install_craft_suite
         install_waydroid
         install_mysql_workbench
+        install_1password
         optimize_system
         install_flatpaks
         ;;
@@ -489,6 +503,9 @@ case "$ACTION" in
     mysql)
         install_mysql_workbench
         flatpak install -y flathub org.apache.netbeans
+        ;;
+    onepassword)
+        install_1password
         ;;
     optimize)
         optimize_system
