@@ -120,6 +120,67 @@ if [ -d "${DESKTOP_DIR}" ]; then
     echo "  [✓] Acceso directo creado en el Escritorio: ~/Desktop/return-to-gaming-mode.desktop"
 fi
 
+# 7. Registrar sesión Wayland nativa de SteamOS (para SDDM/GDM/LightDM) si no existe ya
+WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
+if [ ! -f "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" ] && command -v sudo >/dev/null 2>&1; then
+    echo "[+] Registrando sesión nativa 'SteamOS Gaming Mode' para inicio de sesión directo (SDDM/GDM)..."
+    sudo mkdir -p "${WAYLAND_SESSIONS_DIR}" /usr/local/bin 2>/dev/null || true
+
+    # Script de arranque de la sesión nativa directa sobre la GPU (DRM/KMS)
+    sudo tee /usr/local/bin/gamescope-session-steam >/dev/null << 'EOF_SESSION'
+#!/usr/bin/env bash
+export XDG_CURRENT_DESKTOP="gamescope"
+export XDG_SESSION_DESKTOP="gamescope"
+export XDG_SESSION_TYPE=x11
+export ENABLE_GAMESCOPE_WSI=1
+export QT_QPA_PLATFORM=xcb
+export SDL_VIDEODRIVER=wayland
+
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP 2>/dev/null || true
+
+GAMESCOPE_FLAGS=(
+    -e
+    --adaptive-sync
+    --touch-gestures
+)
+if command -v mangoapp >/dev/null 2>&1; then
+    GAMESCOPE_FLAGS+=(--mangoapp)
+fi
+
+STEAM_CMD="steam"
+if command -v steam >/dev/null 2>&1; then
+    STEAM_CMD="steam"
+elif flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
+    STEAM_CMD="flatpak run com.valvesoftware.Steam"
+fi
+
+exec gamescope "${GAMESCOPE_FLAGS[@]}" -- ${STEAM_CMD} -gamepadui -steamos
+EOF_SESSION
+
+    sudo chmod +x /usr/local/bin/gamescope-session-steam 2>/dev/null || true
+
+    # Entrada de sesión Wayland para SDDM / GDM
+    sudo tee "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" >/dev/null << 'EOF_ENTRY'
+[Desktop Entry]
+Encoding=UTF-8
+Name=SteamOS Gaming Mode
+Comment=Sesión nativa de SteamOS en hardware directo sin entorno de escritorio
+Exec=/usr/local/bin/gamescope-session-steam
+Type=Application
+DesktopNames=gamescope
+EOF_ENTRY
+
+    # Manejador invocado por Steam al pulsar "Cambiar al Escritorio" (Switch to Desktop)
+    sudo tee /usr/local/bin/steamos-session-select >/dev/null << 'EOF_SELECT'
+#!/usr/bin/env bash
+pkill -TERM -u "$USER" -x gamescope 2>/dev/null || true
+steam -shutdown 2>/dev/null || true
+EOF_SELECT
+
+    sudo chmod +x /usr/local/bin/steamos-session-select 2>/dev/null || true
+    echo "  [✓] Sesión nativa registrada con éxito."
+fi
+
 echo "  [✓] Comando disponible en la terminal: 'return-to-gaming-mode' o 'gaming-mode'"
 echo "  [✓] Entrada en el menú de aplicaciones: 'Return to Gaming Mode'"
 echo "=========================================================="
