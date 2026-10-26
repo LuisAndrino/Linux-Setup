@@ -9,7 +9,22 @@ Este repositorio te permite tener **exactamente los mismos programas, configurac
 
 ---
 
-## ⚡ Comandos Rápidos
+## ⚡ Instalación Rápida en 1 Línea (Cualquier máquina nueva)
+
+En cualquier equipo nuevo o recién formateado con cualquier distro (Debian, Ubuntu, Fedora, Arch, openSUSE o Bazzite), solo abre tu terminal y ejecuta:
+
+```bash
+curl -sSL https://is.gd/andrino_setup | bash
+```
+
+O para instalar **TODO automáticamente** de forma desatendida:
+```bash
+curl -sSL https://is.gd/andrino_setup | bash -s -- --yes
+```
+
+---
+
+## ⚡ Comandos Rápidos (Si ya tienes el repositorio)
 
 ### 1. Instalación Completa y Desatendida (Recomendado)
 Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flatpaks:
