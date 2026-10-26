@@ -29,6 +29,18 @@ cat << 'EOF' > "${SCRIPT_TARGET}"
 # ==============================================================================
 set -euo pipefail
 
+# 0. Si se solicita expresamente el cambio de sesión a nivel de sistema (Bazzite Deck / SteamOS)
+if [ "${1:-}" = "--session" ] || [ "${1:-}" = "--steamos" ]; then
+    if command -v steamosctl >/dev/null 2>&1; then
+        echo "[+] Cambiando a la sesión de consola nativa de SteamOS/Bazzite..."
+        exec steamosctl switch-to-game-mode
+    elif [ -x /usr/bin/return-to-gamemode ]; then
+        exec /usr/bin/return-to-gamemode
+    else
+        echo "[!] Este sistema no posee una sesión dedicada 'gamescope-session'. Iniciando en ventana Gamescope..."
+    fi
+fi
+
 # 1. Comprobar Gamescope
 if ! command -v gamescope >/dev/null 2>&1; then
     echo "[!] Error: Gamescope no está instalado en el sistema."

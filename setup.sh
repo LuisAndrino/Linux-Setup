@@ -57,6 +57,7 @@ show_help() {
     echo -e "  ${CYAN}--multimedia${NC}       Instala la suite Multimedia (VLC, MPV, HandBrake, OBS Studio, Kdenlive, Krita, Audacity, GIMP, Blender, Spotify)"
     echo -e "  ${CYAN}--cli${NC}              Instala solo herramientas de terminal y paquetes esenciales cross-distro"
     echo -e "  ${CYAN}--brave${NC}            Instala solo Brave Origin (repositorio nativo oficial)"
+    echo -e "  ${CYAN}--firefox${NC}          Instala solo Mozilla Firefox (nativo o Flatpak oficial)"
     echo -e "  ${CYAN}--vscode${NC}           Instala solo Visual Studio Code (nativo con fallback a Flatpak)"
     echo -e "  ${CYAN}--steam${NC}            Instala solo Steam"
     echo -e "  ${CYAN}--tailscale${NC}        Instala y configura solo Tailscale"
@@ -125,6 +126,11 @@ install_flatpaks() {
             continue
         fi
 
+        if [ "$app" = "org.mozilla.firefox" ] && command -v firefox >/dev/null 2>&1; then
+            echo -e "  ${MAGENTA}[* Omitido]${NC} org.mozilla.firefox (Ya tienes instalado Firefox nativo)"
+            continue
+        fi
+
         echo -e "${BLUE}[+] Instalando Flatpak:${NC} ${BOLD}${app}${NC}"
         flatpak install -y --noninteractive flathub "$app" || true
     done
@@ -146,6 +152,11 @@ install_cli() {
 install_brave_origin() {
     echo -e "\n${BOLD}${CYAN}=== BRAVE BROWSER (ORIGIN) ===${NC}"
     bash "${SCRIPTS_DIR}/install-brave.sh"
+}
+
+install_firefox() {
+    echo -e "\n${BOLD}${CYAN}=== MOZILLA FIREFOX ===${NC}"
+    bash "${SCRIPTS_DIR}/install-firefox.sh"
 }
 
 install_vscode() {
@@ -307,6 +318,7 @@ if [ $# -gt 0 ]; then
         --gamescope) ACTION="gamescope" ;;
         --cli) ACTION="cli" ;;
         --brave) ACTION="brave" ;;
+        --firefox) ACTION="firefox" ;;
         --vscode) ACTION="vscode" ;;
         --steam) ACTION="steam" ;;
         --tailscale) ACTION="tailscale" ;;
@@ -371,6 +383,7 @@ case "$ACTION" in
         install_dev_tools
         install_ai_tools
         install_brave_origin
+        install_firefox
         install_vscode "false"
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
@@ -387,6 +400,7 @@ case "$ACTION" in
         install_cli
         install_dev_tools
         install_ai_tools
+        install_firefox
         install_vscode "true"
         install_steam "true"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
@@ -424,6 +438,9 @@ case "$ACTION" in
         ;;
     brave)
         install_brave_origin
+        ;;
+    firefox)
+        install_firefox
         ;;
     vscode)
         install_vscode "false"
