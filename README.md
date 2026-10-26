@@ -24,6 +24,7 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 ./setup.sh --ai           # Suite de IA (Ollama local, Claude Code CLI, Aider, Antigravity, Grok)
 ./setup.sh --gaming       # Suite Gaming (Steam, Lutris, Heroic, Prism, RetroArch, ProtonUp-Qt, Goverlay)
 ./setup.sh --multimedia   # Suite Multimedia (OBS Studio, VLC, MPV, HandBrake, Krita, Audacity, GIMP, Blender, Spotify)
+./setup.sh --optimize     # Optimizador de Hardware (Laptop/Desktop), Memoria (sysctl), Red TCP BBR y Batería/AC
 ./setup.sh --flatpak-only # Modo 100% Flatpak (Ideal para Bazzite / SteamOS / distros inmutables)
 ./setup.sh --dry-run      # Simulación sin realizar cambios
 ```
@@ -78,6 +79,23 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 * **Streaming y Edición:** OBS Studio (grabación y directos), Kdenlive (editor de video no lineal).
 * **Diseño y 3D:** Krita (pintura digital e ilustración), GIMP (retoque fotográfico), Blender (modelado y renderizado 3D).
 * **Audio y Música:** Audacity (edición multipista), Strawberry Music Player (reproductor audiófilo FLAC bit-perfect), Spotify, ncspot (Spotify CLI en Rust).
+
+---
+
+## ⚡ 5. Optimizaciones de Sistema, Red y Portátil / Laptop
+* **Detección Automática de Chasis:** Detecta si tu equipo es un PC de sobremesa (*Desktop*) o un ordenador portátil (*Laptop / Handheld*).
+* **Gestión Dinámica de Energía para Laptops:**
+  * **Conectada a la Corriente (AC):** Activa automáticamente el perfil **MÁXIMO RENDIMIENTO** (`performance` en CPU/EPP, desactivación de PCIe ASPM agresivo y límites de potencia).
+  * **En Batería (DC):** Regresa a modo equilibrado (`balanced` / `balance_performance`) para proteger la autonomía.
+* **Optimizaciones de Memoria y Gaming (Sysctl):**
+  * `vm.max_map_count = 2147483642`: Esencial para que Proton, Wine y juegos DirectX 12 modernos no crasheen por asignación de memoria.
+  * `vm.swappiness = 10`: Evita que el sistema recurra prematuramente a la swap si hay memoria RAM libre.
+  * `vm.vfs_cache_pressure = 50`: Mantiene índices y cachés de archivos en RAM para acelerar la carga de texturas y proyectos de desarrollo.
+  * `kernel.split_lock_mitigate = 0`: Reduce drásticamente caídas de fotogramas y *stuttering* en juegos pesados.
+* **Baja Latencia y Red Ultra-Rápida:**
+  * Algoritmo de congestión **TCP BBR** + cola `fq` para reducir el *bufferbloat* y mantener el ping bajo y estable en partidas online.
+  * `wifi.powersave = 2`: Desactiva el ahorro de energía agresivo en adaptadores WiFi para eliminar picos aleatorios de latencia y micro-cortes.
+  * Aumento de buffers de red para descargas a máxima velocidad en conexiones de fibra y Gigabit.
 
 ---
 

@@ -68,6 +68,7 @@ show_help() {
     echo -e "  ${CYAN}--craft${NC}            Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
     echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
+    echo -e "  ${CYAN}--optimize${NC}         Aplica optimizaciones de rendimiento (CPU, memoria, red BBR y AC para laptop)"
     echo -e "  ${CYAN}--dry-run${NC}          Simula las acciones sin modificar el sistema"
     echo -e "  ${CYAN}-h, --help${NC}         Muestra esta ayuda"
     echo ""
@@ -224,6 +225,19 @@ install_mysql_workbench() {
     bash "${SCRIPTS_DIR}/install-mysql-workbench.sh"
 }
 
+optimize_system() {
+    echo -e "\n${BOLD}${CYAN}=== OPTIMIZACIONES DE RENDIMIENTO, HARDWARE Y RED ===${NC}"
+    if [ -f "${SCRIPTS_DIR}/optimize-system.sh" ]; then
+        if [ "$EUID" -eq 0 ]; then
+            bash "${SCRIPTS_DIR}/optimize-system.sh"
+        elif command -v sudo >/dev/null 2>&1; then
+            sudo bash "${SCRIPTS_DIR}/optimize-system.sh" || true
+        else
+            bash "${SCRIPTS_DIR}/optimize-system.sh" || true
+        fi
+    fi
+}
+
 install_gaming_suite() {
     echo -e "\n${BOLD}${CYAN}=== SUITE INTEGRAL DE GAMING ===${NC}"
     install_steam "false"
@@ -329,6 +343,7 @@ if [ $# -gt 0 ]; then
         --craft) ACTION="craft" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
+        --optimize|--tuning) ACTION="optimize" ;;
         --dry-run) ACTION="dry-run" ;;
         -h|--help) show_help; exit 0 ;;
         *) echo -e "${RED}[!] Opción desconocida: $1${NC}"; show_help; exit 1 ;;
@@ -394,6 +409,7 @@ case "$ACTION" in
         install_craft_suite
         install_waydroid
         install_mysql_workbench
+        optimize_system
         install_flatpaks
         ;;
     flatpak_only)
@@ -411,6 +427,7 @@ case "$ACTION" in
         install_craft_suite
         install_waydroid
         install_mysql_workbench
+        optimize_system
         install_flatpaks
         ;;
     dev_tools)
@@ -472,6 +489,9 @@ case "$ACTION" in
     mysql)
         install_mysql_workbench
         flatpak install -y flathub org.apache.netbeans
+        ;;
+    optimize)
+        optimize_system
         ;;
     communication)
         ensure_flatpak_installed
