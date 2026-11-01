@@ -130,9 +130,9 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 5. Antigravity, Grok Bot y OpenBot
+# 5. Antigravity, Grok Bot, OpenBot y Hex (Dictado Local AI)
 # -----------------------------------------------------------------------------
-echo "[5/6] Verificando Antigravity, Grok Bot y OpenBot..."
+echo "[5/6] Verificando Antigravity, Grok Bot, OpenBot y Hex..."
 if [ -f "${SCRIPT_DIR}/install-antigravity.sh" ]; then
     bash "${SCRIPT_DIR}/install-antigravity.sh"
 fi
@@ -143,6 +143,10 @@ fi
 
 if [ -f "${SCRIPT_DIR}/install-openbot.sh" ]; then
     bash "${SCRIPT_DIR}/install-openbot.sh"
+fi
+
+if [ -f "${SCRIPT_DIR}/install-hex.sh" ]; then
+    bash "${SCRIPT_DIR}/install-hex.sh"
 fi
 
 # -----------------------------------------------------------------------------
@@ -219,5 +223,6 @@ echo "   aider                 -> Asistente de código Git en terminal"
 echo "   antigravity           -> Google Antigravity Agent"
 echo "   grokbot               -> Grok Bot"
 echo "   openbot               -> OpenBot AI Teammates Workspace"
+echo "   hex                   -> Hex (Local voice dictation con Whisper)"
 echo "   agent / c             -> Lanzador rápido de tu agente de IA activo"
 echo "=========================================================="

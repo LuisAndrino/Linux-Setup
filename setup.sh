@@ -67,6 +67,7 @@ show_help() {
     echo -e "  ${CYAN}--terminal${NC}         Instala terminal rápida (Alacritty/Ghostty)"
     echo -e "  ${CYAN}--grokbot${NC}          Instala y configura solo Grok Bot (AppImage)"
     echo -e "  ${CYAN}--openbot${NC}          Instala y configura OpenBot (Nightly Labs AI Workspace AppImage)"
+    echo -e "  ${CYAN}--hex${NC}              Instala y configura Hex (Local Voice Dictation para Linux)"
     echo -e "  ${CYAN}--craft${NC}            Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo -e "  ${CYAN}--homebrew${NC}         Instala y configura Homebrew para Linux"
     echo -e "  ${CYAN}--android${NC}          Instala Android SDK Platform Tools (adb & fastboot)"
@@ -211,6 +212,11 @@ install_grokbot() {
 install_openbot() {
     echo -e "\n${BOLD}${CYAN}=== OPENBOT (AI TEAMMATES DESKTOP) ===${NC}"
     bash "${SCRIPTS_DIR}/install-openbot.sh"
+}
+
+install_hex() {
+    echo -e "\n${BOLD}${CYAN}=== HEX (LOCAL VOICE DICTATION) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-hex.sh"
 }
 
 install_dev_tools() {
@@ -392,6 +398,7 @@ if [ $# -gt 0 ]; then
         --terminal) ACTION="terminal" ;;
         --grokbot) ACTION="grokbot" ;;
         --openbot) ACTION="openbot" ;;
+        --hex) ACTION="hex" ;;
         --craft) ACTION="craft" ;;
         --homebrew) ACTION="homebrew" ;;
         --android) ACTION="android" ;;
@@ -542,6 +549,9 @@ case "$ACTION" in
         ;;
     openbot)
         install_openbot
+        ;;
+    hex)
+        install_hex
         ;;
     craft)
         install_craft_suite

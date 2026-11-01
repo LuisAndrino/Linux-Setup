@@ -73,6 +73,7 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 * **Aider (`aider`):** Programación por parejas impulsada por IA integrada directamente en tus repositorios Git.
 * **Google Antigravity (`antigravity`):** Plataforma y SDK de IA avanzada de Google DeepMind.
 * **OpenBot (`openbot`):** Entorno de escritorio local-first para persistent AI teammates (Nightly Labs).
+* **Hex (`hex`):** Dictado por voz 100% privado y local para Linux (Anoma.ly) con transcripción Whisper en tiempo real, soporte de atajos y servidor MCP para agentes.
 * **Grok Bot (`grokbot`):** Cliente de IA para escritorio y terminal.
 * **Atajos de Terminal Rápidos:**
   * `agent`: Selector inteligente que ejecuta tu agente activo disponible (`agent openbot`, `agent claude`, `agent aider`, etc.).
