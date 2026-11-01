@@ -66,6 +66,7 @@ show_help() {
     echo -e "  ${CYAN}--powershell${NC}       Instala Microsoft PowerShell (pwsh)"
     echo -e "  ${CYAN}--terminal${NC}         Instala terminal rápida (Alacritty/Ghostty)"
     echo -e "  ${CYAN}--grokbot${NC}          Instala y configura solo Grok Bot (AppImage)"
+    echo -e "  ${CYAN}--openbot${NC}          Instala y configura OpenBot (Nightly Labs AI Workspace AppImage)"
     echo -e "  ${CYAN}--craft${NC}            Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
     echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
@@ -200,6 +201,11 @@ install_terminal() {
 install_grokbot() {
     echo -e "\n${BOLD}${CYAN}=== GROK BOT ===${NC}"
     bash "${SCRIPTS_DIR}/install-grokbot.sh"
+}
+
+install_openbot() {
+    echo -e "\n${BOLD}${CYAN}=== OPENBOT (AI TEAMMATES DESKTOP) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-openbot.sh"
 }
 
 install_dev_tools() {
@@ -352,6 +358,7 @@ if [ $# -gt 0 ]; then
         --powershell) ACTION="powershell" ;;
         --terminal) ACTION="terminal" ;;
         --grokbot) ACTION="grokbot" ;;
+        --openbot) ACTION="openbot" ;;
         --craft) ACTION="craft" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
@@ -494,6 +501,9 @@ case "$ACTION" in
         ;;
     grokbot)
         install_grokbot
+        ;;
+    openbot)
+        install_openbot
         ;;
     craft)
         install_craft_suite

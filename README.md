@@ -69,9 +69,10 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 * **Claude Code CLI (`claude`):** Asistente oficial por terminal de Anthropic para desarrollo asistido por agentes.
 * **Aider (`aider`):** Programación por parejas impulsada por IA integrada directamente en tus repositorios Git.
 * **Google Antigravity (`antigravity`):** Plataforma y SDK de IA avanzada de Google DeepMind.
+* **OpenBot (`openbot`):** Entorno de escritorio local-first para persistent AI teammates (Nightly Labs).
 * **Grok Bot (`grokbot`):** Cliente de IA para escritorio y terminal.
 * **Atajos de Terminal Rápidos:**
-  * `agent`: Selector inteligente que ejecuta tu agente activo disponible.
+  * `agent`: Selector inteligente que ejecuta tu agente activo disponible (`agent openbot`, `agent claude`, `agent aider`, etc.).
   * `c`: Alias de una sola tecla para lanzar el asistente AI en tu carpeta de trabajo.
 
 ---

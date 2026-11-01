@@ -130,15 +130,19 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# 5. Antigravity y Grok Bot
+# 5. Antigravity, Grok Bot y OpenBot
 # -----------------------------------------------------------------------------
-echo "[5/6] Verificando Antigravity y Grok Bot..."
+echo "[5/6] Verificando Antigravity, Grok Bot y OpenBot..."
 if [ -f "${SCRIPT_DIR}/install-antigravity.sh" ]; then
     bash "${SCRIPT_DIR}/install-antigravity.sh"
 fi
 
 if [ -f "${SCRIPT_DIR}/install-grokbot.sh" ]; then
     bash "${SCRIPT_DIR}/install-grokbot.sh"
+fi
+
+if [ -f "${SCRIPT_DIR}/install-openbot.sh" ]; then
+    bash "${SCRIPT_DIR}/install-openbot.sh"
 fi
 
 # -----------------------------------------------------------------------------
@@ -167,6 +171,9 @@ case "${TARGET}" in
     grok)
         exec grokbot "$@"
         ;;
+    openbot)
+        exec openbot "$@"
+        ;;
     ollama)
         exec ollama "$@"
         ;;
@@ -176,6 +183,8 @@ case "${TARGET}" in
     *)
         if command -v antigravity >/dev/null 2>&1; then
             exec antigravity "$@"
+        elif command -v openbot >/dev/null 2>&1; then
+            exec openbot "$@"
         elif command -v claude >/dev/null 2>&1; then
             exec claude "$@"
         elif command -v aider >/dev/null 2>&1; then
@@ -184,7 +193,7 @@ case "${TARGET}" in
             exec grokbot "$@"
         else
             echo "No se encontró ningún agente AI instalado en el sistema."
-            echo "Herramientas soportadas: antigravity, claude, aider, grokbot, ollama"
+            echo "Herramientas soportadas: antigravity, openbot, claude, aider, grokbot, ollama"
             exit 1
         fi
         ;;
@@ -209,5 +218,6 @@ echo "   claude                -> Abrir Claude Code CLI"
 echo "   aider                 -> Asistente de código Git en terminal"
 echo "   antigravity           -> Google Antigravity Agent"
 echo "   grokbot               -> Grok Bot"
+echo "   openbot               -> OpenBot AI Teammates Workspace"
 echo "   agent / c             -> Lanzador rápido de tu agente de IA activo"
 echo "=========================================================="
