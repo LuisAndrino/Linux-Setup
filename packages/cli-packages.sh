@@ -32,7 +32,8 @@ install_cli_debian() {
         htop btop tmux zsh zip unzip p7zip-full bat \
         build-essential ca-certificates gnupg \
         openssh-client openssh-server alacritty \
-        ffmpeg mpv vlc gamemode mangohud gamescope || true
+        ffmpeg mpv vlc gamemode mangohud gamescope \
+        adb fastboot || true
 
     # En Debian/Ubuntu bat se llama 'batcat', crear alias/symlink a ~/.local/bin/bat
     if command -v batcat >/dev/null 2>&1 && [ ! -f "${HOME}/.local/bin/bat" ]; then
@@ -51,7 +52,8 @@ install_cli_fedora() {
         htop btop tmux zsh zip unzip p7zip p7zip-plugins \
         gcc gcc-c++ make automake autoconf \
         openssh-clients openssh-server fastfetch alacritty \
-        ffmpeg mpv vlc gamemode mangohud gamescope || true
+        ffmpeg mpv vlc gamemode mangohud gamescope \
+        android-tools || true
 
     sudo dnf install -y plasma-discover-flatpak-backend 2>/dev/null || true
 }
@@ -62,7 +64,8 @@ install_cli_arch() {
         curl wget git github-cli jq ripgrep tree rsync fzf bat zoxide \
         htop btop tmux zsh zip unzip p7zip \
         base-devel openssh fastfetch alacritty \
-        ffmpeg mpv vlc gamemode mangohud gamescope || true
+        ffmpeg mpv vlc gamemode mangohud gamescope \
+        android-tools || true
 
     sudo pacman -S --needed --noconfirm plasma-discover-flatpak-backend 2>/dev/null || true
 
@@ -76,7 +79,8 @@ install_cli_zypper() {
         curl wget git gh jq ripgrep tree rsync fzf bat zoxide \
         htop btop tmux zsh zip unzip p7zip \
         gcc gcc-c++ make openssh fastfetch alacritty \
-        ffmpeg mpv vlc gamemode mangohud gamescope || true
+        ffmpeg mpv vlc gamemode mangohud gamescope \
+        android-tools || true
 }
 
 install_cli_immutable() {
@@ -84,6 +88,7 @@ install_cli_immutable() {
     if command -v brew >/dev/null 2>&1; then
         echo "==> Instalando herramientas CLI mediante Homebrew..."
         brew install git gh jq ripgrep fzf bat zoxide tree btop htop tmux fastfetch alacritty 2>/dev/null || true
+        brew install --cask android-platform-tools 2>/dev/null || true
     fi
 }
 

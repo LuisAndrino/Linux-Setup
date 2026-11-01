@@ -31,20 +31,35 @@ else
     fi
 fi
 
-# 2. Resumen y cómo iniciar las herramientas Craft
+# 2. Crear lanzadores CLI para herramientas individuales
+BIN_DIR="${HOME}/.local/bin"
+mkdir -p "${BIN_DIR}"
+
+for app in gridcraft deckcraft pdfcraft wordcraft; do
+    cat << EOF > "${BIN_DIR}/${app}"
+#!/usr/bin/env bash
+if flatpak info "ai.storyteller.${app}" >/dev/null 2>&1; then
+    exec flatpak run "ai.storyteller.${app}" "\$@"
+elif flatpak info "ai.storyteller.artcraft-launcher" >/dev/null 2>&1; then
+    echo "[i] ${app} aún no está descargado en Flatpak. Abriendo ArtCraft Launcher..."
+    exec flatpak run "ai.storyteller.artcraft-launcher" "\$@"
+else
+    echo "[!] Ni ${app} ni ArtCraft Launcher están instalados."
+    exit 1
+fi
+EOF
+    chmod +x "${BIN_DIR}/${app}"
+done
+
+# 3. Resumen y cómo iniciar las herramientas Craft
 echo ""
 echo "----------------------------------------------------------"
 echo " Herramientas de la Suite Craft asociadas:"
-echo "   - GridCraft (Hojas de cálculo y análisis)"
-echo "   - DeckCraft (Presentaciones)"
-echo "   - PdfCraft (Edición y lectura PDF)"
-echo "   - WordCraft (Documentos)"
+echo "   - gridcraft -> GridCraft (Hojas de cálculo y análisis)"
+echo "   - deckcraft -> DeckCraft (Presentaciones)"
+echo "   - pdfcraft  -> PdfCraft (Edición y lectura PDF)"
+echo "   - wordcraft -> WordCraft (Documentos)"
 echo ""
-echo " Con ArtCraft Launcher instalado, puedes abrirlo desde tu menú"
-echo " de aplicaciones para actualizar o lanzar todas las herramientas."
-echo " O ejecutarlas directamente por terminal si ya están descargadas:"
-echo "   flatpak run ai.storyteller.gridcraft"
-echo "   flatpak run ai.storyteller.deckcraft"
-echo "   flatpak run ai.storyteller.pdfcraft"
-echo "   flatpak run ai.storyteller.wordcraft"
+echo " Con ArtCraft Launcher instalado, puedes abrirlas desde tu menú"
+echo " de aplicaciones o por terminal con sus nombres directos."
 echo "----------------------------------------------------------"

@@ -71,6 +71,8 @@ io.github.peazip.PeaZip              # PeaZip (Gestor de compresión y descompre
 org.kde.okular                       # Okular (Lector de documentos PDF, ePub, etc.)
 org.kde.kcalc                        # Calculadora científica
 org.gnome.Firmware                   # Actualizador de firmware del hardware (fwupd)
+org.kde.isoimagewriter               # Grabador de imágenes ISO en memorias USB booteables
+org.virt_manager.virt-manager        # Virt-Manager (Gestor gráfico de máquinas virtuales KVM/QEMU)
 
 # --- GESTIÓN Y TIENDA DE FLATPAKS ---
 io.github.kolunmi.Bazaar             # Bazaar (Tienda visual dedicada a Flathub y Flatpaks)

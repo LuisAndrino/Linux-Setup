@@ -61,6 +61,9 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 * **Bun (`bun`):** Runtime y gestor de paquetes JavaScript / TypeScript de última generación.
 * **Java OpenJDK 21 LTS:** Requerido para desarrollo empresarial y herramientas como Apache NetBeans.
 * **GitHub CLI (`gh`):** Interacción fluida con repositorios y pull requests desde la terminal.
+* **Homebrew en Linux (`brew`):** Gestor de paquetes aislado para fórmulas y casks en distros estándar e inmutables.
+* **Android SDK Tools (`adb` & `fastboot`):** Depuración, conexión y gestión de dispositivos móviles.
+* **Suite Craft:** Aplicaciones de productividad (`gridcraft`, `deckcraft`, `pdfcraft`, `wordcraft`) con lanzador central ArtCraft.
 
 ---
 
@@ -84,8 +87,10 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
   * Incluye acceso directo en el Escritorio (`~/Desktop/return-to-gaming-mode.desktop`) y en el menú de aplicaciones.
   * Al salir de Steam (Apagar -> Salir de Steam), Gamescope se cierra y regresas al escritorio sin cerrar tu sesión.
 * **Steam & Valve Gamescope:** Micro-compositor con reescalado FSR/NIS, soporte HDR y limitador de latencia.
+* **Lossless Scaling FG para Vulkan (`lsfg-vk`):** Generación de fotogramas (Frame Generation) en juegos Vulkan/DirectX en Linux con interfaz visual de configuración (`lsfg-vk-ui`).
 * **GameMode & MangoHud:** Optimización de prioridades del kernel y HUD en pantalla de FPS, temperaturas y consumo.
-* **Launchers:** Lutris, Heroic Games Launcher (Epic/GOG/Amazon), Prism Launcher (Minecraft con mods).
+* **Launchers:** Lutris, Heroic Games Launcher (Epic/GOG/Amazon), Prism Launcher (Minecraft con mods), RecompLauncher (PC Ports nativos de N64 / Zelda 64).
+* **Streaming en Steam Game Mode:** `StreamingServiceLauncher` para accesos a Netflix, YouTube, Disney+ y plataformas web.
 * **Herramientas de Compatibilidad:** ProtonUp-Qt (instalación con 1 clic de GE-Proton / Wine-GE), Goverlay, Bottles, Protontricks.
 * **Emulación y Consolas:** RetroArch (suite universal de emulación) y Chiaki4deck (PlayStation Remote Play).
 * **Sincronización:** Ludusavi (respaldo automático de partidas guardadas de cualquier juego).

@@ -68,6 +68,11 @@ show_help() {
     echo -e "  ${CYAN}--grokbot${NC}          Instala y configura solo Grok Bot (AppImage)"
     echo -e "  ${CYAN}--openbot${NC}          Instala y configura OpenBot (Nightly Labs AI Workspace AppImage)"
     echo -e "  ${CYAN}--craft${NC}            Instala ArtCraft Launcher y la suite Craft (GridCraft, DeckCraft...)"
+    echo -e "  ${CYAN}--homebrew${NC}         Instala y configura Homebrew para Linux"
+    echo -e "  ${CYAN}--android${NC}          Instala Android SDK Platform Tools (adb & fastboot)"
+    echo -e "  ${CYAN}--lsfg${NC}             Instala Lossless Scaling Frame Generation para Vulkan (lsfg-vk)"
+    echo -e "  ${CYAN}--recomp${NC}           Instala RecompLauncher (Zelda N64 PC Ports)"
+    echo -e "  ${CYAN}--streaming${NC}        Instala Streaming Service Launcher para Steam Game Mode"
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
     echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
     echo -e "  ${CYAN}--1password${NC}        Instala 1Password Desktop y 1Password CLI ('op')"
@@ -243,6 +248,31 @@ install_1password() {
     bash "${SCRIPTS_DIR}/install-1password.sh"
 }
 
+install_homebrew() {
+    echo -e "\n${BOLD}${CYAN}=== HOMEBREW PARA LINUX ===${NC}"
+    bash "${SCRIPTS_DIR}/install-homebrew.sh"
+}
+
+install_android_tools() {
+    echo -e "\n${BOLD}${CYAN}=== ANDROID PLATFORM TOOLS (ADB & FASTBOOT) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-android-tools.sh"
+}
+
+install_lsfg_vk() {
+    echo -e "\n${BOLD}${CYAN}=== LOSSLESS SCALING FRAME GENERATION (LSFG-VK) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-lsfg-vk.sh"
+}
+
+install_recomplauncher() {
+    echo -e "\n${BOLD}${CYAN}=== RECOMP LAUNCHER (N64 PC PORTS) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-recomplauncher.sh"
+}
+
+install_streaming_launcher() {
+    echo -e "\n${BOLD}${CYAN}=== STREAMING SERVICE LAUNCHER (STEAM GAMING MODE) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-streaming-launcher.sh"
+}
+
 optimize_system() {
     echo -e "\n${BOLD}${CYAN}=== OPTIMIZACIONES DE RENDIMIENTO, HARDWARE Y RED ===${NC}"
     if [ -f "${SCRIPTS_DIR}/optimize-system.sh" ]; then
@@ -261,6 +291,9 @@ install_gaming_suite() {
     install_steam "false"
     bash "${SCRIPTS_DIR}/install-gamescope.sh"
     bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
+    bash "${SCRIPTS_DIR}/install-lsfg-vk.sh"
+    bash "${SCRIPTS_DIR}/install-recomplauncher.sh"
+    bash "${SCRIPTS_DIR}/install-streaming-launcher.sh"
     ensure_flatpak_installed
     echo "[+] Instalando Launchers y compatibilidad de gaming..."
     flatpak install -y --noninteractive flathub \
@@ -360,6 +393,11 @@ if [ $# -gt 0 ]; then
         --grokbot) ACTION="grokbot" ;;
         --openbot) ACTION="openbot" ;;
         --craft) ACTION="craft" ;;
+        --homebrew) ACTION="homebrew" ;;
+        --android) ACTION="android" ;;
+        --lsfg) ACTION="lsfg" ;;
+        --recomp) ACTION="recomp" ;;
+        --streaming) ACTION="streaming" ;;
         --waydroid) ACTION="waydroid" ;;
         --mysql) ACTION="mysql" ;;
         --1password) ACTION="onepassword" ;;
@@ -507,6 +545,21 @@ case "$ACTION" in
         ;;
     craft)
         install_craft_suite
+        ;;
+    homebrew)
+        install_homebrew
+        ;;
+    android)
+        install_android_tools
+        ;;
+    lsfg)
+        install_lsfg_vk
+        ;;
+    recomp)
+        install_recomplauncher
+        ;;
+    streaming)
+        install_streaming_launcher
         ;;
     waydroid)
         install_waydroid
