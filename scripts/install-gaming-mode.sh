@@ -110,14 +110,18 @@ EOF
 
 chmod +x "${DESKTOP_ENTRY}"
 
-# 6. Crear acceso directo en el Escritorio si la carpeta existe
+# 6. Crear acceso directo en el Escritorio si la carpeta existe y no hay ya uno nativo
 if [ -d "${DESKTOP_DIR}" ]; then
-    cp -f "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
-    chmod +x "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
-    if command -v gio >/dev/null 2>&1; then
-        gio set "${DESKTOP_DIR}/return-to-gaming-mode.desktop" metadata::trusted true 2>/dev/null || true
+    if [ -f "${DESKTOP_DIR}/Return.desktop" ] || [ -x "/usr/bin/return-to-gamemode" ]; then
+        echo "  [i] Se detectó acceso nativo de Bazzite/SteamOS (Return.desktop). Omitiendo duplicado en el Escritorio."
+    else
+        cp -f "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
+        chmod +x "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
+        if command -v gio >/dev/null 2>&1; then
+            gio set "${DESKTOP_DIR}/return-to-gaming-mode.desktop" metadata::trusted true 2>/dev/null || true
+        fi
+        echo "  [✓] Acceso directo creado en el Escritorio: ~/Desktop/return-to-gaming-mode.desktop"
     fi
-    echo "  [✓] Acceso directo creado en el Escritorio: ~/Desktop/return-to-gaming-mode.desktop"
 fi
 
 # 7. Registrar sesión Wayland nativa de SteamOS (para SDDM/GDM/LightDM) si no existe ya
