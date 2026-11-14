@@ -200,6 +200,11 @@ if [ "$ON_AC" = true ]; then
         powerprofilesctl set performance 2>/dev/null || true
     fi
 
+    # 3b. ThinkPad / ACPI platform_profile directo (ideal para ThinkPad AMD incluso sin KDE/GNOME)
+    if [ -w /sys/firmware/acpi/platform_profile ]; then
+        echo "performance" > /sys/firmware/acpi/platform_profile 2>/dev/null || true
+    fi
+
     # 4. Desactivar autosuspensión agresiva de PCIe en AC
     for pcie in /sys/bus/pci/devices/*/power/control; do
         if [ -w "$pcie" ]; then
@@ -218,6 +223,10 @@ else
 
     if command -v powerprofilesctl >/dev/null 2>&1; then
         powerprofilesctl set balanced 2>/dev/null || true
+    fi
+
+    if [ -w /sys/firmware/acpi/platform_profile ]; then
+        echo "balanced" > /sys/firmware/acpi/platform_profile 2>/dev/null || true
     fi
 
     logger -t "laptop-power-profile" "Alimentación por batería detectada: Perfil EQUILIBRADO activado."

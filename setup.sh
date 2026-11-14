@@ -82,6 +82,8 @@ show_help() {
     echo -e "  ${CYAN}--recomp${NC}           Instala RecompLauncher (Zelda N64 PC Ports)"
     echo -e "  ${CYAN}--streaming${NC}        Instala Streaming Service Launcher para Steam Game Mode"
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
+    echo -e "  ${CYAN}--hyprland${NC}         Instala perfil ligero Hyprland + Quickshell (estilo Omarchy)"
+    echo -e "  ${CYAN}--omarchy${NC}          Alias de --hyprland"
     echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
     echo -e "  ${CYAN}--1password${NC}        Instala 1Password Desktop y 1Password CLI ('op')"
     echo -e "  ${CYAN}--optimize${NC}         Aplica optimizaciones de rendimiento (CPU, memoria, red BBR y AC para laptop)"
@@ -302,6 +304,11 @@ install_streaming_launcher() {
     bash "${SCRIPTS_DIR}/install-streaming-launcher.sh"
 }
 
+install_omarchy_hyprland() {
+    echo -e "\n${BOLD}${CYAN}=== HYPRLAND + QUICKSHELL (PERFIL LIGERO OMARCHY) ===${NC}"
+    bash "${SCRIPTS_DIR}/install-omarchy-hyprland.sh"
+}
+
 optimize_system() {
     echo -e "\n${BOLD}${CYAN}=== OPTIMIZACIONES DE RENDIMIENTO, HARDWARE Y RED ===${NC}"
     if [ -f "${SCRIPTS_DIR}/optimize-system.sh" ]; then
@@ -449,6 +456,7 @@ if [ $# -gt 0 ]; then
         --recomp) ACTION="recomp" ;;
         --streaming) ACTION="streaming" ;;
         --waydroid) ACTION="waydroid" ;;
+        --hyprland|--omarchy) ACTION="hyprland" ;;
         --mysql) ACTION="mysql" ;;
         --1password) ACTION="onepassword" ;;
         --optimize|--tuning) ACTION="optimize" ;;
@@ -584,6 +592,9 @@ case "$ACTION" in
     vm)
         ensure_flatpak_installed
         flatpak install -y flathub org.virt_manager.virt-manager
+        ;;
+    hyprland)
+        install_omarchy_hyprland
         ;;
     media)
         install_media_suite
