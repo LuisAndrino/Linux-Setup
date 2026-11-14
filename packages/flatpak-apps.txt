@@ -30,10 +30,18 @@ com.steamgriddb.SGDBoop              # SGDBoop (Instalación de arte y portadas 
 # --- MULTIMEDIA, VIDEO Y STREAMING ---
 org.videolan.VLC                     # Reproductor multimedia VLC
 io.mpv.Mpv                           # Reproductor MPV (Ultra-ligero y de alta fidelidad)
+com.stremio.Stremio                  # Stremio (Streaming de películas y series sin costo con Torrentio)
+tv.kodi.Kodi                         # Kodi (Centro multimedia universal y streaming)
+io.freetubeapp.FreeTube              # FreeTube (Cliente privado de YouTube sin publicidad)
+com.github.iwalton3.jellyfin-media-player # Jellyfin Media Player (Streaming para servidores locales)
 fr.handbrake.ghb                     # HandBrake (Conversor y transcodificador de video profesional)
 com.obsproject.Studio                # OBS Studio (Grabación de pantalla y streaming)
 org.kde.kdenlive                     # Kdenlive (Editor de video no lineal profesional)
 org.kde.haruna                       # Reproductor de video moderno Haruna (libmpv)
+
+# --- DESCARGAS Y GESTORES DE TORRENT ---
+org.qbittorrent.qBittorrent          # qBittorrent (Cliente BitTorrent rápido sin publicidad)
+org.jdownloader.JDownloader          # JDownloader 2 (Gestor avanzado de descargas directas)
 
 # --- CREACIÓN GRÁFICA, FOTO Y 3D ---
 org.kde.krita                        # Krita (Pintura digital, dibujo e ilustración)

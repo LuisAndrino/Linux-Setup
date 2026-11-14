@@ -56,6 +56,11 @@ show_help() {
     echo -e "  ${CYAN}--gaming${NC}           Instala la suite de Gaming (Steam, Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Gamescope)"
     echo -e "  ${CYAN}--gaming-mode${NC}      Configura el modo 'Return to Gaming Mode' universal (SteamOS Gamepad UI en Gamescope)"
     echo -e "  ${CYAN}--multimedia${NC}       Instala la suite Multimedia (VLC, MPV, HandBrake, OBS Studio, Kdenlive, Krita, Audacity, GIMP, Blender, Spotify)"
+    echo -e "  ${CYAN}--media, --movies${NC}  Instala suite de Streaming y Películas (Stremio, Kodi, qBittorrent, JDownloader, FreeTube)"
+    echo -e "  ${CYAN}--qbittorrent${NC}     Instala qBittorrent y configura motores de búsqueda integrados"
+    echo -e "  ${CYAN}--stremio${NC}         Instala Stremio (Streaming de películas y series sin costo)"
+    echo -e "  ${CYAN}--kodi${NC}            Instala Kodi Media Center"
+    echo -e "  ${CYAN}--jdownloader${NC}     Instala JDownloader 2 (Gestor de descargas directas)"
     echo -e "  ${CYAN}--cli${NC}              Instala solo herramientas de terminal y paquetes esenciales cross-distro"
     echo -e "  ${CYAN}--brave${NC}            Instala solo Brave Origin (repositorio nativo oficial)"
     echo -e "  ${CYAN}--firefox${NC}          Instala solo Mozilla Firefox (nativo o Flatpak oficial)"
@@ -325,6 +330,12 @@ install_multimedia_suite() {
     flatpak install -y --noninteractive flathub \
         org.videolan.VLC \
         io.mpv.Mpv \
+        com.stremio.Stremio \
+        tv.kodi.Kodi \
+        org.qbittorrent.qBittorrent \
+        org.jdownloader.JDownloader \
+        io.freetubeapp.FreeTube \
+        com.github.iwalton3.jellyfin-media-player \
         fr.handbrake.ghb \
         com.obsproject.Studio \
         org.kde.kdenlive \
@@ -336,6 +347,15 @@ install_multimedia_suite() {
         org.strawberrymusicplayer.strawberry \
         io.bassi.Amberol \
         com.spotify.Client || true
+
+    if [ -f "${SCRIPTS_DIR}/configure-qbittorrent.sh" ]; then
+        bash "${SCRIPTS_DIR}/configure-qbittorrent.sh"
+    fi
+}
+
+install_media_suite() {
+    echo -e "\n${BOLD}${CYAN}=== SUITE DE STREAMING, PELÍCULAS, SERIES Y DESCARGAS ===${NC}"
+    bash "${SCRIPTS_DIR}/install-media-suite.sh"
 }
 
 dry_run() {
@@ -386,6 +406,11 @@ if [ $# -gt 0 ]; then
         --gaming) ACTION="gaming" ;;
         --gaming-mode) ACTION="gaming_mode" ;;
         --multimedia) ACTION="multimedia" ;;
+        --media|--movies|--streaming-suite) ACTION="media" ;;
+        --qbittorrent) ACTION="qbittorrent" ;;
+        --stremio) ACTION="stremio" ;;
+        --kodi) ACTION="kodi" ;;
+        --jdownloader) ACTION="jdownloader" ;;
         --gamescope) ACTION="gamescope" ;;
         --cli) ACTION="cli" ;;
         --brave) ACTION="brave" ;;
@@ -430,14 +455,15 @@ if [ "$ACTION" = "interactive" ]; then
     echo "  4) Suite de Inteligencia Artificial (Ollama, Claude Code, Aider, Antigravity, Grok Bot)"
     echo "  5) Suite de Gaming (Steam, Lutris, Heroic, Prism, RetroArch, ProtonUp-Qt, Goverlay)"
     echo "  6) Suite Multimedia y Creación (OBS Studio, VLC, MPV, HandBrake, Krita, Audacity, GIMP, Blender)"
-    echo "  7) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
-    echo "  8) Solo Música (Spotify, ncspot [Rust], Strawberry FLAC, Amberol)"
-    echo "  9) Solo Terminal rápida (Alacritty) y utilidades CLI"
-    echo "  10) Solo Tailscale"
-    echo "  11) Simulación (Dry run)"
-    echo "  12) Salir"
+    echo "  7) Suite de Streaming, Películas y Descargas (Stremio, Kodi, qBittorrent, JDownloader)"
+    echo "  8) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
+    echo "  9) Solo Música (Spotify, ncspot [Rust], Strawberry FLAC, Amberol)"
+    echo "  10) Solo Terminal rápida (Alacritty) y utilidades CLI"
+    echo "  11) Solo Tailscale"
+    echo "  12) Simulación (Dry run)"
+    echo "  13) Salir"
     echo ""
-    read -rp "Selecciona una opción [1-12] (por defecto 1): " choice
+    read -rp "Selecciona una opción [1-13] (por defecto 1): " choice
     choice=${choice:-1}
 
     case "$choice" in
@@ -447,12 +473,13 @@ if [ "$ACTION" = "interactive" ]; then
         4) ACTION="ai" ;;
         5) ACTION="gaming" ;;
         6) ACTION="multimedia" ;;
-        7) ACTION="communication" ;;
-        8) ACTION="audio" ;;
-        9) ACTION="cli" ;;
-        10) ACTION="tailscale" ;;
-        11) ACTION="dry-run" ;;
-        12) echo "Cancelado."; exit 0 ;;
+        7) ACTION="media" ;;
+        8) ACTION="communication" ;;
+        9) ACTION="audio" ;;
+        10) ACTION="cli" ;;
+        11) ACTION="tailscale" ;;
+        12) ACTION="dry-run" ;;
+        13) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
     esac
 fi
@@ -516,6 +543,26 @@ case "$ACTION" in
         ;;
     multimedia)
         install_multimedia_suite
+        ;;
+    media)
+        install_media_suite
+        ;;
+    qbittorrent)
+        ensure_flatpak_installed
+        flatpak install -y flathub org.qbittorrent.qBittorrent
+        bash "${SCRIPTS_DIR}/configure-qbittorrent.sh"
+        ;;
+    stremio)
+        ensure_flatpak_installed
+        flatpak install -y flathub com.stremio.Stremio
+        ;;
+    kodi)
+        ensure_flatpak_installed
+        flatpak install -y flathub tv.kodi.Kodi
+        ;;
+    jdownloader)
+        ensure_flatpak_installed
+        flatpak install -y flathub org.jdownloader.JDownloader
         ;;
     gamescope)
         bash "${SCRIPTS_DIR}/install-gamescope.sh"

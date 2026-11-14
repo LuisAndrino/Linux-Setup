@@ -98,7 +98,7 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 
 ---
 
-## 🎬 4. Multimedia, Creación y Streaming
+## 🎬 4. Multimedia, Creación y Edición
 * **Video:** VLC, MPV (reproductor ultraligero de alta fidelidad), Haruna, HandBrake (transcodificación por hardware).
 * **Streaming y Edición:** OBS Studio (grabación y directos), Kdenlive (editor de video no lineal).
 * **Diseño y 3D:** Krita (pintura digital e ilustración), GIMP (retoque fotográfico), Blender (modelado y renderizado 3D).
@@ -106,7 +106,20 @@ Instala Desarrollo, Inteligencia Artificial, Gaming, Multimedia, Terminal y Flat
 
 ---
 
-## ⚡ 5. Optimizaciones de Sistema, Red y Portátil / Laptop
+## 🍿 5. Streaming, Películas Gratis, Torrents y Descargas
+* **Stremio (`stremio`):** Plataforma de streaming de películas y series sin costo. Con compatibilidad para add-ons comunitarios (Torrentio, CyberFlix, OpenSubtitles v3) para ver cualquier contenido al instante con subtítulos.
+* **Kodi Media Center (`kodi`):** Centro multimedia universal para reproducir contenido local o mediante add-ons de streaming (Balandro, Alfa, The Crew).
+* **qBittorrent (`qbittorrent`) + 19 Motores de Búsqueda Integrados:**
+  * Incluye preinstaladas y activas las extensiones de búsqueda para DonTorrent, ThePirateBay, 1337x, TorrentGalaxy, EZTV, LimeTorrents, SolidTorrents, BitSearch, Nyaa, Jackett, Prowlarr, etc.
+  * Pestaña "Buscar" activada de fábrica en la configuración (`~/.var/app/org.qbittorrent.qBittorrent/` y `~/.config/qBittorrent/`).
+* **JDownloader 2 (`jdownloader`):** Gestor integral de descargas directas multihilo con captura de portapapeles y descompresión automática.
+* **FreeTube (`freetube`):** Cliente privado de YouTube sin anuncios ni seguimiento de cuenta.
+* **Jellyfin Media Player (`jellyfin`):** Reproductor para streaming de librerías multimedia personales.
+* **VLC Media Player (`vlc`):** El reproductor por excelencia para cualquier formato o códec existente.
+
+---
+
+## ⚡ 6. Optimizaciones de Sistema, Red y Portátil / Laptop
 * **Detección Automática de Chasis:** Detecta si tu equipo es un PC de sobremesa (*Desktop*) o un ordenador portátil (*Laptop / Handheld*).
 * **Gestión Dinámica de Energía para Laptops:**
   * **Conectada a la Corriente (AC):** Activa automáticamente el perfil **MÁXIMO RENDIMIENTO** (`performance` en CPU/EPP, desactivación de PCIe ASPM agresivo y límites de potencia).
