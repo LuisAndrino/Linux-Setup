@@ -46,11 +46,24 @@ MEDIA_APPS=(
     "com.github.iwalton3.jellyfin-media-player"
 )
 
-echo "[+] Instalando aplicaciones multimedia y gestores de streaming..."
+INSTALLED_FLATPAKS=$(flatpak list --app --columns=application 2>/dev/null || true)
+TO_INSTALL=()
 for app in "${MEDIA_APPS[@]}"; do
-    echo "  -> Verificando / Instalando: ${app}..."
-    flatpak install -y --noninteractive flathub "${app}" || true
+    if ! echo "${INSTALLED_FLATPAKS}" | grep -qx "${app}"; then
+        TO_INSTALL+=("${app}")
+    fi
 done
+
+if [ ${#TO_INSTALL[@]} -gt 0 ]; then
+    echo "[+] Instalando aplicaciones multimedia en lote único (${#TO_INSTALL[@]} apps)..."
+    flatpak install -y --noninteractive flathub "${TO_INSTALL[@]}" || {
+        for app in "${TO_INSTALL[@]}"; do
+            flatpak install -y --noninteractive flathub "${app}" || true
+        done
+    }
+else
+    echo "  [✓] Todas las aplicaciones de la suite multimedia ya están instaladas."
+fi
 
 # 3. Configurar qBittorrent e instalar extensiones de búsqueda
 echo ""

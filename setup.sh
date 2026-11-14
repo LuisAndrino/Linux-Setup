@@ -124,36 +124,52 @@ install_flatpaks() {
         fi
     done < "${PACKAGES_FILE}"
 
+    local installed_apps
+    installed_apps=$(flatpak list --app --columns=application 2>/dev/null || true)
+
+    local to_install=()
     for app in "${apps[@]}"; do
-        # Evitar duplicados si el usuario instaló versión nativa de Brave, VS Code o Steam
+        # Evitar duplicados si el usuario instaló versión nativa de Brave, VS Code, Steam, Firefox o 1Password
         if [ "$app" = "com.brave.Browser" ] && (command -v brave-origin >/dev/null 2>&1 || command -v brave-browser >/dev/null 2>&1); then
             echo -e "  ${MAGENTA}[* Omitido]${NC} com.brave.Browser (Ya tienes instalado Brave Origin nativo)"
             continue
         fi
-
         if [ "$app" = "com.visualstudio.code" ] && command -v code >/dev/null 2>&1; then
             echo -e "  ${MAGENTA}[* Omitido]${NC} com.visualstudio.code (Ya tienes instalado VS Code nativo 'code')"
             continue
         fi
-
         if [ "$app" = "com.valvesoftware.Steam" ] && command -v steam >/dev/null 2>&1; then
             echo -e "  ${MAGENTA}[* Omitido]${NC} com.valvesoftware.Steam (Ya tienes instalado Steam nativo)"
             continue
         fi
-
         if [ "$app" = "org.mozilla.firefox" ] && command -v firefox >/dev/null 2>&1; then
             echo -e "  ${MAGENTA}[* Omitido]${NC} org.mozilla.firefox (Ya tienes instalado Firefox nativo)"
             continue
         fi
-
         if [ "$app" = "com.onepassword.OnePassword" ] && command -v 1password >/dev/null 2>&1; then
             echo -e "  ${MAGENTA}[* Omitido]${NC} com.onepassword.OnePassword (Ya tienes instalado 1Password nativo)"
             continue
         fi
 
-        echo -e "${BLUE}[+] Instalando Flatpak:${NC} ${BOLD}${app}${NC}"
-        flatpak install -y --noninteractive flathub "$app" || true
+        if echo "${installed_apps}" | grep -qx "$app"; then
+            echo -e "  ${GREEN}[✓ Ya instalado]${NC} ${app}"
+            continue
+        fi
+
+        to_install+=("$app")
     done
+
+    if [ ${#to_install[@]} -gt 0 ]; then
+        echo -e "${BLUE}[+] Instalando ${#to_install[@]} aplicaciones Flatpak en lote único (máxima velocidad)...${NC}"
+        flatpak install -y --noninteractive flathub "${to_install[@]}" || {
+            echo -e "${YELLOW}[!] Reintentando aplicaciones faltantes individualmente...${NC}"
+            for app in "${to_install[@]}"; do
+                flatpak install -y --noninteractive flathub "$app" || true
+            done
+        }
+    else
+        echo -e "${GREEN}[✓] Todas las aplicaciones Flatpak ya estaban instaladas.${NC}"
+    fi
 
     echo -e "${GREEN}[✓] Instalación de Flatpaks finalizada.${NC}"
 }
@@ -484,17 +500,37 @@ if [ "$ACTION" = "interactive" ]; then
     esac
 fi
 
+# Mantener sesión de sudo activa durante toda la ejecución
+SUDO_KEEPALIVE_PID=""
+if [ "$ACTION" != "dry-run" ] && [ "$EUID" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
+    if ! sudo -n true 2>/dev/null; then
+        sudo -v || true
+    fi
+    ( while true; do sleep 50; sudo -n true 2>/dev/null || exit; done ) &
+    SUDO_KEEPALIVE_PID=$!
+    trap 'kill "${SUDO_KEEPALIVE_PID:-}" 2>/dev/null || true' EXIT
+fi
+
+run_user_space_parallel_lane() {
+    echo -e "\n${BOLD}${CYAN}=== CARRIL PARALELO: HERRAMIENTAS DEV, IA Y GAMING EN SEGUNDO PLANO ===${NC}"
+    install_dev_tools &
+    install_ai_tools &
+    bash "${SCRIPTS_DIR}/install-lsfg-vk.sh" &
+    bash "${SCRIPTS_DIR}/install-recomplauncher.sh" &
+    bash "${SCRIPTS_DIR}/install-streaming-launcher.sh" &
+    bash "${SCRIPTS_DIR}/configure-qbittorrent.sh" &
+    bash "${SCRIPTS_DIR}/install-gaming-mode.sh" &
+}
+
 case "$ACTION" in
     native)
         install_cli
-        install_dev_tools
-        install_ai_tools
+        run_user_space_parallel_lane
         install_brave_origin
         install_firefox
         install_vscode "false"
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
-        bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
         install_tailscale
         install_powershell
         install_terminal
@@ -504,16 +540,16 @@ case "$ACTION" in
         install_1password
         optimize_system
         install_flatpaks
+        echo -e "\n${BLUE}[i] Esperando a que finalicen las descargas paralelas de Dev, IA y Gaming...${NC}"
+        wait
         ;;
     flatpak_only)
         install_cli
-        install_dev_tools
-        install_ai_tools
+        run_user_space_parallel_lane
         install_firefox
         install_vscode "true"
         install_steam "true"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
-        bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
         install_tailscale
         install_powershell
         install_terminal
@@ -523,6 +559,8 @@ case "$ACTION" in
         install_1password
         optimize_system
         install_flatpaks
+        echo -e "\n${BLUE}[i] Esperando a que finalicen las descargas paralelas de Dev, IA y Gaming...${NC}"
+        wait
         ;;
     dev_tools)
         install_dev_tools

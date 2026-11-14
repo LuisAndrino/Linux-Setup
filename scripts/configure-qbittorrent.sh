@@ -61,21 +61,24 @@ declare -A PLUGINS=(
     ["latteam.py"]="https://raw.githubusercontent.com/tolotp/qbittorrent-search-plugins-de-busqueda/refs/heads/main/Plugins/latteam.py"
 )
 
-echo "  [+] Descargando e instalando extensiones de búsqueda para qBittorrent..."
+echo "  [+] Descargando e instalando extensiones de búsqueda en paralelo..."
 TMP_DIR=$(mktemp -d)
 
 for file in "${!PLUGINS[@]}"; do
-    url="${PLUGINS[$file]}"
-    target_tmp="${TMP_DIR}/${file}"
-    if curl -sSL -m 10 "$url" -o "$target_tmp" && [ -s "$target_tmp" ]; then
-        for d in "${DIRS[@]}"; do
-            cp -f "$target_tmp" "$d/${file}"
-        done
-        echo "    * ${file} [OK]"
-    else
-        echo "    * ${file} [Omitido por timeout / no disponible]"
-    fi
+    (
+        url="${PLUGINS[$file]}"
+        target_tmp="${TMP_DIR}/${file}"
+        if curl -sSL -m 10 "$url" -o "$target_tmp" && [ -s "$target_tmp" ]; then
+            for d in "${DIRS[@]}"; do
+                cp -f "$target_tmp" "$d/${file}"
+            done
+            echo "    * ${file} [OK]"
+        else
+            echo "    * ${file} [Omitido]"
+        fi
+    ) &
 done
+wait
 rm -rf "$TMP_DIR"
 
 # 4. Activar pestaña de búsqueda en los archivos de configuración de qBittorrent
