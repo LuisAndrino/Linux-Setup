@@ -275,6 +275,12 @@ bindm = $mainMod, mouse:272, movewindow
 bindm = $mainMod, mouse:273, resizewindow
 EOF_HYPR
 
+# 5. Instalar y habilitar plugins populares de Omarchy
+SCRIPT_SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "${SCRIPT_SELF_DIR}/install-omarchy-plugins.sh" ]; then
+    bash "${SCRIPT_SELF_DIR}/install-omarchy-plugins.sh"
+fi
+
 echo ""
 echo "=========================================================="
 echo " [✓] ¡Perfil Hyprland + Quickshell (Omarchy) configurado!"
@@ -283,9 +289,9 @@ echo " Para iniciarlo:"
 echo "   1. Cierra tu sesión actual."
 echo "   2. En la pantalla de login (SDDM/GDM), elige 'Hyprland'."
 echo "   3. Atajos principales:"
-echo "      Super + Enter   -> Terminal (Alacritty)"
-echo "      Super + Espacio -> Lanzador de aplicaciones"
-echo "      Super + Q / W   -> Cerrar ventana"
-echo "      Super + V       -> Historial de portapapeles"
-echo "      Super + L       -> Bloquear pantalla"
+echo "      Super + Enter    -> Terminal (Alacritty)"
+echo "      Super + Espacio  -> Lanzador de aplicaciones"
+echo "      Super + Q / W    -> Cerrar ventana"
+echo "      Super + V        -> Historial de portapapeles"
+echo "      Super + Ctrl + L -> Bloquear pantalla"
 echo "=========================================================="

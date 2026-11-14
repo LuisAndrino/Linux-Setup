@@ -84,6 +84,7 @@ show_help() {
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
     echo -e "  ${CYAN}--hyprland${NC}         Instala perfil ligero Hyprland + Quickshell (estilo Omarchy)"
     echo -e "  ${CYAN}--omarchy${NC}          Alias de --hyprland"
+    echo -e "  ${CYAN}--omarchy-plugins${NC}  Instala los plugins más populares de Omarchy (omni, overview, stats, power-profiles...)"
     echo -e "  ${CYAN}--tui, --archinstall${NC} Abre el selector interactivo estilo archinstall (muestra paquetes y detecta T14 Gen 2)"
     echo -e "  ${CYAN}--desktop-app${NC}      Crea acceso directo de aplicación de escritorio para el instalador interactivo"
     echo -e "  ${CYAN}--messaging${NC}        Instala clientes de WhatsApp (ZapZap) y Telegram Desktop"
@@ -463,6 +464,7 @@ if [ $# -gt 0 ]; then
         --streaming) ACTION="streaming" ;;
         --waydroid) ACTION="waydroid" ;;
         --hyprland|--omarchy) ACTION="hyprland" ;;
+        --omarchy-plugins) ACTION="omarchy_plugins" ;;
         --tui|--archinstall) ACTION="tui" ;;
         --desktop-app) ACTION="desktop_app" ;;
         --messaging) ACTION="messaging" ;;
@@ -616,6 +618,9 @@ case "$ACTION" in
         ;;
     hyprland)
         install_omarchy_hyprland
+        ;;
+    omarchy_plugins)
+        bash "${SCRIPTS_DIR}/install-omarchy-plugins.sh"
         ;;
     media)
         install_media_suite
