@@ -45,11 +45,36 @@ if compgen -G "/sys/class/power_supply/BAT*" > /dev/null || \
     IS_LAPTOP=true
 fi
 
+# Detección específica de Lenovo ThinkPad T14 Gen 2 AMD
+IS_T14_GEN2_AMD=false
+DMI_VENDOR=$(cat /sys/class/dmi/id/sys_vendor 2>/dev/null || true)
+DMI_PRODUCT=$(cat /sys/class/dmi/id/product_name 2>/dev/null || true)
+DMI_VERSION=$(cat /sys/class/dmi/id/product_version 2>/dev/null || true)
+CPU_MODEL=$(grep -m1 "model name" /proc/cpuinfo 2>/dev/null | cut -d: -f2- | xargs || true)
+
+if echo "${DMI_VENDOR} ${DMI_PRODUCT} ${DMI_VERSION}" | grep -qiE "ThinkPad T14 Gen 2|20XK|20XL"; then
+    IS_LAPTOP=true
+    if echo "${CPU_MODEL}" | grep -qi "AMD"; then
+        IS_T14_GEN2_AMD=true
+    fi
+fi
+
 echo "[1/4] Detección de Hardware:"
-if [ "$IS_LAPTOP" = true ]; then
-    echo "  [✓] Tipo de dispositivo detectado: PORTÁTIL / LAPTOP (${CHASSIS_TYPE})"
+if [ "$IS_T14_GEN2_AMD" = true ]; then
+    echo "  [✓] Hardware detectado: Lenovo ThinkPad T14 Gen 2 AMD (${CPU_MODEL})"
+    echo "      -> Se activará automáticamente el modo de rendimiento ACPI platform_profile + CPU EPP en AC."
+elif [ "$IS_LAPTOP" = true ]; then
+    echo "  [✓] Tipo de dispositivo detectado: PORTÁTIL / LAPTOP (${CHASSIS_TYPE} - ${DMI_VERSION:-$DMI_PRODUCT})"
 else
     echo "  [✓] Tipo de dispositivo detectado: PC DE ESCRITORIO (DESKTOP)"
+    if [ "${NONINTERACTIVE:-0}" != "1" ] && [ -t 0 ]; then
+        read -rp "  [?] ¿Este equipo es una ThinkPad T14 Gen 2 AMD / laptop y deseas activar el modo rendimiento en AC? [s/N]: " t14_ans
+        if [[ "${t14_ans:-n}" =~ ^[sSyY]$ ]]; then
+            IS_LAPTOP=true
+            IS_T14_GEN2_AMD=true
+            echo "  [✓] Modo ThinkPad T14 Gen 2 / Laptop activado manualmente."
+        fi
+    fi
 fi
 
 # -----------------------------------------------------------------------------

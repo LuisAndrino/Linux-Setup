@@ -84,6 +84,12 @@ show_help() {
     echo -e "  ${CYAN}--waydroid${NC}         Instala y configura Waydroid (Emulador Android en Linux)"
     echo -e "  ${CYAN}--hyprland${NC}         Instala perfil ligero Hyprland + Quickshell (estilo Omarchy)"
     echo -e "  ${CYAN}--omarchy${NC}          Alias de --hyprland"
+    echo -e "  ${CYAN}--tui, --archinstall${NC} Abre el selector interactivo estilo archinstall (muestra paquetes y detecta T14 Gen 2)"
+    echo -e "  ${CYAN}--desktop-app${NC}      Crea acceso directo de aplicación de escritorio para el instalador interactivo"
+    echo -e "  ${CYAN}--messaging${NC}        Instala clientes de WhatsApp (ZapZap) y Telegram Desktop"
+    echo -e "  ${CYAN}--whatsapp${NC}         Instala solo cliente de WhatsApp (ZapZap)"
+    echo -e "  ${CYAN}--telegram${NC}         Instala solo Telegram Desktop"
+    echo -e "  ${CYAN}--communication${NC}    Instala WhatsApp, Telegram, Discord, Vesktop y Slack"
     echo -e "  ${CYAN}--mysql${NC}            Instala MySQL Workbench (con parche XWayland) y DBeaver"
     echo -e "  ${CYAN}--1password${NC}        Instala 1Password Desktop y 1Password CLI ('op')"
     echo -e "  ${CYAN}--optimize${NC}         Aplica optimizaciones de rendimiento (CPU, memoria, red BBR y AC para laptop)"
@@ -457,6 +463,12 @@ if [ $# -gt 0 ]; then
         --streaming) ACTION="streaming" ;;
         --waydroid) ACTION="waydroid" ;;
         --hyprland|--omarchy) ACTION="hyprland" ;;
+        --tui|--archinstall) ACTION="tui" ;;
+        --desktop-app) ACTION="desktop_app" ;;
+        --messaging) ACTION="messaging" ;;
+        --whatsapp) ACTION="whatsapp" ;;
+        --telegram) ACTION="telegram" ;;
+        --communication) ACTION="communication" ;;
         --mysql) ACTION="mysql" ;;
         --1password) ACTION="onepassword" ;;
         --optimize|--tuning) ACTION="optimize" ;;
@@ -473,7 +485,16 @@ if [ "$ACTION" = "dry-run" ]; then
     exit 0
 fi
 
+if [ "$ACTION" = "tui" ]; then
+    bash "${SCRIPTS_DIR}/tui-installer.sh"
+    exit $?
+fi
+
 if [ "$ACTION" = "interactive" ]; then
+    if [ -f "${SCRIPTS_DIR}/tui-installer.sh" ] && [ -t 0 ]; then
+        bash "${SCRIPTS_DIR}/tui-installer.sh"
+        exit $?
+    fi
     echo -e "${BOLD}¿Cómo deseas instalar tus programas?${NC}"
     echo "  1) Instalar TODO automáticamente (Desarrollo + IA + Gaming + Multimedia + CLI) [Recomendado]"
     echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
@@ -682,6 +703,33 @@ case "$ACTION" in
         ;;
     optimize)
         optimize_system
+        ;;
+    messaging)
+        ensure_flatpak_installed
+        flatpak install -y flathub com.rtosta.zapzap org.telegram.desktop
+        ;;
+    whatsapp)
+        ensure_flatpak_installed
+        flatpak install -y flathub com.rtosta.zapzap
+        ;;
+    telegram)
+        ensure_flatpak_installed
+        flatpak install -y flathub org.telegram.desktop
+        ;;
+    desktop_app)
+        mkdir -p "${HOME}/.local/share/applications"
+        cat << EOF_APP > "${HOME}/.local/share/applications/linux-setup.desktop"
+[Desktop Entry]
+Name=Linux-Setup Installer
+Comment=Instalador interactivo estilo archinstall para Linux-Setup
+Exec=bash -c 'for term in alacritty kitty ghostty gnome-terminal konsole xfce4-terminal xterm; do if command -v "\$term" >/dev/null 2>&1; then exec "\$term" -e bash "${SCRIPT_DIR}/setup.sh" --tui; fi; done'
+Icon=system-software-install
+Terminal=false
+Type=Application
+Categories=System;Settings;PackageManager;
+EOF_APP
+        chmod +x "${HOME}/.local/share/applications/linux-setup.desktop"
+        echo -e "${GREEN}[✓] App de escritorio creada en ~/.local/share/applications/linux-setup.desktop${NC}"
         ;;
     communication)
         ensure_flatpak_installed

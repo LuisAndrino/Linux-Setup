@@ -83,16 +83,25 @@ else
     git clone --depth 1 --branch quattro https://github.com/omacom/omarchy.git "${OMARCHY_DIR}" 2>/dev/null || true
 fi
 
+mkdir -p "${BIN_DIR}" "${HYPR_CONF_DIR}" "${QUICKSHELL_CONF_DIR}" "${HOME}/.config/omarchy/plugins"
+
 if [ -d "${OMARCHY_DIR}/shell" ]; then
     ln -sfn "${OMARCHY_DIR}/shell" "${QUICKSHELL_CONF_DIR}/omarchy"
     echo "  [✓] Shell Quickshell de Omarchy enlazado en ${QUICKSHELL_CONF_DIR}/omarchy"
+fi
+
+if [ -x "${OMARCHY_DIR}/bin/omarchy" ]; then
+    ln -sfn "${OMARCHY_DIR}/bin/omarchy" "${BIN_DIR}/omarchy"
+    echo "  [✓] CLI 'omarchy' enlazado en ${BIN_DIR}/omarchy (para 'omarchy plugin list/add/enable')"
 fi
 
 # 3. Crear lanzador inteligente de Quickshell estilo Omarchy
 echo "[3/4] Creando lanzador ~/.local/bin/omarchy-shell..."
 cat << 'EOF_SHELL' > "${BIN_DIR}/omarchy-shell"
 #!/usr/bin/env bash
-SHELL_QML="${HOME}/.local/share/omarchy/shell/shell.qml"
+export OMARCHY_PATH="${OMARCHY_PATH:-${HOME}/.local/share/omarchy}"
+export PATH="${OMARCHY_PATH}/bin:${HOME}/.local/bin:${PATH}"
+SHELL_QML="${OMARCHY_PATH}/shell/shell.qml"
 if command -v quickshell >/dev/null 2>&1 && [ -f "${SHELL_QML}" ]; then
     exec quickshell -p "${SHELL_QML}" "$@"
 elif command -v waybar >/dev/null 2>&1; then
@@ -128,6 +137,7 @@ exec-once = hypridle
 exec-once = nm-applet --indicator
 
 # --- ENTORNO WAYLAND ---
+env = OMARCHY_PATH,$HOME/.local/share/omarchy
 env = XCURSOR_SIZE,24
 env = QT_QPA_PLATFORM,wayland
 env = SDL_VIDEODRIVER,wayland
