@@ -55,7 +55,9 @@ show_help() {
     echo -e "  ${CYAN}--ai, --ai-tools${NC}   Instala la suite de IA (Ollama local, Claude Code CLI, Aider, Antigravity, Grok Bot, agent/c)"
     echo -e "  ${CYAN}--gaming${NC}           Instala la suite de Gaming (Steam, Lutris, Heroic, Prism, ProtonUp-Qt, Goverlay, Gamescope)"
     echo -e "  ${CYAN}--gaming-mode${NC}      Configura el modo 'Return to Gaming Mode' universal (SteamOS Gamepad UI en Gamescope)"
-    echo -e "  ${CYAN}--multimedia${NC}       Instala la suite Multimedia (VLC, MPV, HandBrake, OBS Studio, Kdenlive, Krita, Audacity, GIMP, Blender, Spotify)"
+    echo -e "  ${CYAN}--multimedia${NC}       Instala la suite Multimedia y Streaming (VLC, Stremio, Kodi, qBittorrent, JDownloader, OBS, Spotify)"
+    echo -e "  ${CYAN}--creative${NC}         Instala la suite Creativa pesada (Blender, Kdenlive, Krita, GIMP, Audacity, HandBrake)"
+    echo -e "  ${CYAN}--vm${NC}               Instala Virt-Manager (Máquinas Virtuales KVM/QEMU)"
     echo -e "  ${CYAN}--media, --movies${NC}  Instala suite de Streaming y Películas (Stremio, Kodi, qBittorrent, JDownloader, FreeTube)"
     echo -e "  ${CYAN}--qbittorrent${NC}     Instala qBittorrent y configura motores de búsqueda integrados"
     echo -e "  ${CYAN}--stremio${NC}         Instala Stremio (Streaming de películas y series sin costo)"
@@ -314,7 +316,7 @@ optimize_system() {
 }
 
 install_gaming_suite() {
-    echo -e "\n${BOLD}${CYAN}=== SUITE INTEGRAL DE GAMING ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== SUITE INTEGRAL DE GAMING (ALTO RENDIMIENTO) ===${NC}"
     install_steam "false"
     bash "${SCRIPTS_DIR}/install-gamescope.sh"
     bash "${SCRIPTS_DIR}/install-gaming-mode.sh"
@@ -326,47 +328,45 @@ install_gaming_suite() {
     flatpak install -y --noninteractive flathub \
         net.lutris.Lutris \
         com.heroicgameslauncher.hgl \
-        org.prismlauncher.PrismLauncher \
-        net.davidotek.pupgui2 \
         io.github.benjamimgois.goverlay \
-        com.usebottles.bottles \
         com.github.Matoking.protontricks \
         com.vysp3r.ProtonPlus \
         com.github.mtkennerly.ludusavi \
-        io.github.antimicrox.antimicrox \
         org.libretro.RetroArch \
-        io.github.streetpea.Chiaki4deck \
         com.steamgriddb.SGDBoop || true
 }
 
 install_multimedia_suite() {
-    echo -e "\n${BOLD}${CYAN}=== SUITE MULTIMEDIA Y CREACIÓN DE CONTENIDO ===${NC}"
+    echo -e "\n${BOLD}${CYAN}=== SUITE MULTIMEDIA, STREAMING Y DESCARGAS ===${NC}"
     ensure_flatpak_installed
-    echo "[+] Instalando aplicaciones multimedia, audio, video y diseño..."
+    echo "[+] Instalando aplicaciones multimedia y streaming de alto rendimiento..."
     flatpak install -y --noninteractive flathub \
         org.videolan.VLC \
-        io.mpv.Mpv \
         com.stremio.Stremio \
         tv.kodi.Kodi \
         org.qbittorrent.qBittorrent \
         org.jdownloader.JDownloader \
         io.freetubeapp.FreeTube \
         com.github.iwalton3.jellyfin-media-player \
-        fr.handbrake.ghb \
         com.obsproject.Studio \
-        org.kde.kdenlive \
-        org.audacityteam.Audacity \
-        org.kde.krita \
-        org.gimp.GIMP \
-        org.blender.Blender \
-        org.kde.haruna \
-        org.strawberrymusicplayer.strawberry \
         io.bassi.Amberol \
         com.spotify.Client || true
 
     if [ -f "${SCRIPTS_DIR}/configure-qbittorrent.sh" ]; then
         bash "${SCRIPTS_DIR}/configure-qbittorrent.sh"
     fi
+}
+
+install_creative_suite() {
+    echo -e "\n${BOLD}${CYAN}=== SUITE CREATIVA Y EDICIÓN PROFESIONAL ===${NC}"
+    ensure_flatpak_installed
+    flatpak install -y --noninteractive flathub \
+        fr.handbrake.ghb \
+        org.kde.kdenlive \
+        org.audacityteam.Audacity \
+        org.kde.krita \
+        org.gimp.GIMP \
+        org.blender.Blender || true
 }
 
 install_media_suite() {
@@ -422,6 +422,8 @@ if [ $# -gt 0 ]; then
         --gaming) ACTION="gaming" ;;
         --gaming-mode) ACTION="gaming_mode" ;;
         --multimedia) ACTION="multimedia" ;;
+        --creative) ACTION="creative" ;;
+        --vm) ACTION="vm" ;;
         --media|--movies|--streaming-suite) ACTION="media" ;;
         --qbittorrent) ACTION="qbittorrent" ;;
         --stremio) ACTION="stremio" ;;
@@ -532,11 +534,8 @@ case "$ACTION" in
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
         install_tailscale
-        install_powershell
         install_terminal
         install_craft_suite
-        install_waydroid
-        install_mysql_workbench
         install_1password
         optimize_system
         install_flatpaks
@@ -551,11 +550,8 @@ case "$ACTION" in
         install_steam "true"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
         install_tailscale
-        install_powershell
         install_terminal
         install_craft_suite
-        install_waydroid
-        install_mysql_workbench
         install_1password
         optimize_system
         install_flatpaks
@@ -581,6 +577,13 @@ case "$ACTION" in
         ;;
     multimedia)
         install_multimedia_suite
+        ;;
+    creative)
+        install_creative_suite
+        ;;
+    vm)
+        ensure_flatpak_installed
+        flatpak install -y flathub org.virt_manager.virt-manager
         ;;
     media)
         install_media_suite

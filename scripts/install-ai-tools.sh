@@ -43,7 +43,7 @@ export PATH="${BIN_DIR}:${HOME}/.bun/bin:${PATH}"
 # -----------------------------------------------------------------------------
 # 2. Instalación en PARALELO de toda la Suite de IA
 # -----------------------------------------------------------------------------
-echo "[2/3] Instalando Suite de IA en paralelo (Ollama, Claude, Aider, Antigravity, OpenBot, GrokBot, Hex)..."
+echo "[2/3] Instalando Suite de IA en paralelo (Ollama, Claude, Antigravity, OpenBot, GrokBot, Hex)..."
 
 # Ollama (Background)
 (
@@ -104,20 +104,6 @@ EOF
             npm install -g @anthropic-ai/claude-code >/dev/null 2>&1 || true
         fi
         echo "  [✓] Claude Code CLI listo."
-    fi
-) &
-
-# Aider (Background)
-(
-    if command -v aider >/dev/null 2>&1 || [ -f "${BIN_DIR}/aider" ]; then
-        echo "  [✓] Aider ya está instalado."
-    else
-        if command -v uv >/dev/null 2>&1; then
-            uv tool install aider-chat >/dev/null 2>&1 || true
-        elif command -v pipx >/dev/null 2>&1; then
-            pipx install aider-chat >/dev/null 2>&1 || true
-        fi
-        echo "  [✓] Aider listo."
     fi
 ) &
 
