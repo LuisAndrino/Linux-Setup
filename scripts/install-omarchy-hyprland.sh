@@ -26,10 +26,11 @@ echo "[1/4] Instalando Hyprland, Quickshell y utilidades Wayland..."
 if command -v rpm-ostree >/dev/null 2>&1; then
     echo "  [i] Sistema inmutable (Bazzite / OSTree) detectado."
     if ! command -v hyprland >/dev/null 2>&1; then
-        echo "  -> En sistemas OSTree, Hyprland se integra como capa del sistema:"
-        echo "     Ejecutando: sudo rpm-ostree install --idempotent hyprland xdg-desktop-portal-hyprland hyprlock hypridle wl-clipboard grim slurp brightnessctl playerctl cliphist fuzzel"
-        sudo rpm-ostree install --idempotent hyprland xdg-desktop-portal-hyprland hyprlock hypridle wl-clipboard grim slurp brightnessctl playerctl cliphist fuzzel 2>/dev/null || true
-        echo "  [!] Nota: Si rpm-ostree instaló paquetes nuevos, reinicia para activar la sesión Hyprland en el login."
+        echo "  [!] Nota sobre Hyprland en Bazzite / OSTree:"
+        echo "      Fedora no empaqueta 'hyprland' en los repositorios oficiales base de rpm-ostree."
+        echo "      En el ecosistema Bazzite/uBlue, para usar Hyprland como sesión principal se recomienda"
+        echo "      rebasar a una imagen con Hyprland integrado (o usar Niri: sudo rpm-ostree install niri)."
+        echo "  -> Se configurarán los archivos de Omarchy Quattro, Quickshell, plugins y atajos de Hyprland en tu usuario."
     else
         echo "  [✓] Hyprland ya está presente en el sistema."
     fi

@@ -91,8 +91,9 @@ MOD_DETAILS=(
     "Incluye: sysctl gaming (vm.max_map_count, swappiness=10, split_lock_mitigate=0), TCP BBR, WiFi powersave OFF, y perfil ThinkPad T14 Gen 2 AMD (ACPI platform_profile + CPU EPP performance en AC)."
 )
 
-# Estado por defecto (1 = seleccionado, 0 = no seleccionado)
-MOD_SELECTED=(1 0 0 0 0 1 0 0 0 1 1)
+# Estado por defecto: TODAS las suites recomendadas seleccionadas [x]
+# (Módulo 6 se deja desmarcado porque el 7 ya incluye Comunicación Completa con WhatsApp + Telegram)
+MOD_SELECTED=(1 1 1 1 1 0 1 1 1 1 1)
 
 detect_hardware_summary
 
