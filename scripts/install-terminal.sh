@@ -17,7 +17,12 @@ else
     echo "[+] Instalando Alacritty (Terminal ultra-rápida acelerada por GPU)..."
 
     if command -v apt-get >/dev/null 2>&1; then
-        sudo apt-get update -y && sudo apt-get install -y alacritty
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get update -qq || true
+        if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y alacritty 2>/dev/null; then
+            echo "[+] Alacritty no disponible vía APT, intentando Flatpak..."
+            flatpak install -y --noninteractive flathub org.alacritty.Alacritty || flatpak install --user -y --noninteractive flathub org.alacritty.Alacritty || true
+        fi
     elif command -v dnf >/dev/null 2>&1; then
         sudo dnf install -y alacritty
     elif command -v pacman >/dev/null 2>&1; then

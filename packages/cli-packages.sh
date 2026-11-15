@@ -25,29 +25,74 @@ detect_distro() {
 
 install_cli_debian() {
     export DEBIAN_FRONTEND=noninteractive
-    if [ -z "$(find /var/lib/apt/lists -maxdepth 1 -mmin -15 2>/dev/null)" ]; then
-        echo "==> [APT] Actualizando índices de paquetes..."
-        sudo apt-get update -qq
-    else
-        echo "==> [APT] Índices actualizados recientemente. Omitiendo apt update."
-    fi
-    echo "==> [APT] Instalando paquetes CLI, desarrollo, multimedia y gaming..."
-    sudo apt-get install -y -qq \
-        curl wget git gh jq ripgrep tree rsync fzf zoxide \
-        htop btop tmux zsh zip unzip p7zip-full bat \
-        build-essential ca-certificates gnupg \
-        openssh-client openssh-server alacritty \
-        ffmpeg mpv vlc gamemode mangohud gamescope \
-        adb fastboot openjdk-21-jdk || true
 
-    # En Debian/Ubuntu bat se llama 'batcat', crear alias/symlink a ~/.local/bin/bat
-    if command -v batcat >/dev/null 2>&1 && [ ! -f "${HOME}/.local/bin/bat" ]; then
-        mkdir -p "${HOME}/.local/bin"
+    # Habilitar repositorios universe/multiverse en Ubuntu (necesario para steam-installer, gamescope, mangohud, fastfetch, etc.)
+    if grep -qiE '^ID=ubuntu' /etc/os-release 2>/dev/null || grep -qiE '^ID_LIKE=.*ubuntu' /etc/os-release 2>/dev/null; then
+        if command -v add-apt-repository >/dev/null 2>&1; then
+            sudo add-apt-repository -y universe >/dev/null 2>&1 || true
+            sudo add-apt-repository -y multiverse >/dev/null 2>&1 || true
+        fi
+    fi
+
+    # Habilitar i386 (multilib) para Steam / Wine / Proton
+    sudo dpkg --add-architecture i386 2>/dev/null || true
+
+    echo "==> [APT] Actualizando índices de paquetes..."
+    sudo apt-get update -qq || sudo apt-get update || true
+
+    echo "==> [APT] Verificando disponibilidad e instalando paquetes CLI, dev y gaming..."
+    local candidate_pkgs=(
+        curl wget git gh jq ripgrep tree rsync fzf zoxide fd-find
+        htop btop tmux zsh zip unzip p7zip-full bat
+        build-essential ca-certificates gnupg software-properties-common
+        openssh-client openssh-server alacritty
+        ffmpeg mpv vlc gamemode mangohud gamescope
+        adb fastboot python3 python3-pip flatpak
+        gnome-software-plugin-flatpak
+    )
+
+    local apt_cache_dump
+    apt_cache_dump="$(apt-cache pkgnames 2>/dev/null || true)"
+    local valid_pkgs=()
+    for pkg in "${candidate_pkgs[@]}"; do
+        if [ -z "$apt_cache_dump" ] || printf '%s\n' "$apt_cache_dump" | grep -qx "$pkg"; then
+            valid_pkgs+=("$pkg")
+        else
+            echo "  [!] Paquete '$pkg' no disponible en esta versión de Debian/Ubuntu, omitiendo."
+        fi
+    done
+
+    # Elegir JDK 21 si existe, si no default-jdk (compatible con Ubuntu 22.04/24.04 y Debian 12)
+    if printf '%s\n' "$apt_cache_dump" | grep -qx "openjdk-21-jdk"; then
+        valid_pkgs+=("openjdk-21-jdk")
+    elif printf '%s\n' "$apt_cache_dump" | grep -qx "default-jdk"; then
+        valid_pkgs+=("default-jdk")
+    fi
+
+    # Elegir fastfetch si existe en la versión actual, si no neofetch
+    if printf '%s\n' "$apt_cache_dump" | grep -qx "fastfetch"; then
+        valid_pkgs+=("fastfetch")
+    elif printf '%s\n' "$apt_cache_dump" | grep -qx "neofetch"; then
+        valid_pkgs+=("neofetch")
+    fi
+
+    if [ "${#valid_pkgs[@]}" -gt 0 ]; then
+        if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${valid_pkgs[@]}"; then
+            echo "  [!] Fallo en lote APT; reintentando paquete por paquete..."
+            for pkg in "${valid_pkgs[@]}"; do
+                sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pkg" 2>/dev/null || true
+            done
+        fi
+    fi
+
+    # En Debian/Ubuntu bat se llama 'batcat' y fd se llama 'fdfind'; crear symlinks en ~/.local/bin
+    mkdir -p "${HOME}/.local/bin"
+    if command -v batcat >/dev/null 2>&1 && [ ! -e "${HOME}/.local/bin/bat" ]; then
         ln -sf "$(command -v batcat)" "${HOME}/.local/bin/bat"
     fi
-
-    sudo apt-get install -y -qq fastfetch 2>/dev/null || sudo apt-get install -y -qq neofetch 2>/dev/null || true
-    sudo apt-get install -y -qq gnome-software-plugin-flatpak 2>/dev/null || true
+    if command -v fdfind >/dev/null 2>&1 && [ ! -e "${HOME}/.local/bin/fd" ]; then
+        ln -sf "$(command -v fdfind)" "${HOME}/.local/bin/fd"
+    fi
 }
 
 install_cli_fedora() {

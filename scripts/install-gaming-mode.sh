@@ -48,11 +48,14 @@ if ! command -v gamescope >/dev/null 2>&1; then
     exit 1
 fi
 
-# 2. Localizar ejecutable de Steam (Nativo o Flatpak)
+# 2. Localizar ejecutable de Steam (Nativo, /usr/games o Flatpak)
+export PATH="${PATH}:/usr/games:${HOME}/.local/bin"
 STEAM_RUNNER=""
 if command -v steam >/dev/null 2>&1; then
     STEAM_RUNNER="steam"
-elif flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
+elif [ -x /usr/games/steam ]; then
+    STEAM_RUNNER="/usr/games/steam"
+elif command -v flatpak >/dev/null 2>&1 && flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
     STEAM_RUNNER="flatpak run com.valvesoftware.Steam"
 else
     echo "[!] Error: Steam no está instalado."
@@ -63,20 +66,25 @@ fi
 # 3. Si Steam está abierto en el escritorio, cerrarlo para evitar conflictos de instancia
 if pgrep -u "$USER" -x steam >/dev/null 2>&1; then
     echo "[*] Cerrando instancia de Steam en segundo plano..."
-    steam -shutdown 2>/dev/null || pkill -TERM -u "$USER" -x steam 2>/dev/null || true
+    ${STEAM_RUNNER} -shutdown 2>/dev/null || pkill -TERM -u "$USER" -x steam 2>/dev/null || true
     for _ in {1..10}; do
         pgrep -u "$USER" -x steam >/dev/null 2>&1 || break
         sleep 0.5
     done
 fi
 
-# 4. Parámetros de Gamescope para recrear la experiencia SteamOS
+# 4. Parámetros de Gamescope para recrear la experiencia SteamOS (compatibles con versiones antiguas y nuevas)
+GAMESCOPE_HELP="$(gamescope --help 2>&1 || true)"
 GAMESCOPE_ARGS=(
     -e                       # Steam integration: enlaza controles, superposiciones y gestión de ciclo de vida
     -f                       # Modo pantalla completa
-    --adaptive-sync          # VRR / FreeSync si la pantalla lo soporta
-    --touch-gestures         # Gestos táctiles para menús de Steam
 )
+if printf '%s' "$GAMESCOPE_HELP" | grep -q -- '--adaptive-sync'; then
+    GAMESCOPE_ARGS+=(--adaptive-sync)
+fi
+if printf '%s' "$GAMESCOPE_HELP" | grep -q -- '--touch-gestures'; then
+    GAMESCOPE_ARGS+=(--touch-gestures)
+fi
 
 # Integrar MangoHud automáticamente si mangoapp está disponible en el sistema
 if command -v mangoapp >/dev/null 2>&1; then
@@ -124,6 +132,10 @@ if [ -d "${DESKTOP_DIR}" ]; then
     fi
 fi
 
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database "${APP_DIR}" 2>/dev/null || true
+fi
+
 # 7. Registrar sesión Wayland nativa de SteamOS (para SDDM/GDM/LightDM) si no existe ya
 WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
 if [ ! -f "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" ] && command -v sudo >/dev/null 2>&1; then
@@ -131,8 +143,9 @@ if [ ! -f "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" ] && command
     sudo mkdir -p "${WAYLAND_SESSIONS_DIR}" /usr/local/bin 2>/dev/null || true
 
     # Script de arranque de la sesión nativa directa sobre la GPU (DRM/KMS)
-    sudo tee /usr/local/bin/gamescope-session-steam >/dev/null << 'EOF_SESSION'
+    if sudo tee /usr/local/bin/gamescope-session-steam >/dev/null << 'EOF_SESSION'
 #!/usr/bin/env bash
+export PATH="${PATH}:/usr/games:${HOME}/.local/bin"
 export XDG_CURRENT_DESKTOP="gamescope"
 export XDG_SESSION_DESKTOP="gamescope"
 export XDG_SESSION_TYPE=x11
@@ -142,11 +155,14 @@ export SDL_VIDEODRIVER=wayland
 
 dbus-update-activation-environment --systemd WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP 2>/dev/null || true
 
-GAMESCOPE_FLAGS=(
-    -e
-    --adaptive-sync
-    --touch-gestures
-)
+GAMESCOPE_HELP="$(gamescope --help 2>&1 || true)"
+GAMESCOPE_FLAGS=(-e)
+if printf '%s' "$GAMESCOPE_HELP" | grep -q -- '--adaptive-sync'; then
+    GAMESCOPE_FLAGS+=(--adaptive-sync)
+fi
+if printf '%s' "$GAMESCOPE_HELP" | grep -q -- '--touch-gestures'; then
+    GAMESCOPE_FLAGS+=(--touch-gestures)
+fi
 if command -v mangoapp >/dev/null 2>&1; then
     GAMESCOPE_FLAGS+=(--mangoapp)
 fi
@@ -154,17 +170,19 @@ fi
 STEAM_CMD="steam"
 if command -v steam >/dev/null 2>&1; then
     STEAM_CMD="steam"
-elif flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
+elif [ -x /usr/games/steam ]; then
+    STEAM_CMD="/usr/games/steam"
+elif command -v flatpak >/dev/null 2>&1 && flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
     STEAM_CMD="flatpak run com.valvesoftware.Steam"
 fi
 
 exec gamescope "${GAMESCOPE_FLAGS[@]}" -- ${STEAM_CMD} -gamepadui -steamos
 EOF_SESSION
+    then
+        sudo chmod +x /usr/local/bin/gamescope-session-steam 2>/dev/null || true
 
-    sudo chmod +x /usr/local/bin/gamescope-session-steam 2>/dev/null || true
-
-    # Entrada de sesión Wayland para SDDM / GDM
-    sudo tee "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" >/dev/null << 'EOF_ENTRY'
+        # Entrada de sesión Wayland para SDDM / GDM
+        sudo tee "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" >/dev/null << 'EOF_ENTRY' || true
 [Desktop Entry]
 Encoding=UTF-8
 Name=SteamOS Gaming Mode
@@ -174,15 +192,18 @@ Type=Application
 DesktopNames=gamescope
 EOF_ENTRY
 
-    # Manejador invocado por Steam al pulsar "Cambiar al Escritorio" (Switch to Desktop)
-    sudo tee /usr/local/bin/steamos-session-select >/dev/null << 'EOF_SELECT'
+        # Manejador invocado por Steam al pulsar "Cambiar al Escritorio" (Switch to Desktop)
+        sudo tee /usr/local/bin/steamos-session-select >/dev/null << 'EOF_SELECT' || true
 #!/usr/bin/env bash
 pkill -TERM -u "$USER" -x gamescope 2>/dev/null || true
 steam -shutdown 2>/dev/null || true
 EOF_SELECT
 
-    sudo chmod +x /usr/local/bin/steamos-session-select 2>/dev/null || true
-    echo "  [✓] Sesión nativa registrada con éxito."
+        sudo chmod +x /usr/local/bin/steamos-session-select 2>/dev/null || true
+        echo "  [✓] Sesión nativa registrada con éxito en ${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop."
+    else
+        echo "  [!] No se pudo escribir en /usr/local/bin o ${WAYLAND_SESSIONS_DIR} (sistema inmutable o sin permisos sudo). El lanzador de usuario 'return-to-gaming-mode' sigue disponible."
+    fi
 fi
 
 echo "  [✓] Comando disponible en la terminal: 'return-to-gaming-mode' o 'gaming-mode'"

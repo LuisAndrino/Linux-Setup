@@ -12,15 +12,19 @@ echo "    Configuración de qBittorrent y Motores de Búsqueda    "
 echo "=========================================================="
 
 # 1. Asegurar dependencias (Python3 es requerido por el motor de búsqueda de qBittorrent)
+# Nota: si se ejecuta en carril paralelo con apt/pacman/dnf activo en primer plano, no competir por el lock.
 if ! command -v python3 >/dev/null 2>&1; then
-    echo "  [+] Instalando Python 3 (requerido para los motores de búsqueda)..."
-    if command -v dnf >/dev/null 2>&1; then
-        sudo dnf install -y python3 python3-pip 2>/dev/null || true
-    elif command -v apt-get >/dev/null 2>&1; then
-        sudo apt-get update -y 2>/dev/null || true
-        sudo apt-get install -y python3 python3-pip 2>/dev/null || true
-    elif command -v pacman >/dev/null 2>&1; then
-        sudo pacman -S --needed --noconfirm python python-pip 2>/dev/null || true
+    if pgrep -x "apt|apt-get|dpkg|pacman|dnf" >/dev/null 2>&1; then
+        echo "  [i] Gestor de paquetes ocupado; Python 3 será provisto por cli-packages."
+    else
+        echo "  [+] Instalando Python 3 (requerido para los motores de búsqueda)..."
+        if command -v dnf >/dev/null 2>&1; then
+            sudo dnf install -y python3 python3-pip 2>/dev/null || true
+        elif command -v apt-get >/dev/null 2>&1; then
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3 python3-pip 2>/dev/null || true
+        elif command -v pacman >/dev/null 2>&1; then
+            sudo pacman -S --needed --noconfirm python python-pip 2>/dev/null || true
+        fi
     fi
 fi
 

@@ -40,13 +40,22 @@ fi
 echo "[+] Intentando instalación de Steam nativo..."
 
 if command -v apt-get >/dev/null 2>&1; then
-    echo "[APT] Habilitando arquitectura i386 e instalando Steam..."
+    echo "[APT] Habilitando i386/multiverse e instalando Steam..."
+    export DEBIAN_FRONTEND=noninteractive
+    if grep -qiE '^ID=ubuntu|^ID_LIKE=.*ubuntu' /etc/os-release 2>/dev/null && command -v add-apt-repository >/dev/null 2>&1; then
+        sudo add-apt-repository -y multiverse >/dev/null 2>&1 || true
+    fi
     sudo dpkg --add-architecture i386 2>/dev/null || true
-    sudo apt-get update -y
-    sudo apt-get install -y steam-installer 2>/dev/null || sudo apt-get install -y steam || {
+    sudo apt-get update -qq || sudo apt-get update -y || true
+    # Pre-aceptar EULA de Steam si debconf-set-selections está disponible (evita bloqueos interactivos)
+    if command -v debconf-set-selections >/dev/null 2>&1; then
+        echo "steam steam/question select I AGREE" | sudo debconf-set-selections 2>/dev/null || true
+        echo "steam steam/license note ''" | sudo debconf-set-selections 2>/dev/null || true
+    fi
+    if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steam-installer 2>/dev/null && ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y steam 2>/dev/null; then
         echo "[!] Falló instalación APT. Instalando Flatpak de Steam..."
-        flatpak install -y flathub com.valvesoftware.Steam
-    }
+        flatpak install -y --noninteractive flathub com.valvesoftware.Steam || flatpak install --user -y --noninteractive flathub com.valvesoftware.Steam || true
+    fi
 
 elif command -v dnf >/dev/null 2>&1; then
     echo "[DNF] Habilitando RPM Fusion e instalando Steam..."

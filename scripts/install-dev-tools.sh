@@ -87,7 +87,20 @@ if ! command -v java >/dev/null 2>&1 || ! command -v gh >/dev/null 2>&1; then
         if [ -z "$(find /var/lib/apt/lists -maxdepth 1 -mmin -15 2>/dev/null)" ]; then
             sudo apt-get update -qq || true
         fi
-        sudo apt-get install -y -qq openjdk-21-jdk gh || true
+        apt_pkgs=()
+        if ! command -v java >/dev/null 2>&1; then
+            if apt-cache show openjdk-21-jdk >/dev/null 2>&1; then
+                apt_pkgs+=("openjdk-21-jdk")
+            elif apt-cache show default-jdk >/dev/null 2>&1; then
+                apt_pkgs+=("default-jdk")
+            fi
+        fi
+        if ! command -v gh >/dev/null 2>&1 && apt-cache show gh >/dev/null 2>&1; then
+            apt_pkgs+=("gh")
+        fi
+        if [ "${#apt_pkgs[@]}" -gt 0 ]; then
+            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${apt_pkgs[@]}" || true
+        fi
     elif command -v pacman >/dev/null 2>&1; then
         sudo pacman -S --needed --noconfirm jdk-openjdk github-cli || true
     elif command -v zypper >/dev/null 2>&1; then

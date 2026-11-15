@@ -548,15 +548,14 @@ run_user_space_parallel_lane() {
     bash "${SCRIPTS_DIR}/install-recomplauncher.sh" &
     bash "${SCRIPTS_DIR}/install-streaming-launcher.sh" &
     bash "${SCRIPTS_DIR}/configure-qbittorrent.sh" &
-    bash "${SCRIPTS_DIR}/install-gaming-mode.sh" &
 }
 
 print_install_summary() {
     echo -e "\n${BOLD}${CYAN}=== RESUMEN DE VERIFICACIÓN ===${NC}"
-    export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:${PATH}"
+    export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:/usr/games:${PATH}"
     local ok=()
     local miss=()
-    for cmd in git gh nvim lazygit mise uv bun ollama claude firefox brave-browser brave-origin code steam gamescope alacritty tailscale flatpak; do
+    for cmd in git gh nvim lazygit mise uv bun ollama claude firefox brave-browser brave-origin code steam gamescope return-to-gaming-mode alacritty tailscale flatpak; do
         if command -v "$cmd" >/dev/null 2>&1; then
             ok+=("$cmd")
         else
@@ -569,6 +568,9 @@ print_install_summary() {
     fi
     echo -e "  ${GREEN}[✓] Binarios disponibles (${#ok[@]}):${NC} ${ok[*]:-ninguno}"
     echo -e "  ${CYAN}[i] Apps Flatpak instaladas:${NC} ${fp_count}"
+    if [ -f /usr/share/wayland-sessions/gamescope-session-steam.desktop ]; then
+        echo -e "  ${GREEN}[✓] Sesión Gaming Mode (Wayland):${NC} /usr/share/wayland-sessions/gamescope-session-steam.desktop"
+    fi
     if [ ${#miss[@]} -gt 0 ]; then
         echo -e "  ${YELLOW}[i] No detectados como binario nativo (pueden estar en Flatpak o ~/.local/bin):${NC} ${miss[*]}"
     fi
@@ -584,6 +586,7 @@ case "$ACTION" in
         install_vscode "false"
         install_steam "false"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
+        bash "${SCRIPTS_DIR}/install-gaming-mode.sh" || true
         install_tailscale
         install_terminal
         install_craft_suite
@@ -602,6 +605,7 @@ case "$ACTION" in
         install_vscode "true"
         install_steam "true"
         bash "${SCRIPTS_DIR}/install-gamescope.sh"
+        bash "${SCRIPTS_DIR}/install-gaming-mode.sh" || true
         install_tailscale
         install_terminal
         install_craft_suite
