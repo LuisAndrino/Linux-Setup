@@ -44,9 +44,11 @@ show_help() {
     echo ""
     echo -e "Comando para instalar TODO desatendido:"
     echo -e "  ${CYAN}./setup.sh --yes${NC}   o   ${CYAN}./setup.sh --all${NC}"
+    echo -e "  ${CYAN}./setup.sh --full${NC}  o   ${CYAN}./setup.sh --all-hyprland${NC} (Incluye escritorio Hyprland + Omarchy)"
     echo ""
     echo -e "Opciones principales:"
     echo -e "  ${CYAN}-y, --yes, --all${NC}   Instala TODO de forma automática (Desarrollo, IA, Gaming, Multimedia, CLI) [Recomendado]"
+    echo -e "  ${CYAN}--full, --all-hyprland${NC} Instala TODO incluyendo entorno ligero Hyprland + Quickshell (Omarchy)"
     echo -e "  ${CYAN}-q, --quick, --quick-install${NC} Instalación rápida automatizada (ejecuta todo sin confirmaciones)"
     echo -e "  ${CYAN}--native${NC}           Instala herramientas y aplicaciones en modo nativo donde aplique"
     echo -e "  ${CYAN}--flatpak-only${NC}     Instala todo mediante Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
@@ -429,6 +431,7 @@ ACTION="interactive"
 if [ $# -gt 0 ]; then
     case "$1" in
         -y|--yes|--all|--install-all|--native|-q|--quick|--quick-install) ACTION="native" ;;
+        --full|--all-hyprland|--all-with-hyprland) ACTION="full" ;;
         --flatpak-only) ACTION="flatpak_only" ;;
         --dev|--devtools) ACTION="dev_tools" ;;
         --neovim) ACTION="neovim" ;;
@@ -499,36 +502,38 @@ if [ "$ACTION" = "interactive" ]; then
     fi
     echo -e "${BOLD}¿Cómo deseas instalar tus programas?${NC}"
     echo "  1) Instalar TODO automáticamente (Desarrollo + IA + Gaming + Multimedia + CLI) [Recomendado]"
-    echo "  2) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
-    echo "  3) Suite de Desarrollo (Neovim, Lazygit, Mise, uv, Bun, Java, GitHub CLI)"
-    echo "  4) Suite de Inteligencia Artificial (Ollama, Claude Code, Aider, Antigravity, Grok Bot)"
-    echo "  5) Suite de Gaming (Steam, Lutris, Heroic, Prism, RetroArch, ProtonUp-Qt, Goverlay)"
-    echo "  6) Suite Multimedia y Creación (OBS Studio, VLC, MPV, HandBrake, Krita, Audacity, GIMP, Blender)"
-    echo "  7) Suite de Streaming, Películas y Descargas (Stremio, Kodi, qBittorrent, JDownloader)"
-    echo "  8) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
-    echo "  9) Solo Música (Spotify, ncspot [Rust], Strawberry FLAC, Amberol)"
-    echo "  10) Solo Terminal rápida (Alacritty) y utilidades CLI"
-    echo "  11) Solo Tailscale"
-    echo "  12) Simulación (Dry run)"
-    echo "  13) Salir"
+    echo "  2) Instalar TODO incluyendo Hyprland + Quickshell (Omarchy)"
+    echo "  3) Modo 100% Flatpak (Ideal para Bazzite, SteamOS o distros inmutables)"
+    echo "  4) Suite de Desarrollo (Neovim, Lazygit, Mise, uv, Bun, Java, GitHub CLI)"
+    echo "  5) Suite de Inteligencia Artificial (Ollama, Claude Code, Aider, Antigravity, Grok Bot)"
+    echo "  6) Suite de Gaming (Steam, Lutris, Heroic, Prism, RetroArch, ProtonUp-Qt, Goverlay)"
+    echo "  7) Suite Multimedia y Creación (OBS Studio, VLC, MPV, HandBrake, Krita, Audacity, GIMP, Blender)"
+    echo "  8) Suite de Streaming, Películas y Descargas (Stremio, Kodi, qBittorrent, JDownloader)"
+    echo "  9) Solo Comunicación (WhatsApp ZapZap, Telegram, Discord, Vesktop, Slack)"
+    echo "  10) Solo Música (Spotify, ncspot [Rust], Strawberry FLAC, Amberol)"
+    echo "  11) Solo Terminal rápida (Alacritty) y utilidades CLI"
+    echo "  12) Solo Tailscale"
+    echo "  13) Simulación (Dry run)"
+    echo "  14) Salir"
     echo ""
-    read -rp "Selecciona una opción [1-13] (por defecto 1): " choice
+    read -rp "Selecciona una opción [1-14] (por defecto 1): " choice
     choice=${choice:-1}
 
     case "$choice" in
         1) ACTION="native" ;;
-        2) ACTION="flatpak_only" ;;
-        3) ACTION="dev_tools" ;;
-        4) ACTION="ai" ;;
-        5) ACTION="gaming" ;;
-        6) ACTION="multimedia" ;;
-        7) ACTION="media" ;;
-        8) ACTION="communication" ;;
-        9) ACTION="audio" ;;
-        10) ACTION="cli" ;;
-        11) ACTION="tailscale" ;;
-        12) ACTION="dry-run" ;;
-        13) echo "Cancelado."; exit 0 ;;
+        2) ACTION="full" ;;
+        3) ACTION="flatpak_only" ;;
+        4) ACTION="dev_tools" ;;
+        5) ACTION="ai" ;;
+        6) ACTION="gaming" ;;
+        7) ACTION="multimedia" ;;
+        8) ACTION="media" ;;
+        9) ACTION="communication" ;;
+        10) ACTION="audio" ;;
+        11) ACTION="cli" ;;
+        12) ACTION="tailscale" ;;
+        13) ACTION="dry-run" ;;
+        14) echo "Cancelado."; exit 0 ;;
         *) echo "Opción no válida."; exit 1 ;;
     esac
 fi
@@ -570,6 +575,24 @@ case "$ACTION" in
         install_1password
         optimize_system
         install_flatpaks
+        echo -e "\n${BLUE}[i] Esperando a que finalicen las descargas paralelas de Dev, IA y Gaming...${NC}"
+        wait
+        ;;
+    full)
+        install_cli
+        run_user_space_parallel_lane
+        install_brave_origin
+        install_firefox
+        install_vscode "false"
+        install_steam "false"
+        bash "${SCRIPTS_DIR}/install-gamescope.sh"
+        install_tailscale
+        install_terminal
+        install_craft_suite
+        install_1password
+        optimize_system
+        install_flatpaks
+        install_omarchy_hyprland
         echo -e "\n${BLUE}[i] Esperando a que finalicen las descargas paralelas de Dev, IA y Gaming...${NC}"
         wait
         ;;
