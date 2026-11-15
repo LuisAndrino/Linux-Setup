@@ -34,13 +34,6 @@ curl -sSL https://is.gd/andrino_setup | bash -s -- --yes
   ./setup.sh --all
   ```
 
-* **Instalar TODO incluyendo el escritorio Hyprland + Quickshell (Omarchy):**
-  ```bash
-  ./setup.sh --full
-  # o alias:
-  ./setup.sh --all-hyprland
-  ```
-
 * **Instalador interactivo estilo `archinstall` (con checkboxes y detalle de paquetes):**
   ```bash
   ./setup.sh
@@ -50,7 +43,6 @@ curl -sSL https://is.gd/andrino_setup | bash -s -- --yes
 
 ### 2. Suites Modulares por Especialidad
 ```bash
-./setup.sh --hyprland      # Escritorio Ligero Hyprland + Quickshell (Omarchy Quattro) + Plugins
 ./setup.sh --dev           # Suite Dev (Neovim Lua, Lazygit, Mise, uv, Bun, Java, GitHub CLI)
 ./setup.sh --neovim        # Solo Neovim v0.10+ y su configuración Lua moderna
 ./setup.sh --ai            # Suite de IA (Ollama local, Claude Code CLI, Aider, Antigravity, Grok)
@@ -149,21 +141,6 @@ curl -sSL https://is.gd/andrino_setup | bash -s -- --yes
   * Algoritmo de congestión **TCP BBR** + cola `fq` para reducir el *bufferbloat* y mantener el ping bajo y estable en partidas online.
   * `wifi.powersave = 2`: Desactiva el ahorro de energía agresivo en adaptadores WiFi para eliminar picos aleatorios de latencia y micro-cortes.
   * Aumento de buffers de red para descargas a máxima velocidad en conexiones de fibra y Gigabit.
-
----
-
-## 🪟 7. Escritorio Ligero: Hyprland + Quickshell (Estilo Omarchy Quattro)
-Para quienes buscan un entorno ultra-fluido, minimalista y sin KDE ni GNOME:
-* **Compositor Wayland:** Hyprland configurado con VFR (Variable Frame Rate), gestos de trackpad (`workspace_swipe = true`), y atajos estilo Vim.
-* **Shell Gráfico:** Quickshell con el shell oficial de Omarchy (`omacom/omarchy` rama `quattro`).
-* **Plugins Populares Preinstalados:**
-  * `omni`: Command Palette con integración de IA.
-  * `quickapps-hud`: Lanzador rápido estilo HUD.
-  * `cliamp`: Overlay *Now Playing* multimedia.
-  * `omarchy-overview`: Vista de pájaro de escritorios / workspaces.
-  * `dizziee.system-stats` & `dizziee.power-profiles`: Monitoreo y selector de energía en barra.
-  * `ericvrp.bar-autohide`: Auto-ocultación de la barra superior.
-* **Gestor de Plugins CLI:** Integración con `omarchy plugin list`, `omarchy plugin add`, etc.
 
 ---
 

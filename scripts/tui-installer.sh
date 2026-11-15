@@ -54,7 +54,6 @@ MOD_NAMES=(
     "Suite de Desarrollo (Dev Tools + Neovim)"
     "Suite de Inteligencia Artificial (IA)"
     "Gaming + Steam + Gaming Mode"
-    "Escritorio Ligero: Hyprland + Quickshell (Omarchy)"
     "Comunicación: WhatsApp (ZapZap) + Telegram"
     "Comunicación Completa (+ Discord, Vesktop, Slack)"
     "Streaming, Películas y Descargas (Stremio, Kodi, qBit)"
@@ -68,7 +67,6 @@ MOD_FLAGS=(
     "--dev"
     "--ai"
     "--gaming"
-    "--hyprland"
     "--messaging"
     "--communication"
     "--media"
@@ -82,7 +80,6 @@ MOD_DETAILS=(
     "Incluye: Neovim (Lazy.nvim, Treesitter, Telescope), Lazygit, Mise, uv (Python), Bun, Java, GitHub CLI (gh), VS Code."
     "Incluye: Ollama (LLM local), Claude Code CLI, Aider, Google Antigravity, Grok Bot, OpenBot, Hex (dictado por voz)."
     "Incluye: Steam, Lutris, Heroic Games Launcher, Prism Launcher, ProtonUp-Qt, Goverlay, Gamescope, lsfg-vk y Return to Gaming Mode."
-    "Incluye: Hyprland + Quickshell (rama quattro de omacom/omarchy), soporte de plugins Omarchy, fuzzel, alacritty, hyprlock, hypridle, cliphist, grim, slurp (sin KDE/GNOME)."
     "Incluye: ZapZap (cliente nativo/Flatpak de WhatsApp) y Telegram Desktop."
     "Incluye: ZapZap (WhatsApp), Telegram Desktop, Discord, Vesktop y Slack."
     "Incluye: Stremio, Kodi, qBittorrent (con plugins de búsqueda), JDownloader 2, VLC, MPV y FreeTube."
@@ -92,8 +89,8 @@ MOD_DETAILS=(
 )
 
 # Estado por defecto: TODAS las suites recomendadas seleccionadas [x]
-# (Módulo 6 se deja desmarcado porque el 7 ya incluye Comunicación Completa con WhatsApp + Telegram)
-MOD_SELECTED=(1 1 1 1 1 0 1 1 1 1 1)
+# (Módulo 5 se deja desmarcado porque el 6 ya incluye Comunicación Completa con WhatsApp + Telegram)
+MOD_SELECTED=(1 1 1 1 0 1 1 1 1 1)
 
 detect_hardware_summary
 
@@ -191,7 +188,7 @@ while true; do
 
     echo ""
     echo -e "${DIM}----------------------------------------------------------------------${NC}"
-    echo -e "  Comandos: ${CYAN}1-11${NC}=Alternar  |  ${CYAN}i <n>${NC}=Ver paquetes  |  ${CYAN}a${NC}=Todos  |  ${CYAN}n${NC}=Ninguno"
+    echo -e "  Comandos: ${CYAN}1-10${NC}=Alternar  |  ${CYAN}i <n>${NC}=Ver paquetes  |  ${CYAN}a${NC}=Todos  |  ${CYAN}n${NC}=Ninguno"
     echo -e "            ${GREEN}${BOLD}go${NC}=Instalar seleccionados  |  ${RED}q${NC}=Salir"
     echo ""
     read -rp "archinstall-setup> " cmd arg
