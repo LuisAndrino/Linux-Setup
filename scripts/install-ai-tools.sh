@@ -62,8 +62,12 @@ echo "[2/3] Instalando Suite de IA en paralelo (Ollama, Claude, Antigravity, Ope
                 OLLAMA_TAR=""
             fi
             if [ -n "${OLLAMA_TAR}" ]; then
-                curl -sL "https://ollama.com/download/${OLLAMA_TAR}" | tar --zstd -xf - -C "${HOME}/.local" 2>/dev/null || true
-                echo "  [✓] Ollama instalado en ${BIN_DIR}/ollama."
+                curl -sSL "https://ollama.com/download/${OLLAMA_TAR}" | tar --zstd -xf - -C "${HOME}/.local" 2>/dev/null || true
+                if [ -x "${BIN_DIR}/ollama" ]; then
+                    echo "  [✓] Ollama instalado en ${BIN_DIR}/ollama."
+                else
+                    echo "  [!] No se pudo instalar Ollama (verifica conexión o 'zstd')."
+                fi
             fi
         fi
     fi

@@ -12,8 +12,19 @@ echo "      Instalación de Suite Craft (ArtCraft, GridCraft...) "
 echo "=========================================================="
 
 if ! command -v flatpak >/dev/null 2>&1; then
-    echo "[!] Flatpak no está instalado. Asegúrate de instalar Flatpak primero."
-    exit 1
+    echo "[+] Flatpak no está instalado. Intentando instalarlo antes de Suite Craft..."
+    if command -v pacman >/dev/null 2>&1; then
+        sudo pacman -S --needed --noconfirm flatpak || true
+    elif command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get update -y && sudo apt-get install -y flatpak || true
+    elif command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y flatpak || true
+    fi
+fi
+
+if ! command -v flatpak >/dev/null 2>&1; then
+    echo "[!] Flatpak no está disponible en este sistema. Omitiendo Suite Craft."
+    exit 0
 fi
 
 # 1. Instalar ArtCraft Launcher desde el bundle incluido

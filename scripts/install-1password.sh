@@ -68,14 +68,17 @@ if [ "$INSTALLED_DESKTOP" = false ]; then
                 INSTALLED_DESKTOP=true
                 ;;
 
-            arch|manjaro|endeavouros|garuda)
+            arch|cachyos|manjaro|endeavouros|garuda|artix|arcolinux)
                 echo "  [PACMAN] Instalando 1Password en Arch..."
                 if command -v paru >/dev/null 2>&1; then
-                    paru -S --needed --noconfirm 1password 1password-cli || true
-                    INSTALLED_DESKTOP=true
+                    paru -S --needed --noconfirm 1password 1password-cli && INSTALLED_DESKTOP=true || true
                 elif command -v yay >/dev/null 2>&1; then
-                    yay -S --needed --noconfirm 1password 1password-cli || true
-                    INSTALLED_DESKTOP=true
+                    yay -S --needed --noconfirm 1password 1password-cli && INSTALLED_DESKTOP=true || true
+                fi
+                if [ "$INSTALLED_DESKTOP" = false ] && command -v flatpak >/dev/null 2>&1; then
+                    echo "  [+] Sin helper AUR (yay/paru) o falló AUR. Instalando 1Password vía Flatpak..."
+                    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+                    flatpak install -y --noninteractive flathub com.onepassword.OnePassword && INSTALLED_DESKTOP=true || true
                 fi
                 ;;
 

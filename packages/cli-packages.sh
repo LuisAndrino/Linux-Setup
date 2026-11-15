@@ -72,21 +72,62 @@ install_cli_fedora() {
 }
 
 install_cli_arch() {
-    # Acelerar Pacman habilitando ParallelDownloads = 10
+    # Acelerar Pacman habilitando ParallelDownloads = 10, Color y [multilib] (Steam/32-bit)
     if [ -f /etc/pacman.conf ]; then
-        sudo sed -i 's/^#ParallelDownloads.*/ParallelDownloads = 10/' /etc/pacman.conf 2>/dev/null || true
+        sudo sed -i 's/^#\?ParallelDownloads.*/ParallelDownloads = 10/' /etc/pacman.conf 2>/dev/null || true
+        sudo sed -i 's/^#Color$/Color/' /etc/pacman.conf 2>/dev/null || true
+        if grep -qE '^#\[multilib\]' /etc/pacman.conf; then
+            echo "==> [PACMAN] Habilitando repositorio [multilib] en /etc/pacman.conf..."
+            sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf 2>/dev/null || true
+        fi
     fi
 
-    echo "==> [PACMAN] Actualizando e instalando paquetes CLI, desarrollo, multimedia y gaming..."
-    sudo pacman -Syu --noconfirm --needed \
-        curl wget git github-cli jq ripgrep tree rsync fzf bat zoxide \
-        htop btop tmux zsh zip unzip p7zip \
-        base-devel openssh fastfetch alacritty \
-        ffmpeg mpv vlc gamemode mangohud gamescope \
-        android-tools jdk-openjdk plasma-discover-flatpak-backend || true
+    echo "==> [PACMAN] Sincronizando bases de datos..."
+    sudo pacman -Sy --noconfirm
 
-    # Si multilib está habilitado, instalar versiones de 32 bits para juegos clásicos
-    sudo pacman -S --needed --noconfirm lib32-gamemode lib32-mangohud 2>/dev/null || true
+    # Lista validada con nombres oficiales reales de Arch Linux (7zip reemplaza p7zip; sin paquetes Debian/Fedora)
+    local desired_pkgs=(
+        curl wget git github-cli jq ripgrep fd tree rsync fzf bat zoxide
+        htop btop tmux zsh zip unzip 7zip zstd
+        base-devel openssh fastfetch alacritty
+        ffmpeg mpv vlc gamemode mangohud gamescope
+        android-tools jdk-openjdk python python-pip
+        flatpak firefox code tailscale
+        steam lib32-gamemode lib32-mangohud
+    )
+
+    # Filtrar contra pacman -Slq para que ningún paquete inexistente aborte toda la transacción
+    local available_pkgs
+    available_pkgs=$(pacman -Slq 2>/dev/null || true)
+    local valid_pkgs=()
+    local skipped_pkgs=()
+    for pkg in "${desired_pkgs[@]}"; do
+        if echo "${available_pkgs}" | grep -qx "${pkg}"; then
+            valid_pkgs+=("${pkg}")
+        else
+            skipped_pkgs+=("${pkg}")
+        fi
+    done
+
+    if [ ${#skipped_pkgs[@]} -gt 0 ]; then
+        echo "  [i] Omitiendo paquetes no presentes en tus repos habilitados: ${skipped_pkgs[*]}"
+    fi
+
+    if [ ${#valid_pkgs[@]} -gt 0 ]; then
+        echo "==> [PACMAN] Actualizando sistema e instalando ${#valid_pkgs[@]} paquetes en lote único (ParallelDownloads=10)..."
+        if ! sudo pacman -Syu --noconfirm --needed "${valid_pkgs[@]}"; then
+            echo "[!] Reintentando actualización e instalación individual de paquetes restantes..."
+            sudo pacman -Syu --noconfirm || true
+            for pkg in "${valid_pkgs[@]}"; do
+                sudo pacman -S --noconfirm --needed "${pkg}" || echo "  [!] No se pudo instalar ${pkg}"
+            done
+        fi
+    fi
+
+    # Asegurar servicio tailscaled habilitado si se instaló tailscale vía pacman
+    if command -v tailscale >/dev/null 2>&1 && command -v systemctl >/dev/null 2>&1; then
+        sudo systemctl enable --now tailscaled 2>/dev/null || true
+    fi
 }
 
 install_cli_zypper() {

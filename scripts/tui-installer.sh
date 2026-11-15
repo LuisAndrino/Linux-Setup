@@ -138,6 +138,17 @@ run_selected_modules() {
     echo -e "${GREEN}${BOLD}=== Iniciando instalación de ${count} módulo(s) ===${NC}"
     export NONINTERACTIVE=1
 
+    # Si están seleccionados todos los módulos principales (o >=8 de las 9 suites únicas),
+    # ejecutar la ruta unificada paralela --all que es mucho más rápida y sin colisiones de lock.
+    if [ "${MOD_SELECTED[0]}" -eq 1 ] && [ "${MOD_SELECTED[1]}" -eq 1 ] && [ "${MOD_SELECTED[2]}" -eq 1 ] && \
+       [ "${MOD_SELECTED[3]}" -eq 1 ] && [ "${MOD_SELECTED[5]}" -eq 1 ] && [ "${MOD_SELECTED[6]}" -eq 1 ] && \
+       [ "${MOD_SELECTED[7]}" -eq 1 ] && [ "${MOD_SELECTED[8]}" -eq 1 ] && [ "${MOD_SELECTED[9]}" -eq 1 ]; then
+        echo -e "${CYAN}[+] Ejecutando pipeline unificado paralelo (--all)...${NC}"
+        bash "${SETUP_SH}" --all
+        echo -e "\n${GREEN}${BOLD}[✓] Instalación completa finalizada.${NC}"
+        return
+    fi
+
     for i in "${!MOD_SELECTED[@]}"; do
         if [ "${MOD_SELECTED[$i]}" -eq 1 ]; then
             local flag="${MOD_FLAGS[$i]}"

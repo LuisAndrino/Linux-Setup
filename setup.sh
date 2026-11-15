@@ -111,7 +111,10 @@ ensure_flatpak_installed() {
     fi
 
     echo -e "${BLUE}[+] Verificando repositorio Flathub...${NC}"
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+    if ! flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null; then
+        sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+    fi
+    flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
     echo -e "${GREEN}[✓] Flatpak y Flathub configurados.${NC}"
 }
 
@@ -169,12 +172,15 @@ install_flatpaks() {
 
     if [ ${#to_install[@]} -gt 0 ]; then
         echo -e "${BLUE}[+] Instalando ${#to_install[@]} aplicaciones Flatpak en lote único (máxima velocidad)...${NC}"
-        flatpak install -y --noninteractive flathub "${to_install[@]}" || {
-            echo -e "${YELLOW}[!] Reintentando aplicaciones faltantes individualmente...${NC}"
-            for app in "${to_install[@]}"; do
-                flatpak install -y --noninteractive flathub "$app" || true
-            done
-        }
+        if ! flatpak install -y --noninteractive flathub "${to_install[@]}"; then
+            echo -e "${YELLOW}[!] Reintentando en modo --user (sin requerir Polkit) o individualmente...${NC}"
+            if ! flatpak install --user -y --noninteractive flathub "${to_install[@]}"; then
+                for app in "${to_install[@]}"; do
+                    flatpak install -y --noninteractive flathub "$app" 2>/dev/null || \
+                    flatpak install --user -y --noninteractive flathub "$app" || true
+                done
+            fi
+        fi
     else
         echo -e "${GREEN}[✓] Todas las aplicaciones Flatpak ya estaban instaladas.${NC}"
     fi
@@ -545,9 +551,33 @@ run_user_space_parallel_lane() {
     bash "${SCRIPTS_DIR}/install-gaming-mode.sh" &
 }
 
+print_install_summary() {
+    echo -e "\n${BOLD}${CYAN}=== RESUMEN DE VERIFICACIÓN ===${NC}"
+    export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:${PATH}"
+    local ok=()
+    local miss=()
+    for cmd in git gh nvim lazygit mise uv bun ollama claude firefox brave-browser brave-origin code steam gamescope alacritty tailscale flatpak; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            ok+=("$cmd")
+        else
+            miss+=("$cmd")
+        fi
+    done
+    local fp_count=0
+    if command -v flatpak >/dev/null 2>&1; then
+        fp_count=$(flatpak list --app 2>/dev/null | wc -l || echo 0)
+    fi
+    echo -e "  ${GREEN}[✓] Binarios disponibles (${#ok[@]}):${NC} ${ok[*]:-ninguno}"
+    echo -e "  ${CYAN}[i] Apps Flatpak instaladas:${NC} ${fp_count}"
+    if [ ${#miss[@]} -gt 0 ]; then
+        echo -e "  ${YELLOW}[i] No detectados como binario nativo (pueden estar en Flatpak o ~/.local/bin):${NC} ${miss[*]}"
+    fi
+}
+
 case "$ACTION" in
     native)
         install_cli
+        ensure_flatpak_installed
         run_user_space_parallel_lane
         install_brave_origin
         install_firefox
@@ -562,9 +592,11 @@ case "$ACTION" in
         install_flatpaks
         echo -e "\n${BLUE}[i] Esperando a que finalicen las descargas paralelas de Dev, IA y Gaming...${NC}"
         wait
+        print_install_summary
         ;;
     flatpak_only)
         install_cli
+        ensure_flatpak_installed
         run_user_space_parallel_lane
         install_firefox
         install_vscode "true"
@@ -578,6 +610,7 @@ case "$ACTION" in
         install_flatpaks
         echo -e "\n${BLUE}[i] Esperando a que finalicen las descargas paralelas de Dev, IA y Gaming...${NC}"
         wait
+        print_install_summary
         ;;
     dev_tools)
         install_dev_tools

@@ -58,9 +58,18 @@ elif command -v dnf >/dev/null 2>&1; then
 
 elif command -v pacman >/dev/null 2>&1; then
     echo "[PACMAN] Instalando Steam..."
-    sudo pacman -S --needed --noconfirm steam 2>/dev/null || {
-        echo "[!] Asegúrate de tener '[multilib]' habilitado en /etc/pacman.conf si falla."
-        flatpak install -y flathub com.valvesoftware.Steam
+    if [ -f /etc/pacman.conf ] && grep -qE '^#\[multilib\]' /etc/pacman.conf; then
+        echo "[+] Habilitando repositorio [multilib] en /etc/pacman.conf..."
+        sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf 2>/dev/null || true
+        sudo pacman -Sy --noconfirm || true
+    fi
+    sudo pacman -S --needed --noconfirm steam || {
+        echo "[!] No se pudo instalar Steam nativo. Instalando vía Flatpak..."
+        if ! command -v flatpak >/dev/null 2>&1; then
+            sudo pacman -S --needed --noconfirm flatpak || true
+        fi
+        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+        flatpak install -y --noninteractive flathub com.valvesoftware.Steam || true
     }
 
 else

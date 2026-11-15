@@ -69,9 +69,12 @@ EOF
         sudo apt-get update -y && sudo apt-get install -y firefox-esr || sudo apt-get install -y firefox
         ;;
 
-    arch|manjaro|endeavouros|garuda)
+    arch|cachyos|manjaro|endeavouros|garuda|artix|arcolinux)
         echo "[PACMAN] Instalando Mozilla Firefox..."
-        sudo pacman -S --needed --noconfirm firefox
+        sudo pacman -S --needed --noconfirm firefox || {
+            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+            flatpak install -y --noninteractive flathub org.mozilla.firefox || true
+        }
         ;;
 
     opensuse*|suse|sles)
@@ -86,7 +89,10 @@ EOF
         elif command -v apt-get >/dev/null 2>&1; then
             sudo apt-get update -y && sudo apt-get install -y firefox 2>/dev/null || sudo apt-get install -y firefox-esr
         elif command -v pacman >/dev/null 2>&1; then
-            sudo pacman -S --needed --noconfirm firefox
+            sudo pacman -S --needed --noconfirm firefox || {
+                flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+                flatpak install -y --noninteractive flathub org.mozilla.firefox || true
+            }
         elif command -v zypper >/dev/null 2>&1; then
             sudo zypper --non-interactive install MozillaFirefox
         else

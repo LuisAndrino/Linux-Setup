@@ -31,14 +31,11 @@ if [ "$IS_IMMUTABLE" = true ]; then
     echo "    Intentando primero el instalador oficial de Brave con FLAVOR=origin..."
 fi
 
-echo "[+] Ejecutando script oficial de Brave con FLAVOR=origin..."
-if curl -fsSL https://dl.brave.com/install.sh | env FLAVOR=origin sh; then
+echo "[+] Configurando e instalando Brave..."
+if ! command -v pacman >/dev/null 2>&1 && curl -fsSL https://dl.brave.com/install.sh | env FLAVOR=origin sh; then
     echo "[✓] Brave Origin instalado exitosamente mediante el instalador oficial."
     exit 0
 else
-    echo "[!] El instalador automático de Brave falló o no soportó la distro directamente."
-    echo "[+] Intentando configuración manual de repositorios oficiales..."
-
     if command -v apt-get >/dev/null 2>&1; then
         echo "[APT] Configurando repositorio oficial de Brave..."
         sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
@@ -58,16 +55,20 @@ else
 
     elif command -v pacman >/dev/null 2>&1; then
         echo "[PACMAN] Instalando Brave en Arch..."
-        if command -v yay >/dev/null 2>&1; then
-            yay -S --needed --noconfirm brave-bin
+        if pacman -Slq 2>/dev/null | grep -qx "brave-browser"; then
+            sudo pacman -S --needed --noconfirm brave-browser || true
+        elif command -v yay >/dev/null 2>&1; then
+            yay -S --needed --noconfirm brave-bin || true
         elif command -v paru >/dev/null 2>&1; then
-            paru -S --needed --noconfirm brave-bin
-        else
-            sudo pacman -S --needed --noconfirm brave-browser 2>/dev/null || true
+            paru -S --needed --noconfirm brave-bin || true
         fi
+    fi
 
-    else
-        echo "[!] No se pudo instalar de forma nativa. Como respaldo seguro, instalando Flatpak..."
-        flatpak install -y flathub com.brave.Browser
+    if ! command -v brave-origin >/dev/null 2>&1 && ! command -v brave-browser >/dev/null 2>&1 && ! command -v brave >/dev/null 2>&1; then
+        echo "[+] Instalando Brave como respaldo universal vía Flatpak..."
+        if command -v flatpak >/dev/null 2>&1; then
+            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+            flatpak install -y --noninteractive flathub com.brave.Browser || true
+        fi
     fi
 fi
