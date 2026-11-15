@@ -37,7 +37,12 @@ fi
 cd "${TARGET_DIR}"
 chmod +x setup.sh scripts/*.sh packages/*.sh 2>/dev/null || true
 
-# 3. Ejecutar setup.sh pasando cualquier argumento recibido
+# 3. Reconectar stdin a la terminal si se ejecutó vía tubería (ej. curl ... | bash)
+if [ ! -t 0 ] && [ -e /dev/tty ]; then
+    exec < /dev/tty 2>/dev/null || true
+fi
+
+# 4. Ejecutar setup.sh pasando cualquier argumento recibido
 if [ $# -gt 0 ]; then
     exec ./setup.sh "$@"
 else
