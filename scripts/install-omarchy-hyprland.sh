@@ -39,9 +39,19 @@ elif command -v pacman >/dev/null 2>&1; then
         hyprland xdg-desktop-portal-hyprland hyprlock hypridle \
         wl-clipboard cliphist grim slurp brightnessctl playerctl \
         pamixer pavucontrol network-manager-applet fuzzel alacritty \
-        ttf-jetbrains-mono-nerd qt6-wayland || true
+        ttf-jetbrains-mono-nerd qt6-wayland qt5-wayland xorg-xwayland \
+        polkit-kde-agent sddm qt6-svg || true
 
-    # Instalar quickshell desde repositorios o AUR (yay/paru)
+    # Si no hay Display Manager activo (instalación mínima sin DE en CachyOS/Arch), habilitar SDDM
+    if ! systemctl is-enabled sddm >/dev/null 2>&1 && \
+       ! systemctl is-enabled gdm >/dev/null 2>&1 && \
+       ! systemctl is-enabled lightdm >/dev/null 2>&1 && \
+       ! systemctl is-enabled greetd >/dev/null 2>&1; then
+        sudo systemctl enable sddm 2>/dev/null || true
+        echo "  [✓] Gestor de login gráfico (SDDM) habilitado automáticamente."
+    fi
+
+    # Instalar quickshell desde repositorios oficiales o AUR (yay/paru)
     if ! command -v quickshell >/dev/null 2>&1; then
         if pacman -Si quickshell >/dev/null 2>&1; then
             sudo pacman -S --needed --noconfirm quickshell || true
