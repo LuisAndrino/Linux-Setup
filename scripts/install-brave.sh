@@ -38,10 +38,14 @@ if ! command -v pacman >/dev/null 2>&1 && curl -fsSL https://dl.brave.com/instal
 else
     if command -v apt-get >/dev/null 2>&1; then
         echo "[APT] Configurando repositorio oficial de Brave..."
+        export DEBIAN_FRONTEND=noninteractive
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install -qq curl ca-certificates gnupg 2>/dev/null || true
+        sudo install -d -m 0755 /usr/share/keyrings
         sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list
-        sudo apt-get update
-        sudo apt-get install -y brave-browser || sudo apt-get install -y brave-origin
+        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
+        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install brave-browser || \
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install brave-origin || true
         echo "[✓] Brave instalado vía APT."
 
     elif command -v dnf >/dev/null 2>&1 && [ "$IS_IMMUTABLE" = false ]; then
@@ -55,7 +59,7 @@ else
 
     elif command -v pacman >/dev/null 2>&1; then
         echo "[PACMAN] Instalando Brave en Arch..."
-        if pacman -Slq 2>/dev/null | grep -qx "brave-browser"; then
+        if pacman -Si brave-browser >/dev/null 2>&1; then
             sudo pacman -S --needed --noconfirm brave-browser || true
         elif command -v yay >/dev/null 2>&1; then
             yay -S --needed --noconfirm brave-bin || true

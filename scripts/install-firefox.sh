@@ -49,6 +49,7 @@ case "${DISTRO_ID}" in
 
     ubuntu|pop|mint|zorin)
         echo "[APT] Configurando repositorio APT oficial de Mozilla (Firefox nativo sin Snap)..."
+        export DEBIAN_FRONTEND=noninteractive
         sudo install -d -m 0755 /etc/apt/keyrings
         if curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null; then
             echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
@@ -57,16 +58,20 @@ Package: *
 Pin: origin packages.mozilla.org
 Pin-Priority: 1000
 EOF
-            sudo apt-get update -y
-            sudo apt-get install -y firefox || sudo apt-get install -y firefox-esr
+            sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox || \
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox-esr || true
         else
-            sudo apt-get update -y && sudo apt-get install -y firefox 2>/dev/null || sudo apt-get install -y firefox-esr
+            sudo apt-get -o DPkg::Lock::Timeout=120 update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox 2>/dev/null || \
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox-esr || true
         fi
         ;;
 
     debian|kali)
         echo "[APT] Instalando Firefox en Debian..."
-        sudo apt-get update -y && sudo apt-get install -y firefox-esr || sudo apt-get install -y firefox
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox-esr || \
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox || true
         ;;
 
     arch|cachyos|manjaro|endeavouros|garuda|artix|arcolinux)

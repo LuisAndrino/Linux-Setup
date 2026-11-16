@@ -25,62 +25,91 @@ detect_distro() {
 
 install_cli_debian() {
     export DEBIAN_FRONTEND=noninteractive
+    local apt_opts=(-y -o DPkg::Lock::Timeout=120)
 
-    # Habilitar repositorios universe/multiverse en Ubuntu (necesario para steam-installer, gamescope, mangohud, fastfetch, etc.)
-    if grep -qiE '^ID=ubuntu' /etc/os-release 2>/dev/null || grep -qiE '^ID_LIKE=.*ubuntu' /etc/os-release 2>/dev/null; then
+    # Recuperar estado de dpkg por si hubo una ejecución interrumpida previa
+    sudo dpkg --configure -a >/dev/null 2>&1 || true
+
+    echo "==> [APT] Actualizando índices base de paquetes..."
+    sudo apt-get "${apt_opts[@]}" update -qq || sudo apt-get update || true
+
+    # 1. Instalar primero pre-requisitos mínimos para repositorios externos y PPAs
+    local bootstrap_pkgs=(curl wget ca-certificates gnupg apt-transport-https debconf-utils)
+    if grep -qiE '^ID=ubuntu|^ID_LIKE=.*ubuntu' /etc/os-release 2>/dev/null; then
+        bootstrap_pkgs+=(software-properties-common)
+    fi
+    sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_opts[@]}" install -qq "${bootstrap_pkgs[@]}" || \
+        sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_opts[@]}" install "${bootstrap_pkgs[@]}" || true
+
+    # 2. Habilitar repositorios universe/multiverse en Ubuntu (necesario para steam-installer, gamescope, mangohud, fastfetch, alacritty, etc.)
+    if grep -qiE '^ID=ubuntu|^ID_LIKE=.*ubuntu' /etc/os-release 2>/dev/null; then
         if command -v add-apt-repository >/dev/null 2>&1; then
             sudo add-apt-repository -y universe >/dev/null 2>&1 || true
             sudo add-apt-repository -y multiverse >/dev/null 2>&1 || true
         fi
     fi
 
-    # Habilitar i386 (multilib) para Steam / Wine / Proton
+    # 3. Habilitar i386 (multilib) para Steam / Wine / Proton
     sudo dpkg --add-architecture i386 2>/dev/null || true
 
-    echo "==> [APT] Actualizando índices de paquetes..."
-    sudo apt-get update -qq || sudo apt-get update || true
+    echo "==> [APT] Actualizando índices tras habilitar universe/multiverse/i386..."
+    sudo apt-get "${apt_opts[@]}" update -qq || sudo apt-get update || true
 
-    echo "==> [APT] Verificando disponibilidad e instalando paquetes CLI, dev y gaming..."
+    echo "==> [APT] Verificando disponibilidad e instalando pre-requisitos, CLI, dev y gaming..."
     local candidate_pkgs=(
         curl wget git gh jq ripgrep tree rsync fzf zoxide fd-find
-        htop btop tmux zsh zip unzip p7zip-full bat
-        build-essential ca-certificates gnupg software-properties-common
+        htop btop tmux zsh zip unzip tar xz-utils zstd p7zip-full bat
+        build-essential ca-certificates gnupg apt-transport-https debconf-utils
         openssh-client openssh-server alacritty
         ffmpeg mpv vlc gamemode mangohud gamescope
+        vulkan-tools mesa-vulkan-drivers
         adb fastboot python3 python3-pip flatpak
-        gnome-software-plugin-flatpak
     )
 
-    local apt_cache_dump
-    apt_cache_dump="$(apt-cache pkgnames 2>/dev/null || true)"
-    local valid_pkgs=()
-    for pkg in "${candidate_pkgs[@]}"; do
-        if [ -z "$apt_cache_dump" ] || printf '%s\n' "$apt_cache_dump" | grep -qx "$pkg"; then
-            valid_pkgs+=("$pkg")
-        else
-            echo "  [!] Paquete '$pkg' no disponible en esta versión de Debian/Ubuntu, omitiendo."
-        fi
-    done
+    # Solo incluir plugin de GNOME Software si ya existe gnome-software (evita arrastrarlo en Kubuntu/Server)
+    if command -v gnome-software >/dev/null 2>&1; then
+        candidate_pkgs+=(gnome-software-plugin-flatpak)
+    fi
+
+    # FUSE2 para ejecutar AppImages en Ubuntu 22.04+ / 24.04+ (Antigravity, OpenBot, Grok Bot, RecompLauncher, etc.)
+    if apt-cache show libfuse2t64 >/dev/null 2>&1; then
+        candidate_pkgs+=(libfuse2t64)
+    elif apt-cache show libfuse2 >/dev/null 2>&1; then
+        candidate_pkgs+=(libfuse2)
+    fi
 
     # Elegir JDK 21 si existe, si no default-jdk (compatible con Ubuntu 22.04/24.04 y Debian 12)
-    if printf '%s\n' "$apt_cache_dump" | grep -qx "openjdk-21-jdk"; then
-        valid_pkgs+=("openjdk-21-jdk")
-    elif printf '%s\n' "$apt_cache_dump" | grep -qx "default-jdk"; then
-        valid_pkgs+=("default-jdk")
+    if apt-cache show openjdk-21-jdk >/dev/null 2>&1; then
+        candidate_pkgs+=(openjdk-21-jdk)
+    elif apt-cache show default-jdk >/dev/null 2>&1; then
+        candidate_pkgs+=(default-jdk)
     fi
 
     # Elegir fastfetch si existe en la versión actual, si no neofetch
-    if printf '%s\n' "$apt_cache_dump" | grep -qx "fastfetch"; then
-        valid_pkgs+=("fastfetch")
-    elif printf '%s\n' "$apt_cache_dump" | grep -qx "neofetch"; then
-        valid_pkgs+=("neofetch")
+    if apt-cache show fastfetch >/dev/null 2>&1; then
+        candidate_pkgs+=(fastfetch)
+    elif apt-cache show neofetch >/dev/null 2>&1; then
+        candidate_pkgs+=(neofetch)
     fi
 
+    # Filtrar usando apt-cache show (evita paquetes virtuales y evita pipe >64KB con SIGPIPE bajo pipefail)
+    local valid_pkgs=()
+    for pkg in "${candidate_pkgs[@]}"; do
+        if apt-cache show "$pkg" >/dev/null 2>&1; then
+            valid_pkgs+=("$pkg")
+        else
+            echo "  [!] Paquete '$pkg' sin candidato en esta versión de Debian/Ubuntu, omitiendo."
+        fi
+    done
+
     if [ "${#valid_pkgs[@]}" -gt 0 ]; then
-        if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${valid_pkgs[@]}"; then
-            echo "  [!] Fallo en lote APT; reintentando paquete por paquete..."
+        echo "  [+] Instalando ${#valid_pkgs[@]} paquetes vía APT..."
+        if ! sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_opts[@]}" install -qq "${valid_pkgs[@]}"; then
+            echo "  [!] Fallo en lote APT; reparando dependencias e instalando paquete por paquete..."
+            sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_opts[@]}" install -f || true
             for pkg in "${valid_pkgs[@]}"; do
-                sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "$pkg" 2>/dev/null || true
+                sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_opts[@]}" install -qq "$pkg" || \
+                    echo "  [!] No se pudo instalar '$pkg'"
             done
         fi
     fi
@@ -147,7 +176,7 @@ install_cli_arch() {
     local valid_pkgs=()
     local skipped_pkgs=()
     for pkg in "${desired_pkgs[@]}"; do
-        if echo "${available_pkgs}" | grep -qx "${pkg}"; then
+        if [[ $'\n'"${available_pkgs}"$'\n' == *$'\n'"${pkg}"$'\n'* ]]; then
             valid_pkgs+=("${pkg}")
         else
             skipped_pkgs+=("${pkg}")

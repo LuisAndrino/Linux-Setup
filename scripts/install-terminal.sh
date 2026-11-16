@@ -18,8 +18,8 @@ else
 
     if command -v apt-get >/dev/null 2>&1; then
         export DEBIAN_FRONTEND=noninteractive
-        sudo apt-get update -qq || true
-        if ! sudo DEBIAN_FRONTEND=noninteractive apt-get install -y alacritty 2>/dev/null; then
+        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || true
+        if ! sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install alacritty 2>/dev/null; then
             echo "[+] Alacritty no disponible vía APT, intentando Flatpak..."
             flatpak install -y --noninteractive flathub org.alacritty.Alacritty || flatpak install --user -y --noninteractive flathub org.alacritty.Alacritty || true
         fi

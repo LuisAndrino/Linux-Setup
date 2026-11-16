@@ -17,7 +17,9 @@ else
     echo "[+] Instalando Gamescope mediante el gestor de paquetes del sistema..."
 
     if command -v apt-get >/dev/null 2>&1; then
-        sudo apt-get update -y && sudo apt-get install -y gamescope || true
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || true
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install gamescope || true
     elif command -v dnf >/dev/null 2>&1; then
         sudo dnf install -y gamescope || true
     elif command -v pacman >/dev/null 2>&1; then

@@ -96,11 +96,53 @@ show_help() {
     echo ""
 }
 
+ensure_base_prerequisites() {
+    export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:/usr/games:${PATH}"
+
+    local missing_cmds=()
+    for cmd in curl git unzip tar gpg zstd jq; do
+        if ! command -v "$cmd" >/dev/null 2>&1; then
+            missing_cmds+=("$cmd")
+        fi
+    done
+
+    local need_fuse=false
+    if command -v apt-get >/dev/null 2>&1 && ! ldconfig -p 2>/dev/null | grep -q 'libfuse\.so\.2'; then
+        need_fuse=true
+    fi
+
+    if [ ${#missing_cmds[@]} -eq 0 ] && [ "$need_fuse" = false ]; then
+        return 0
+    fi
+
+    echo -e "${BLUE}[+] Instalando pre-requisitos base del sistema (${missing_cmds[*]:-libfuse2})...${NC}"
+    if command -v apt-get >/dev/null 2>&1; then
+        export DEBIAN_FRONTEND=noninteractive
+        sudo dpkg --configure -a >/dev/null 2>&1 || true
+        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || true
+        local pkgs=(curl git unzip zip tar xz-utils zstd jq ca-certificates gnupg apt-transport-https debconf-utils)
+        if apt-cache show libfuse2t64 >/dev/null 2>&1; then
+            pkgs+=(libfuse2t64)
+        elif apt-cache show libfuse2 >/dev/null 2>&1; then
+            pkgs+=(libfuse2)
+        fi
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install -qq "${pkgs[@]}" || true
+    elif command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y --skip-unavailable curl git unzip zip tar xz zstd jq ca-certificates gnupg2 fuse fuse-libs || true
+    elif command -v pacman >/dev/null 2>&1; then
+        sudo pacman -S --needed --noconfirm curl git unzip zip tar xz zstd jq ca-certificates gnupg fuse2 || true
+    elif command -v zypper >/dev/null 2>&1; then
+        sudo zypper --non-interactive install curl git unzip zip tar xz zstd jq ca-certificates gpg2 libfuse2 || true
+    fi
+}
+
 ensure_flatpak_installed() {
     if ! command -v flatpak >/dev/null 2>&1; then
         echo -e "${YELLOW}[!] Flatpak no está instalado. Instalándolo mediante el gestor del sistema...${NC}"
         if command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update && sudo apt-get install -y flatpak
+            export DEBIAN_FRONTEND=noninteractive
+            sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || true
+            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install flatpak
         elif command -v dnf >/dev/null 2>&1; then
             sudo dnf install -y flatpak
         elif command -v pacman >/dev/null 2>&1; then
@@ -575,6 +617,10 @@ print_install_summary() {
         echo -e "  ${YELLOW}[i] No detectados como binario nativo (pueden estar en Flatpak o ~/.local/bin):${NC} ${miss[*]}"
     fi
 }
+
+if [ "$ACTION" != "dry-run" ] && [ "$ACTION" != "desktop_app" ]; then
+    ensure_base_prerequisites
+fi
 
 case "$ACTION" in
     native)

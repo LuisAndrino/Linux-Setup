@@ -60,11 +60,12 @@ if [ "$INSTALLED_DESKTOP" = false ]; then
 
             ubuntu|pop|mint|debian|kali|zorin)
                 echo "  [APT] Configurando repositorio oficial de 1Password..."
+                export DEBIAN_FRONTEND=noninteractive
                 sudo install -d -m 0755 /usr/share/keyrings
                 curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --batch --yes -o /usr/share/keyrings/1password-archive-keyring.gpg
-                echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list
-                sudo apt-get update -y
-                sudo apt-get install -y 1password 1password-cli 2>/dev/null || true
+                echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list >/dev/null
+                sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
+                sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install 1password 1password-cli 2>/dev/null || true
                 INSTALLED_DESKTOP=true
                 ;;
 

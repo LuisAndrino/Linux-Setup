@@ -29,14 +29,14 @@ echo "[+] Configurando e instalando VS Code nativo oficial (Microsoft)..."
 
 if command -v apt-get >/dev/null 2>&1; then
     export DEBIAN_FRONTEND=noninteractive
-    sudo apt-get update -qq || sudo apt-get update -y || true
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wget gpg apt-transport-https ca-certificates
+    sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install wget gpg apt-transport-https ca-certificates
     wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor --batch --yes -o /tmp/packages.microsoft.gpg
     sudo install -D -o root -g root -m 644 /tmp/packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
     rm -f /tmp/packages.microsoft.gpg
     echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
-    sudo apt-get update -qq || sudo apt-get update -y || true
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y code
+    sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install code
     echo "[✓] VS Code nativo instalado vía APT."
 
 elif command -v dnf >/dev/null 2>&1; then

@@ -25,7 +25,9 @@ if ! command -v flatpak >/dev/null 2>&1; then
     if command -v dnf >/dev/null 2>&1; then
         sudo dnf install -y flatpak
     elif command -v apt-get >/dev/null 2>&1; then
-        sudo apt-get update -y && sudo apt-get install -y flatpak
+        export DEBIAN_FRONTEND=noninteractive
+        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || true
+        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install flatpak
     elif command -v pacman >/dev/null 2>&1; then
         sudo pacman -S --needed --noconfirm flatpak
     elif command -v zypper >/dev/null 2>&1; then
