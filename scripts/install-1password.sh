@@ -1,132 +1,99 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-1password.sh - Instalador de 1Password Desktop y 1Password CLI ('op')
+# install-1password.sh - Instalador multi-distro de 1Password Desktop + CLI (op)
 # ==============================================================================
-# Compatible con: Ubuntu, Debian, Fedora, Arch Linux, openSUSE, Bazzite, SteamOS
-# 1. Instala la aplicación de escritorio 1Password (nativa o Flatpak oficial)
-# 2. Instala la herramienta de línea de comandos 1Password CLI ('op') en ~/.local/bin
-# ==============================================================================
-set -euo pipefail
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
 
 BIN_DIR="${HOME}/.local/bin"
 mkdir -p "${BIN_DIR}"
-export PATH="${BIN_DIR}:${PATH}"
 
-echo "=========================================================="
-echo "    Instalación de 1Password Desktop y CLI ('op')         "
-echo "=========================================================="
+echo "=== 1Password (Desktop + CLI) ==="
 
-# -----------------------------------------------------------------------------
-# 1. Instalar 1Password Desktop (GUI)
-# -----------------------------------------------------------------------------
-echo "[1/2] Verificando 1Password Desktop..."
-
-INSTALLED_DESKTOP=false
-
-if command -v 1password >/dev/null 2>&1; then
-    echo "  [✓] 1Password Desktop ya está instalado en el sistema ($(command -v 1password))."
-    INSTALLED_DESKTOP=true
-elif flatpak info com.onepassword.OnePassword >/dev/null 2>&1; then
-    echo "  [✓] 1Password ya está instalado mediante Flatpak."
-    INSTALLED_DESKTOP=true
-fi
-
-if [ "$INSTALLED_DESKTOP" = false ]; then
-    IS_IMMUTABLE=false
-    DISTRO_ID="unknown"
-    if [ -f /etc/os-release ]; then
-        # shellcheck source=/dev/null
-        . /etc/os-release
-        DISTRO_ID="${ID:-unknown}"
-        if [ "${ID:-}" = "bazzite" ] || command -v rpm-ostree >/dev/null 2>&1 || [ -f /etc/steamos-release ]; then
-            IS_IMMUTABLE=true
-        fi
-    fi
-
-    if [ "$IS_IMMUTABLE" = true ]; then
-        echo "  [+] Sistema inmutable detectado (${DISTRO_ID}). Instalando 1Password Flatpak oficial..."
-        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
-        flatpak install -y --noninteractive flathub com.onepassword.OnePassword || true
-        INSTALLED_DESKTOP=true
-    else
-        case "${DISTRO_ID}" in
-            fedora|rhel|centos|rocky|alma)
-                echo "  [DNF] Configurando repositorio oficial de 1Password..."
-                sudo rpm --import https://downloads.1password.com/linux/keys/1password.asc 2>/dev/null || true
-                sudo sh -c 'echo -e "[1password]\nname=1Password Stable Channel\nbaseurl=https://downloads.1password.com/linux/rpm/stable/\$basearch\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=\"https://downloads.1password.com/linux/keys/1password.asc\"" > /etc/yum.repos.d/1password.repo'
-                sudo dnf install -y 1password 1password-cli 2>/dev/null || true
-                INSTALLED_DESKTOP=true
-                ;;
-
-            ubuntu|pop|mint|debian|kali|zorin)
-                echo "  [APT] Configurando repositorio oficial de 1Password..."
-                export DEBIAN_FRONTEND=noninteractive
-                sudo install -d -m 0755 /usr/share/keyrings
-                curl -sS https://downloads.1password.com/linux/keys/1password.asc | sudo gpg --dearmor --batch --yes -o /usr/share/keyrings/1password-archive-keyring.gpg
-                echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main' | sudo tee /etc/apt/sources.list.d/1password.list >/dev/null
-                sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
-                sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install 1password 1password-cli 2>/dev/null || true
-                INSTALLED_DESKTOP=true
-                ;;
-
-            arch|cachyos|manjaro|endeavouros|garuda|artix|arcolinux)
-                echo "  [PACMAN] Instalando 1Password en Arch..."
-                if command -v paru >/dev/null 2>&1; then
-                    paru -S --needed --noconfirm 1password 1password-cli && INSTALLED_DESKTOP=true || true
-                elif command -v yay >/dev/null 2>&1; then
-                    yay -S --needed --noconfirm 1password 1password-cli && INSTALLED_DESKTOP=true || true
-                fi
-                if [ "$INSTALLED_DESKTOP" = false ] && command -v flatpak >/dev/null 2>&1; then
-                    echo "  [+] Sin helper AUR (yay/paru) o falló AUR. Instalando 1Password vía Flatpak..."
-                    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
-                    flatpak install -y --noninteractive flathub com.onepassword.OnePassword && INSTALLED_DESKTOP=true || true
-                fi
-                ;;
-
-            *)
-                echo "  [+] Instalando 1Password vía Flatpak..."
-                flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
-                flatpak install -y --noninteractive flathub com.onepassword.OnePassword || true
-                INSTALLED_DESKTOP=true
-                ;;
-        esac
-    fi
-fi
-
-# -----------------------------------------------------------------------------
-# 2. Instalar 1Password CLI ('op')
-# -----------------------------------------------------------------------------
-echo "[2/2] Verificando 1Password CLI ('op')..."
-
-if command -v op >/dev/null 2>&1 || [ -f "${BIN_DIR}/op" ]; then
-    echo "  [✓] 1Password CLI ya está disponible ($(op --version 2>/dev/null || echo 'en ruta'))."
+# 1. 1Password Desktop
+if command -v 1password >/dev/null 2>&1 || (command -v flatpak >/dev/null 2>&1 && flatpak info com.onepassword.OnePassword >/dev/null 2>&1); then
+    echo "  [✓] 1Password Desktop ya está instalado."
 else
-    echo "  -> Descargando 1Password CLI oficial..."
-    ARCH=$(uname -m)
-    if [ "$ARCH" = "x86_64" ]; then
-        OP_ARCH="amd64"
-    elif [ "$ARCH" = "aarch64" ]; then
-        OP_ARCH="arm64"
-    else
-        OP_ARCH="386"
-    fi
+    case "${PKG_MGR}" in
+        immutable)
+            flatpak_install_safe com.onepassword.OnePassword || true
+            ;;
+        apt)
+            if [ "${DEB_ARCH}" = "amd64" ]; then
+                echo "  [+] Configurando repositorio oficial de 1Password (APT)..."
+                run_root install -d -m 0755 /usr/share/keyrings
+                if safe_download "https://downloads.1password.com/linux/keys/1password.asc" "/tmp/1password.asc" 30; then
+                    gpg --dearmor --batch --yes -o /tmp/1password.gpg /tmp/1password.asc
+                    run_root install -m 0644 /tmp/1password.gpg /usr/share/keyrings/1password-archive-keyring.gpg
+                    rm -f /tmp/1password.asc /tmp/1password.gpg
+                    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/1password-archive-keyring.gpg] https://downloads.1password.com/linux/debian/amd64 stable main" | \
+                        run_root tee /etc/apt/sources.list.d/1password.list >/dev/null
+                    apt_update_safe
+                    apt_install_list 1password 1password-cli
+                fi
+            else
+                flatpak_install_safe com.onepassword.OnePassword || true
+            fi
+            ;;
+        dnf)
+            echo "  [+] Configurando repositorio oficial de 1Password (DNF)..."
+            run_root rpm --import https://downloads.1password.com/linux/keys/1password.asc 2>/dev/null || true
+            run_root tee /etc/yum.repos.d/1password.repo >/dev/null << 'EOF'
+[1password]
+name=1Password Stable Channel
+baseurl=https://downloads.1password.com/linux/rpm/stable/$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://downloads.1password.com/linux/keys/1password.asc
+EOF
+            dnf_install_list 1password 1password-cli
+            ;;
+        pacman)
+            if command -v paru >/dev/null 2>&1 && [ "${EUID:-$(id -u)}" -ne 0 ]; then
+                paru -S --needed --noconfirm 1password 1password-cli || true
+            elif command -v yay >/dev/null 2>&1 && [ "${EUID:-$(id -u)}" -ne 0 ]; then
+                yay -S --needed --noconfirm 1password 1password-cli || true
+            else
+                flatpak_install_safe com.onepassword.OnePassword || true
+            fi
+            ;;
+        zypper)
+            echo "  [+] Configurando repositorio oficial de 1Password (Zypper)..."
+            run_root rpm --import https://downloads.1password.com/linux/keys/1password.asc 2>/dev/null || true
+            run_root tee /etc/zypp/repos.d/1password.repo >/dev/null << 'EOF'
+[1password]
+name=1Password Stable Channel
+baseurl=https://downloads.1password.com/linux/rpm/stable/$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://downloads.1password.com/linux/keys/1password.asc
+EOF
+            run_root zypper --non-interactive --gpg-auto-import-keys refresh || true
+            zypper_install_list 1password 1password-cli
+            ;;
+    esac
+fi
 
-    TMP_OP="/tmp/op_download"
-    mkdir -p "${TMP_OP}"
+# 2. 1Password CLI ('op') binario oficial como respaldo universal
+if command -v op >/dev/null 2>&1 || [ -x "${BIN_DIR}/op" ]; then
+    echo "  [✓] 1Password CLI ('op') ya está disponible."
+else
+    echo "  [+] Descargando 1Password CLI ('op')..."
     OP_VERSION="v2.30.0"
-    if curl -sLo "${TMP_OP}/op.zip" "https://cache.agilebits.com/dist/1P/op2/pkg/${OP_VERSION}/op_linux_${OP_ARCH}_${OP_VERSION}.zip"; then
-        unzip -q -o "${TMP_OP}/op.zip" -d "${TMP_OP}"
+    TMP_OP="/tmp/op_download_$$"
+    mkdir -p "${TMP_OP}"
+    if safe_download "https://cache.agilebits.com/dist/1P/op2/pkg/${OP_VERSION}/op_linux_${DEB_ARCH}_${OP_VERSION}.zip" "${TMP_OP}/op.zip" 90; then
+        unzip -q -o "${TMP_OP}/op.zip" -d "${TMP_OP}" 2>/dev/null || true
         if [ -f "${TMP_OP}/op" ]; then
             install -m 755 "${TMP_OP}/op" "${BIN_DIR}/op"
-            rm -rf "${TMP_OP}"
-            echo "  [✓] 1Password CLI instalado exitosamente en ${BIN_DIR}/op."
+            echo "  [✓] 1Password CLI instalado en ${BIN_DIR}/op."
         fi
+    else
+        echo "  [!] No se pudo descargar 1Password CLI."
     fi
+    rm -rf "${TMP_OP}"
 fi
-
-echo ""
-echo "=========================================================="
-echo " [✓] ¡1Password Desktop y CLI ('op') listos para usar!"
-echo "     - Interfaz gráfica: Busca '1Password' en tus aplicaciones"
-echo "     - Terminal CLI: Escribe 'op signin' para autenticarte"
-echo "=========================================================="

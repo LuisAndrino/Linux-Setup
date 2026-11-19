@@ -1,113 +1,74 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-firefox.sh - Instalador Universal y Optimizado de Mozilla Firefox
+# install-firefox.sh - Instalador multi-distro de Mozilla Firefox
 # ==============================================================================
-# Compatible con: Ubuntu, Debian, Fedora, Arch Linux, openSUSE, Bazzite, SteamOS
-# Instala la versión nativa optimizada (o Flatpak oficial en sistemas inmutables)
-# ==============================================================================
-set -euo pipefail
+set -uo pipefail
 
-echo "=========================================================="
-echo "          Instalación de Mozilla Firefox                  "
-echo "=========================================================="
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
 
-if command -v firefox >/dev/null 2>&1; then
-    echo "[✓] Firefox ya está instalado en el sistema ($(firefox --version 2>/dev/null || command -v firefox))."
+echo "=== Mozilla Firefox ==="
+
+if command -v firefox >/dev/null 2>&1 || command -v firefox-esr >/dev/null 2>&1; then
+    echo "  [✓] Firefox ya está instalado."
     exit 0
 fi
 
-if flatpak info org.mozilla.firefox >/dev/null 2>&1; then
-    echo "[✓] Firefox ya está instalado mediante Flatpak."
+if command -v flatpak >/dev/null 2>&1 && flatpak info org.mozilla.firefox >/dev/null 2>&1; then
+    echo "  [✓] Firefox ya está instalado vía Flatpak."
     exit 0
 fi
 
-# Detectar distro e inmutabilidad
-IS_IMMUTABLE=false
-DISTRO_ID="unknown"
-if [ -f /etc/os-release ]; then
-    # shellcheck source=/dev/null
-    . /etc/os-release
-    DISTRO_ID="${ID:-unknown}"
-    if [ "${ID:-}" = "bazzite" ] || command -v rpm-ostree >/dev/null 2>&1 || [ -f /etc/steamos-release ]; then
-        IS_IMMUTABLE=true
-    fi
-fi
-
-if [ "$IS_IMMUTABLE" = true ]; then
-    echo "[+] Sistema inmutable detectado (${DISTRO_ID}). Instalando Firefox Flatpak oficial..."
-    flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
-    flatpak install -y --noninteractive flathub org.mozilla.firefox
-    echo "[✓] Firefox instalado con éxito vía Flatpak."
-    exit 0
-fi
-
-case "${DISTRO_ID}" in
-    fedora|rhel|centos|rocky|alma)
-        echo "[DNF] Instalando Mozilla Firefox nativo..."
-        sudo dnf install -y firefox
+case "${PKG_MGR}" in
+    immutable)
+        flatpak_install_safe org.mozilla.firefox || true
         ;;
-
-    ubuntu|pop|mint|zorin)
-        echo "[APT] Configurando repositorio APT oficial de Mozilla (Firefox nativo sin Snap)..."
-        export DEBIAN_FRONTEND=noninteractive
-        sudo install -d -m 0755 /etc/apt/keyrings
-        if curl -fsSL https://packages.mozilla.org/apt/repo-signing-key.gpg | sudo tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null; then
-            echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | sudo tee /etc/apt/sources.list.d/mozilla.list > /dev/null
-            cat << 'EOF' | sudo tee /etc/apt/preferences.d/mozilla > /dev/null
+    apt)
+        if [[ "${DISTRO_ID}" == "ubuntu" ]] || [[ "${DISTRO_ID_LIKE}" == *ubuntu* ]]; then
+            echo "  [+] Configurando repositorio APT oficial de Mozilla (sin Snap)..."
+            run_root install -d -m 0755 /etc/apt/keyrings
+            if safe_download "https://packages.mozilla.org/apt/repo-signing-key.gpg" "/tmp/mozilla-key.asc" 30; then
+                run_root install -m 0644 /tmp/mozilla-key.asc /etc/apt/keyrings/packages.mozilla.org.asc
+                rm -f /tmp/mozilla-key.asc
+                echo "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main" | \
+                    run_root tee /etc/apt/sources.list.d/mozilla.list >/dev/null
+                run_root tee /etc/apt/preferences.d/mozilla >/dev/null << 'EOF'
 Package: *
 Pin: origin packages.mozilla.org
 Pin-Priority: 1000
 EOF
-            sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox || \
-                sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox-esr || true
+                apt_update_safe
+                apt_install_list firefox
+            else
+                apt_install_list firefox-esr
+            fi
         else
-            sudo apt-get -o DPkg::Lock::Timeout=120 update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox 2>/dev/null || \
-                sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox-esr || true
+            echo "  [+] Instalando Firefox (Debian APT)..."
+            if apt_has_candidate firefox-esr; then
+                apt_install_list firefox-esr
+            else
+                apt_install_list firefox
+            fi
         fi
         ;;
-
-    debian|kali)
-        echo "[APT] Instalando Firefox en Debian..."
-        export DEBIAN_FRONTEND=noninteractive
-        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox-esr || \
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install firefox || true
+    dnf)
+        dnf_install_list firefox
         ;;
-
-    arch|cachyos|manjaro|endeavouros|garuda|artix|arcolinux)
-        echo "[PACMAN] Instalando Mozilla Firefox..."
-        sudo pacman -S --needed --noconfirm firefox || {
-            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
-            flatpak install -y --noninteractive flathub org.mozilla.firefox || true
-        }
+    pacman)
+        pacman_install_list firefox
         ;;
-
-    opensuse*|suse|sles)
-        echo "[ZYPPER] Instalando Mozilla Firefox..."
-        sudo zypper --non-interactive install MozillaFirefox
-        ;;
-
-    *)
-        echo "[!] Distribución no detectada directamente. Intentando con gestores conocidos..."
-        if command -v dnf >/dev/null 2>&1; then
-            sudo dnf install -y firefox
-        elif command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update -y && sudo apt-get install -y firefox 2>/dev/null || sudo apt-get install -y firefox-esr
-        elif command -v pacman >/dev/null 2>&1; then
-            sudo pacman -S --needed --noconfirm firefox || {
-                flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
-                flatpak install -y --noninteractive flathub org.mozilla.firefox || true
-            }
-        elif command -v zypper >/dev/null 2>&1; then
-            sudo zypper --non-interactive install MozillaFirefox
-        else
-            echo "[+] Fallback a Flatpak..."
-            flatpak install -y --noninteractive flathub org.mozilla.firefox
-        fi
+    zypper)
+        zypper_install_list MozillaFirefox
         ;;
 esac
 
-echo ""
-echo "=========================================================="
-echo " [✓] ¡Mozilla Firefox instalado exitosamente!"
-echo "=========================================================="
+if ! command -v firefox >/dev/null 2>&1 && ! command -v firefox-esr >/dev/null 2>&1; then
+    flatpak_install_safe org.mozilla.firefox || true
+fi
+
+if command -v firefox >/dev/null 2>&1 || command -v firefox-esr >/dev/null 2>&1 || (command -v flatpak >/dev/null 2>&1 && flatpak info org.mozilla.firefox >/dev/null 2>&1); then
+    echo "  [✓] Firefox instalado correctamente."
+else
+    echo "  [!] No se pudo instalar Firefox en este entorno."
+fi

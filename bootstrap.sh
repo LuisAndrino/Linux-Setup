@@ -1,50 +1,45 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# bootstrap.sh - Instalador Rápido de 1 Línea para Linux Setup
+# bootstrap.sh - Instalador Universal de 1 Línea para Linux Setup
 # ==============================================================================
-# Uso desde cualquier terminal nueva:
-#   curl -sSL https://raw.githubusercontent.com/LuisAndrino/Linux-Setup/main/bootstrap.sh | bash
-# O con argumentos (ej. --dev, --yes, --ai, etc.):
-#   bash -c "$(curl -sSL https://raw.githubusercontent.com/LuisAndrino/Linux-Setup/main/bootstrap.sh)" -- --yes
+# Uso:
+#   curl -fsSL https://raw.githubusercontent.com/LuisAndrino/Linux-Setup/main/bootstrap.sh | bash
 # ==============================================================================
 set -euo pipefail
 
 REPO_URL="https://github.com/LuisAndrino/Linux-Setup.git"
+ARCHIVE_URL="https://github.com/LuisAndrino/Linux-Setup/archive/refs/heads/main.tar.gz"
 TARGET_DIR="${HOME}/linux-setup"
 
 echo "=========================================================="
-echo "    Instalador Universal de Linux Setup (Luis Andrino)    "
+echo "    Linux Setup - Instalador Universal (Luis Andrino)     "
 echo "=========================================================="
 
-# 1. Asegurar clonación o descarga del proyecto
 if command -v git >/dev/null 2>&1; then
     if [ -d "${TARGET_DIR}/.git" ]; then
-        echo "[+] Actualizando repositorio existente en ${TARGET_DIR}..."
+        echo "[+] Actualizando repositorio en ${TARGET_DIR}..."
         git -C "${TARGET_DIR}" pull --ff-only 2>/dev/null || true
     else
         echo "[+] Clonando repositorio en ${TARGET_DIR}..."
         rm -rf "${TARGET_DIR}"
-        git clone "${REPO_URL}" "${TARGET_DIR}"
+        git clone --depth 1 "${REPO_URL}" "${TARGET_DIR}"
     fi
-else
-    echo "[!] Git no está disponible en el sistema base."
-    echo "[+] Descargando código fuente mediante curl..."
+elif command -v curl >/dev/null 2>&1; then
+    echo "[+] Descargando código fuente con curl..."
+    rm -rf "${TARGET_DIR}"
     mkdir -p "${TARGET_DIR}"
-    curl -fsSL "https://github.com/LuisAndrino/Linux-Setup/archive/refs/heads/main.tar.gz" | tar -xz -C "${TARGET_DIR}" --strip-components=1
-fi
-
-# 2. Permisos de ejecución
-cd "${TARGET_DIR}"
-chmod +x setup.sh scripts/*.sh packages/*.sh 2>/dev/null || true
-
-# 3. Reconectar stdin a la terminal si se ejecutó vía tubería (ej. curl ... | bash)
-if [ ! -t 0 ] && [ -e /dev/tty ]; then
-    exec < /dev/tty 2>/dev/null || true
-fi
-
-# 4. Ejecutar setup.sh pasando cualquier argumento recibido
-if [ $# -gt 0 ]; then
-    exec ./setup.sh "$@"
+    curl -fsSL --connect-timeout 15 --max-time 60 "${ARCHIVE_URL}" | tar -xz -C "${TARGET_DIR}" --strip-components=1
+elif command -v wget >/dev/null 2>&1; then
+    echo "[+] Descargando código fuente con wget..."
+    rm -rf "${TARGET_DIR}"
+    mkdir -p "${TARGET_DIR}"
+    wget -qO- --timeout=30 "${ARCHIVE_URL}" | tar -xz -C "${TARGET_DIR}" --strip-components=1
 else
-    exec ./setup.sh
+    echo "[!] Error: necesitas git, curl o wget instalado para descargar Linux-Setup." >&2
+    exit 1
 fi
+
+cd "${TARGET_DIR}"
+chmod +x setup.sh quick-install.sh bootstrap.sh scripts/*.sh packages/*.sh 2>/dev/null || true
+
+exec bash "${TARGET_DIR}/setup.sh"

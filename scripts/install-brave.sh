@@ -1,78 +1,78 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-brave.sh - Instalador de Brave Origin (Versión oficial nativa)
+# install-brave.sh - Instalador multi-distro de Brave Origin / Brave Browser
 # ==============================================================================
-set -euo pipefail
+set -uo pipefail
 
-echo "=========================================================="
-echo "          Instalación de Brave Origin (Nativo)            "
-echo "=========================================================="
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
 
-# Comprobar si ya está instalado
-if command -v brave-origin >/dev/null 2>&1 || command -v brave-browser >/dev/null 2>&1; then
-    echo "[✓] Brave ya está instalado en el sistema:"
-    command -v brave-origin 2>/dev/null || command -v brave-browser 2>/dev/null
+echo "=== Brave Origin ==="
+
+if command -v brave-origin >/dev/null 2>&1 || command -v brave-browser >/dev/null 2>&1 || command -v brave >/dev/null 2>&1; then
+    echo "  [✓] Brave ya está instalado."
     exit 0
 fi
 
-# Detectar si el sistema es inmutable (Bazzite, SteamOS, Silverblue)
-IS_IMMUTABLE=false
-if [ -f /etc/os-release ]; then
-    # shellcheck source=/dev/null
-    . /etc/os-release
-    if [ "${ID:-}" = "bazzite" ] || command -v rpm-ostree >/dev/null 2>&1 || [ -f /etc/steamos-release ]; then
-        IS_IMMUTABLE=true
-    fi
+case "${PKG_MGR}" in
+    apt)
+        echo "  [+] Configurando repositorio oficial de Brave (APT)..."
+        run_root install -d -m 0755 /usr/share/keyrings
+        if safe_download "https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg" "/tmp/brave-keyring.gpg" 30; then
+            run_root install -m 0644 /tmp/brave-keyring.gpg /usr/share/keyrings/brave-browser-archive-keyring.gpg
+            rm -f /tmp/brave-keyring.gpg
+            echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=${DEB_ARCH}] https://brave-browser-apt-release.s3.brave.com/ stable main" | \
+                run_root tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
+            apt_update_safe
+            if apt_has_candidate brave-origin; then
+                apt_install_list brave-origin
+            else
+                apt_install_list brave-browser
+            fi
+        fi
+        ;;
+    dnf)
+        echo "  [+] Configurando repositorio oficial de Brave (DNF)..."
+        run_root rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc 2>/dev/null || true
+        if safe_download "https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo" "/tmp/brave-browser.repo" 30; then
+            run_root install -m 0644 /tmp/brave-browser.repo /etc/yum.repos.d/brave-browser.repo
+            rm -f /tmp/brave-browser.repo
+            if ! run_root dnf install -y --setopt=timeout=30 --setopt=retries=3 brave-origin 2>/dev/null; then
+                run_root dnf install -y --setopt=timeout=30 --setopt=retries=3 brave-browser || true
+            fi
+        fi
+        ;;
+    pacman)
+        echo "  [+] Instalando Brave en Arch..."
+        if pacman -Si brave-origin >/dev/null 2>&1; then
+            run_root pacman -S --needed --noconfirm brave-origin || true
+        elif pacman -Si brave-browser >/dev/null 2>&1; then
+            run_root pacman -S --needed --noconfirm brave-browser || true
+        elif command -v paru >/dev/null 2>&1 && [ "${EUID:-$(id -u)}" -ne 0 ]; then
+            paru -S --needed --noconfirm brave-origin-bin || paru -S --needed --noconfirm brave-bin || true
+        elif command -v yay >/dev/null 2>&1 && [ "${EUID:-$(id -u)}" -ne 0 ]; then
+            yay -S --needed --noconfirm brave-origin-bin || yay -S --needed --noconfirm brave-bin || true
+        fi
+        ;;
+    zypper)
+        echo "  [+] Configurando repositorio oficial de Brave (Zypper)..."
+        run_root rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc 2>/dev/null || true
+        run_root zypper --non-interactive --gpg-auto-import-keys addrepo -f https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo 2>/dev/null || true
+        run_root zypper --non-interactive --gpg-auto-import-keys refresh || true
+        if ! run_root zypper --non-interactive install --no-confirm brave-origin 2>/dev/null; then
+            run_root zypper --non-interactive install --no-confirm brave-browser || true
+        fi
+        ;;
+esac
+
+if ! command -v brave-origin >/dev/null 2>&1 && ! command -v brave-browser >/dev/null 2>&1 && ! command -v brave >/dev/null 2>&1; then
+    echo "  [+] Respaldo universal: instalando Brave vía Flatpak..."
+    flatpak_install_safe com.brave.Browser || true
 fi
 
-if [ "$IS_IMMUTABLE" = true ]; then
-    echo "[!] Sistema inmutable detectado (${ID:-})."
-    echo "    En sistemas como Bazzite/SteamOS, la instalación nativa directa puede requerir layering."
-    echo "    Intentando primero el instalador oficial de Brave con FLAVOR=origin..."
-fi
-
-echo "[+] Configurando e instalando Brave..."
-if ! command -v pacman >/dev/null 2>&1 && curl -fsSL https://dl.brave.com/install.sh | env FLAVOR=origin sh; then
-    echo "[✓] Brave Origin instalado exitosamente mediante el instalador oficial."
-    exit 0
+if command -v brave-origin >/dev/null 2>&1 || command -v brave-browser >/dev/null 2>&1 || command -v brave >/dev/null 2>&1 || flatpak info com.brave.Browser >/dev/null 2>&1; then
+    echo "  [✓] Brave instalado correctamente."
 else
-    if command -v apt-get >/dev/null 2>&1; then
-        echo "[APT] Configurando repositorio oficial de Brave..."
-        export DEBIAN_FRONTEND=noninteractive
-        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install -qq curl ca-certificates gnupg 2>/dev/null || true
-        sudo install -d -m 0755 /usr/share/keyrings
-        sudo curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
-        echo "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg] https://brave-browser-apt-release.s3.brave.com/ stable main" | sudo tee /etc/apt/sources.list.d/brave-browser-release.list >/dev/null
-        sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update
-        sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install brave-browser || \
-            sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install brave-origin || true
-        echo "[✓] Brave instalado vía APT."
-
-    elif command -v dnf >/dev/null 2>&1 && [ "$IS_IMMUTABLE" = false ]; then
-        echo "[DNF] Configurando repositorio oficial de Brave..."
-        sudo dnf install -y 'dnf-command(config-manager)' 2>/dev/null || true
-        sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo 2>/dev/null || \
-        sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-        sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-        sudo dnf install -y brave-origin || sudo dnf install -y brave-browser
-        echo "[✓] Brave instalado vía DNF."
-
-    elif command -v pacman >/dev/null 2>&1; then
-        echo "[PACMAN] Instalando Brave en Arch..."
-        if pacman -Si brave-browser >/dev/null 2>&1; then
-            sudo pacman -S --needed --noconfirm brave-browser || true
-        elif command -v yay >/dev/null 2>&1; then
-            yay -S --needed --noconfirm brave-bin || true
-        elif command -v paru >/dev/null 2>&1; then
-            paru -S --needed --noconfirm brave-bin || true
-        fi
-    fi
-
-    if ! command -v brave-origin >/dev/null 2>&1 && ! command -v brave-browser >/dev/null 2>&1 && ! command -v brave >/dev/null 2>&1; then
-        echo "[+] Instalando Brave como respaldo universal vía Flatpak..."
-        if command -v flatpak >/dev/null 2>&1; then
-            flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
-            flatpak install -y --noninteractive flathub com.brave.Browser || true
-        fi
-    fi
+    echo "  [!] No se pudo instalar Brave en este entorno."
 fi

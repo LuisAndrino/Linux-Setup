@@ -9,11 +9,18 @@
 # 4. Desactiva WiFi Power Saving para evitar picos de ping en juegos online
 # 5. Si es Laptop: perfil de máximo rendimiento dinámico al conectar la corriente (AC)
 # ==============================================================================
-set -euo pipefail
+set -uo pipefail
 
-echo "=========================================================="
-echo "    Optimizador de Rendimiento de Hardware, Red y Energía "
-echo "=========================================================="
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
+
+echo "=== Optimizador de Rendimiento de Hardware, Red y Energía ==="
+
+if [ "${IN_CONTAINER}" = true ]; then
+    echo "  [i] Contenedor detectado: omitiendo ajustes de kernel/sysctl/systemd del host."
+    exit 0
+fi
 
 # -----------------------------------------------------------------------------
 # 1. Detección de Hardware: Desktop vs Laptop / Handheld
@@ -67,14 +74,6 @@ elif [ "$IS_LAPTOP" = true ]; then
     echo "  [✓] Tipo de dispositivo detectado: PORTÁTIL / LAPTOP (${CHASSIS_TYPE} - ${DMI_VERSION:-$DMI_PRODUCT})"
 else
     echo "  [✓] Tipo de dispositivo detectado: PC DE ESCRITORIO (DESKTOP)"
-    if [ "${NONINTERACTIVE:-0}" != "1" ] && [ -t 0 ]; then
-        read -rp "  [?] ¿Este equipo es una ThinkPad T14 Gen 2 AMD / laptop y deseas activar el modo rendimiento en AC? [s/N]: " t14_ans
-        if [[ "${t14_ans:-n}" =~ ^[sSyY]$ ]]; then
-            IS_LAPTOP=true
-            IS_T14_GEN2_AMD=true
-            echo "  [✓] Modo ThinkPad T14 Gen 2 / Laptop activado manualmente."
-        fi
-    fi
 fi
 
 # -----------------------------------------------------------------------------

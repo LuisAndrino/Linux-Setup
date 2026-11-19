@@ -4,7 +4,11 @@
 # ==============================================================================
 # Compatible con: Debian, Ubuntu, Fedora, Arch Linux, openSUSE, Bazzite, SteamOS
 # ==============================================================================
-set -euo pipefail
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
 
 BIN_DIR="${HOME}/.local/bin"
 OPT_DIR="${HOME}/.local/opt"
@@ -12,64 +16,51 @@ CONFIG_DIR="${HOME}/.config/nvim"
 
 mkdir -p "${BIN_DIR}" "${OPT_DIR}"
 
-echo "=========================================================="
-echo "    Instalación Universal de Neovim Moderno (v0.10+)"
-echo "=========================================================="
+echo "=== Neovim (v0.10+ & Lua) ==="
 
 NEED_INSTALL=true
 
 if command -v nvim >/dev/null 2>&1; then
     CURRENT_VERSION=$(nvim --version | head -n1 | grep -Po 'v[0-9]+\.[0-9]+' || echo "v0.0")
     MAJOR_MINOR=$(echo "${CURRENT_VERSION}" | sed 's/v//')
-    # Comprobar si es al menos 0.10
     if awk "BEGIN {exit !($MAJOR_MINOR >= 0.10)}"; then
-        echo "[✓] Neovim ya está instalado y actualizado: $(nvim --version | head -n1)"
+        echo "  [✓] Neovim ya está instalado y actualizado: $(nvim --version | head -n1)"
         NEED_INSTALL=false
-    else
-        echo "[!] Neovim existente (${CURRENT_VERSION}) es inferior a v0.10."
-        echo "    Se instalará la versión oficial más reciente en ${BIN_DIR}/nvim."
     fi
 fi
 
 if [ "${NEED_INSTALL}" = true ]; then
-    echo "[+] Instalando Neovim oficial más reciente..."
-    ARCH=$(uname -m)
+    echo "  [+] Descargando Neovim oficial más reciente (${ARCH})..."
+    NVIM_URL=""
     if [ "${ARCH}" = "x86_64" ]; then
         NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
     elif [ "${ARCH}" = "aarch64" ]; then
         NVIM_URL="https://github.com/neovim/neovim/releases/latest/download/nvim-linux-arm64.tar.gz"
-    else
-        echo "[!] Arquitectura ${ARCH} no soportada para descarga directa. Intentando gestor nativo..."
-        NVIM_URL=""
     fi
 
     INSTALLED_TARBALL=false
     if [ -n "${NVIM_URL}" ]; then
-        echo "  -> Descargando Neovim desde GitHub releases..."
-        TMP_DIR="/tmp/nvim-download"
+        TMP_DIR="/tmp/nvim-download-$$"
         mkdir -p "${TMP_DIR}"
-        if curl -sLo "${TMP_DIR}/nvim.tar.gz" "${NVIM_URL}"; then
+        if safe_download "${NVIM_URL}" "${TMP_DIR}/nvim.tar.gz" 180; then
             rm -rf "${OPT_DIR}/nvim-linux"
             mkdir -p "${OPT_DIR}/nvim-linux"
-            tar -xzf "${TMP_DIR}/nvim.tar.gz" -C "${OPT_DIR}/nvim-linux" --strip-components=1
-            ln -sf "${OPT_DIR}/nvim-linux/bin/nvim" "${BIN_DIR}/nvim"
-            rm -rf "${TMP_DIR}"
-            INSTALLED_TARBALL=true
-            echo "  [✓] Neovim instalado en ${BIN_DIR}/nvim"
+            if tar -xzf "${TMP_DIR}/nvim.tar.gz" -C "${OPT_DIR}/nvim-linux" --strip-components=1 2>/dev/null; then
+                ln -sf "${OPT_DIR}/nvim-linux/bin/nvim" "${BIN_DIR}/nvim"
+                INSTALLED_TARBALL=true
+                echo "  [✓] Neovim instalado en ${BIN_DIR}/nvim"
+            fi
         fi
+        rm -rf "${TMP_DIR}"
     fi
 
     if [ "${INSTALLED_TARBALL}" = false ]; then
-        echo "  -> Fallback a gestores de paquetes nativos..."
-        if command -v pacman >/dev/null 2>&1; then
-            sudo pacman -S --needed --noconfirm neovim || true
-        elif command -v dnf >/dev/null 2>&1; then
-            sudo dnf install -y neovim || true
-        elif command -v zypper >/dev/null 2>&1; then
-            sudo zypper --non-interactive install neovim || true
-        elif command -v apt-get >/dev/null 2>&1; then
-            sudo apt-get update -y && sudo apt-get install -y neovim || true
-        fi
+        case "${PKG_MGR}" in
+            pacman) pacman_install_list neovim ;;
+            dnf)    dnf_install_list neovim ;;
+            zypper) zypper_install_list neovim ;;
+            apt)    apt_install_list neovim ;;
+        esac
     fi
 fi
 

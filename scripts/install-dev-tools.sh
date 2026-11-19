@@ -1,137 +1,91 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-dev-tools.sh - Instalador Integral de Herramientas de Desarrollo
+# install-dev-tools.sh - Suite de Desarrollo (Neovim, Lazygit, Mise, uv, Bun)
 # ==============================================================================
-# Incluye:
-# 1. Neovim Moderno (v0.10+ con configuración Lua)
-# 2. Lazygit (Terminal UI para Git)
-# 3. Mise (Gestor políglota de entornos: Node, Python, Rust, Go, Java)
-# 4. Astral uv / uvx (Gestor ultra-rápido de Python)
-# 5. Bun (Runtime JS/TS de alto rendimiento)
-# 6. OpenJDK 21 (Java LTS)
-# 7. GitHub CLI (gh)
-# ==============================================================================
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
+
 BIN_DIR="${HOME}/.local/bin"
 mkdir -p "${BIN_DIR}"
-export PATH="${BIN_DIR}:${PATH}"
 
-echo "=========================================================="
-echo "    Instalación de Suite de Desarrollo de Software        "
-echo "=========================================================="
+echo "=== Herramientas de Desarrollo (Neovim, Lazygit, Mise, uv, Bun) ==="
 
-echo "  [+] Lanzando descargas en paralelo (Neovim, Lazygit, Mise, uv, Bun)..."
-
-# 1. Neovim Moderno (Background)
-(
-    if [ -f "${SCRIPT_DIR}/install-neovim.sh" ]; then
-        bash "${SCRIPT_DIR}/install-neovim.sh"
-    fi
-) &
-
-# 2. Lazygit (Background)
-(
-    if ! command -v lazygit >/dev/null 2>&1; then
-        LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*' || echo "0.44.1")
-        curl -sLo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-        tar -xf /tmp/lazygit.tar.gz -C /tmp lazygit 2>/dev/null || true
-        if [ -f /tmp/lazygit ]; then
-            install -m 755 /tmp/lazygit "${BIN_DIR}/lazygit"
-            rm -f /tmp/lazygit /tmp/lazygit.tar.gz
-            echo "  [✓] Lazygit instalado en ${BIN_DIR}/lazygit."
-        fi
-    else
-        echo "  [✓] Lazygit ya está instalado."
-    fi
-) &
-
-# 3. Mise (Background)
-(
-    if ! command -v mise >/dev/null 2>&1 && [ ! -f "${BIN_DIR}/mise" ]; then
-        curl -fsSL https://mise.run | sh 2>/dev/null || true
-        echo "  [✓] Mise instalado."
-    else
-        echo "  [✓] Mise ya está instalado."
-    fi
-) &
-
-# 4. Astral uv (Background)
-(
-    if ! command -v uv >/dev/null 2>&1 && [ ! -f "${BIN_DIR}/uv" ]; then
-        curl -LsSf https://astral.sh/uv/install.sh | env CARGO_HOME="${HOME}/.local" sh 2>/dev/null || true
-        echo "  [✓] uv instalado."
-    else
-        echo "  [✓] uv ya está instalado."
-    fi
-) &
-
-# 5. Bun (Background)
-(
-    if ! command -v bun >/dev/null 2>&1 && [ ! -f "${HOME}/.bun/bin/bun" ]; then
-        curl -fsSL https://bun.sh/install | bash 2>/dev/null || true
-        echo "  [✓] Bun instalado."
-    else
-        echo "  [✓] Bun ya está instalado."
-    fi
-) &
-
-# 6. OpenJDK 21 y GitHub CLI (Primer plano en una sola transacción del gestor del sistema)
-if ! command -v java >/dev/null 2>&1 || ! command -v gh >/dev/null 2>&1; then
-    echo "  -> Verificando/Instalando OpenJDK 21 y GitHub CLI (gh)..."
-    if command -v dnf >/dev/null 2>&1; then
-        sudo dnf install -y --skip-unavailable java-21-openjdk-devel gh || true
-    elif command -v apt-get >/dev/null 2>&1; then
-        export DEBIAN_FRONTEND=noninteractive
-        if [ -z "$(find /var/lib/apt/lists -maxdepth 1 -mmin -15 2>/dev/null)" ]; then
-            sudo apt-get update -qq || true
-        fi
-        apt_pkgs=()
-        if ! command -v java >/dev/null 2>&1; then
-            if apt-cache show openjdk-21-jdk >/dev/null 2>&1; then
-                apt_pkgs+=("openjdk-21-jdk")
-            elif apt-cache show default-jdk >/dev/null 2>&1; then
-                apt_pkgs+=("default-jdk")
-            fi
-        fi
-        if ! command -v gh >/dev/null 2>&1 && apt-cache show gh >/dev/null 2>&1; then
-            apt_pkgs+=("gh")
-        fi
-        if [ "${#apt_pkgs[@]}" -gt 0 ]; then
-            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq "${apt_pkgs[@]}" || true
-        fi
-    elif command -v pacman >/dev/null 2>&1; then
-        sudo pacman -S --needed --noconfirm jdk-openjdk github-cli || true
-    elif command -v zypper >/dev/null 2>&1; then
-        sudo zypper --non-interactive install java-21-openjdk-devel gh || true
-    elif command -v brew >/dev/null 2>&1; then
-        export HOMEBREW_NO_AUTO_UPDATE=1
-        brew install openjdk@21 gh 2>/dev/null || true
-    fi
+# 1. Astral uv (Python)
+if command -v uv >/dev/null 2>&1 || [ -x "${BIN_DIR}/uv" ]; then
+    echo "  [✓] uv ya está instalado."
 else
-    echo "  [✓] Java y GitHub CLI ya están disponibles."
+    echo "  [+] Instalando uv..."
+    TMP_UV="/tmp/uv-install-$$.sh"
+    if safe_download "https://astral.sh/uv/install.sh" "${TMP_UV}" 60; then
+        timeout 120 env CARGO_HOME="${HOME}/.local" UV_INSTALL_DIR="${BIN_DIR}" sh "${TMP_UV}" >/dev/null 2>&1 || \
+            echo "  [!] Falló el instalador de uv."
+        rm -f "${TMP_UV}"
+    fi
+    if [ -x "${BIN_DIR}/uv" ] || command -v uv >/dev/null 2>&1; then
+        echo "  [✓] uv instalado."
+    fi
 fi
 
-wait
-
-# Asegurar variables de entorno y PATH en shells de usuario
-for RC in "${HOME}/.bashrc" "${HOME}/.zshrc"; do
-    if [ -f "$RC" ]; then
-        if ! grep -q 'export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"' "$RC"; then
-            echo 'export PATH="$HOME/.local/bin:$HOME/.bun/bin:$PATH"' >> "$RC"
-        fi
+# 2. Bun (JS/TS runtime)
+if command -v bun >/dev/null 2>&1 || [ -x "${HOME}/.bun/bin/bun" ]; then
+    echo "  [✓] Bun ya está instalado."
+else
+    echo "  [+] Instalando Bun..."
+    TMP_BUN="/tmp/bun-install-$$.sh"
+    if safe_download "https://bun.sh/install" "${TMP_BUN}" 60; then
+        timeout 180 bash "${TMP_BUN}" >/dev/null 2>&1 || echo "  [!] Falló el instalador de Bun."
+        rm -f "${TMP_BUN}"
     fi
-done
+    if [ -x "${HOME}/.bun/bin/bun" ]; then
+        ln -sf "${HOME}/.bun/bin/bun" "${BIN_DIR}/bun"
+        echo "  [✓] Bun instalado."
+    fi
+fi
 
-echo ""
-echo "=========================================================="
-echo " [✓] Suite de Desarrollo lista:"
-echo "     - Neovim: 'nvim'"
-echo "     - Lazygit: 'lazygit'"
-echo "     - Mise: 'mise'"
-echo "     - Astral uv: 'uv'"
-echo "     - Bun: 'bun'"
-echo "     - Java OpenJDK: $(command -v java 2>/dev/null || echo 'en ruta')"
-echo "     - GitHub CLI: 'gh'"
-echo "=========================================================="
+# 3. Mise (gestor de runtimes)
+if command -v mise >/dev/null 2>&1 || [ -x "${BIN_DIR}/mise" ]; then
+    echo "  [✓] Mise ya está instalado."
+else
+    echo "  [+] Instalando Mise..."
+    TMP_MISE="/tmp/mise-install-$$.sh"
+    if safe_download "https://mise.run" "${TMP_MISE}" 60; then
+        timeout 180 sh "${TMP_MISE}" >/dev/null 2>&1 || echo "  [!] Falló el instalador de Mise."
+        rm -f "${TMP_MISE}"
+    fi
+    if [ -x "${BIN_DIR}/mise" ] || command -v mise >/dev/null 2>&1; then
+        echo "  [✓] Mise instalado."
+    fi
+fi
+
+# 4. Lazygit (x86_64 y arm64)
+if command -v lazygit >/dev/null 2>&1 || [ -x "${BIN_DIR}/lazygit" ]; then
+    echo "  [✓] Lazygit ya está instalado."
+else
+    echo "  [+] Instalando Lazygit..."
+    LG_ARCH="${ARCH}"
+    [ "${LG_ARCH}" = "aarch64" ] && LG_ARCH="arm64"
+    LG_VER="$(safe_fetch "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" 20 | grep -Po '"tag_name":\s*"v\K[^"]*' | head -n1 || true)"
+    LG_VER="${LG_VER:-0.44.1}"
+    TMP_LG="/tmp/lazygit-$$"
+    mkdir -p "${TMP_LG}"
+    if safe_download "https://github.com/jesseduffield/lazygit/releases/download/v${LG_VER}/lazygit_${LG_VER}_Linux_${LG_ARCH}.tar.gz" "${TMP_LG}/lazygit.tar.gz" 120; then
+        tar -xzf "${TMP_LG}/lazygit.tar.gz" -C "${TMP_LG}" lazygit 2>/dev/null || true
+        if [ -f "${TMP_LG}/lazygit" ]; then
+            install -m 755 "${TMP_LG}/lazygit" "${BIN_DIR}/lazygit"
+            echo "  [✓] Lazygit v${LG_VER} instalado en ${BIN_DIR}/lazygit."
+        fi
+    else
+        echo "  [!] No se pudo descargar Lazygit."
+    fi
+    rm -rf "${TMP_LG}"
+fi
+
+# 5. Neovim v0.10+ y configuración Lua
+if [ -f "${SCRIPT_DIR}/install-neovim.sh" ]; then
+    bash "${SCRIPT_DIR}/install-neovim.sh" || true
+fi
+
+ensure_user_path_in_rc

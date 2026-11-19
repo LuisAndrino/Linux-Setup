@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-gaming-mode.sh - Instalador del modo "Return to Gaming Mode" Universal
+# install-gaming-mode.sh - Configura "Return to Gaming Mode" universal (SteamOS UI)
 # ==============================================================================
-# Crea un lanzador universal que abre Steam con interfaz Gamepad UI (SteamOS)
-# dentro de una sesión de Gamescope optimizada, compatible con cualquier distro:
-# Ubuntu, Debian, Fedora, Arch Linux, openSUSE y Bazzite Desktop.
-# ==============================================================================
-set -euo pipefail
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
 
 BIN_DIR="${HOME}/.local/bin"
 APP_DIR="${HOME}/.local/share/applications"
@@ -14,42 +14,29 @@ DESKTOP_DIR="${HOME}/Desktop"
 
 mkdir -p "${BIN_DIR}" "${APP_DIR}"
 
-echo "=========================================================="
-echo "   Configurando Modo Universal 'Return to Gaming Mode'    "
-echo "=========================================================="
+echo "=== Return to Gaming Mode (SteamOS Gamepad UI) ==="
 
 SCRIPT_TARGET="${BIN_DIR}/return-to-gaming-mode"
 
 cat << 'EOF' > "${SCRIPT_TARGET}"
 #!/usr/bin/env bash
-# ==============================================================================
-# return-to-gaming-mode - Abre SteamOS Gamepad UI en una ventana de Gamescope
-# ==============================================================================
-# Funciona igual en cualquier distribución Linux (Debian, Fedora, Arch, Ubuntu...)
-# ==============================================================================
 set -euo pipefail
 
-# 0. Si se solicita expresamente el cambio de sesión a nivel de sistema (Bazzite Deck / SteamOS)
+export PATH="${PATH}:/usr/games:${HOME}/.local/bin"
+
 if [ "${1:-}" = "--session" ] || [ "${1:-}" = "--steamos" ]; then
     if command -v steamosctl >/dev/null 2>&1; then
-        echo "[+] Cambiando a la sesión de consola nativa de SteamOS/Bazzite..."
         exec steamosctl switch-to-game-mode
     elif [ -x /usr/bin/return-to-gamemode ]; then
         exec /usr/bin/return-to-gamemode
-    else
-        echo "[!] Este sistema no posee una sesión dedicada 'gamescope-session'. Iniciando en ventana Gamescope..."
     fi
 fi
 
-# 1. Comprobar Gamescope
 if ! command -v gamescope >/dev/null 2>&1; then
-    echo "[!] Error: Gamescope no está instalado en el sistema."
-    echo "    Puedes instalarlo ejecutando: ./setup.sh --gamescope"
+    echo "[!] Error: Gamescope no está instalado."
     exit 1
 fi
 
-# 2. Localizar ejecutable de Steam (Nativo, /usr/games o Flatpak)
-export PATH="${PATH}:/usr/games:${HOME}/.local/bin"
 STEAM_RUNNER=""
 if command -v steam >/dev/null 2>&1; then
     STEAM_RUNNER="steam"
@@ -59,41 +46,28 @@ elif command -v flatpak >/dev/null 2>&1 && flatpak info com.valvesoftware.Steam 
     STEAM_RUNNER="flatpak run com.valvesoftware.Steam"
 else
     echo "[!] Error: Steam no está instalado."
-    echo "    Puedes instalarlo ejecutando: ./setup.sh --steam"
     exit 1
 fi
 
-# 3. Si Steam está abierto en el escritorio, cerrarlo para evitar conflictos de instancia
-if pgrep -u "$USER" -x steam >/dev/null 2>&1; then
-    echo "[*] Cerrando instancia de Steam en segundo plano..."
-    ${STEAM_RUNNER} -shutdown 2>/dev/null || pkill -TERM -u "$USER" -x steam 2>/dev/null || true
+if pgrep -u "${USER:-$(id -un)}" -x steam >/dev/null 2>&1; then
+    ${STEAM_RUNNER} -shutdown 2>/dev/null || pkill -TERM -u "${USER:-$(id -un)}" -x steam 2>/dev/null || true
     for _ in {1..10}; do
-        pgrep -u "$USER" -x steam >/dev/null 2>&1 || break
+        pgrep -u "${USER:-$(id -un)}" -x steam >/dev/null 2>&1 || break
         sleep 0.5
     done
 fi
 
-# 4. Parámetros de Gamescope para recrear la experiencia SteamOS (compatibles con versiones antiguas y nuevas)
 GAMESCOPE_HELP="$(gamescope --help 2>&1 || true)"
-GAMESCOPE_ARGS=(
-    -e                       # Steam integration: enlaza controles, superposiciones y gestión de ciclo de vida
-    -f                       # Modo pantalla completa
-)
+GAMESCOPE_ARGS=(-e -f)
 if printf '%s' "$GAMESCOPE_HELP" | grep -q -- '--adaptive-sync'; then
     GAMESCOPE_ARGS+=(--adaptive-sync)
 fi
 if printf '%s' "$GAMESCOPE_HELP" | grep -q -- '--touch-gestures'; then
     GAMESCOPE_ARGS+=(--touch-gestures)
 fi
-
-# Integrar MangoHud automáticamente si mangoapp está disponible en el sistema
 if command -v mangoapp >/dev/null 2>&1; then
     GAMESCOPE_ARGS+=(--mangoapp)
 fi
-
-echo "[+] Lanzando SteamOS Gamepad UI en Gamescope..."
-echo "  [Atajo] Super + F para alternar pantalla completa / ventana."
-echo "  [Atajo] Para salir: Menú de Steam -> Encendido -> Salir de Steam (o Volver al Escritorio)."
 
 exec gamescope "${GAMESCOPE_ARGS[@]}" -- ${STEAM_RUNNER} -gamepadui -steamos
 EOF
@@ -101,13 +75,12 @@ EOF
 chmod +x "${SCRIPT_TARGET}"
 ln -sf "${SCRIPT_TARGET}" "${BIN_DIR}/gaming-mode"
 
-# 5. Crear acceso directo .desktop en el menú de aplicaciones
 DESKTOP_ENTRY="${APP_DIR}/return-to-gaming-mode.desktop"
 cat << EOF > "${DESKTOP_ENTRY}"
 [Desktop Entry]
 Name=Return to Gaming Mode
 Name[es]=Volver a Gaming Mode
-Comment=Abre la interfaz de SteamOS (Gamepad UI) en un micro-compositor Gamescope optimizado
+Comment=Abre la interfaz SteamOS (Gamepad UI) en Gamescope
 Exec=${SCRIPT_TARGET}
 Icon=steam
 Terminal=false
@@ -115,35 +88,23 @@ Type=Application
 Categories=Game;Utility;
 StartupNotify=false
 EOF
-
 chmod +x "${DESKTOP_ENTRY}"
 
-# 6. Crear acceso directo en el Escritorio si la carpeta existe y no hay ya uno nativo
-if [ -d "${DESKTOP_DIR}" ]; then
-    if [ -f "${DESKTOP_DIR}/Return.desktop" ] || [ -x "/usr/bin/return-to-gamemode" ]; then
-        echo "  [i] Se detectó acceso nativo de Bazzite/SteamOS (Return.desktop). Omitiendo duplicado en el Escritorio."
-    else
-        cp -f "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
-        chmod +x "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
-        if command -v gio >/dev/null 2>&1; then
-            gio set "${DESKTOP_DIR}/return-to-gaming-mode.desktop" metadata::trusted true 2>/dev/null || true
-        fi
-        echo "  [✓] Acceso directo creado en el Escritorio: ~/Desktop/return-to-gaming-mode.desktop"
-    fi
+if [ -d "${DESKTOP_DIR}" ] && [ ! -f "${DESKTOP_DIR}/Return.desktop" ] && [ ! -x "/usr/bin/return-to-gamemode" ]; then
+    cp -f "${DESKTOP_ENTRY}" "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
+    chmod +x "${DESKTOP_DIR}/return-to-gaming-mode.desktop"
+    command -v gio >/dev/null 2>&1 && gio set "${DESKTOP_DIR}/return-to-gaming-mode.desktop" metadata::trusted true 2>/dev/null || true
 fi
 
 if command -v update-desktop-database >/dev/null 2>&1; then
     update-desktop-database "${APP_DIR}" 2>/dev/null || true
 fi
 
-# 7. Registrar sesión Wayland nativa de SteamOS (para SDDM/GDM/LightDM) si no existe ya
+# Registrar sesión Wayland nativa (para SDDM/GDM) si el sistema es editable
 WAYLAND_SESSIONS_DIR="/usr/share/wayland-sessions"
-if [ ! -f "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" ] && command -v sudo >/dev/null 2>&1; then
-    echo "[+] Registrando sesión nativa 'SteamOS Gaming Mode' para inicio de sesión directo (SDDM/GDM)..."
-    sudo mkdir -p "${WAYLAND_SESSIONS_DIR}" /usr/local/bin 2>/dev/null || true
-
-    # Script de arranque de la sesión nativa directa sobre la GPU (DRM/KMS)
-    if sudo tee /usr/local/bin/gamescope-session-steam >/dev/null << 'EOF_SESSION'
+if [ "${IS_IMMUTABLE}" = false ] && [ ! -f "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" ]; then
+    if run_root mkdir -p "${WAYLAND_SESSIONS_DIR}" /usr/local/bin 2>/dev/null; then
+        if run_root tee /usr/local/bin/gamescope-session-steam >/dev/null << 'EOF_SESSION'
 #!/usr/bin/env bash
 export PATH="${PATH}:/usr/games:${HOME}/.local/bin"
 export XDG_CURRENT_DESKTOP="gamescope"
@@ -178,36 +139,26 @@ fi
 
 exec gamescope "${GAMESCOPE_FLAGS[@]}" -- ${STEAM_CMD} -gamepadui -steamos
 EOF_SESSION
-    then
-        sudo chmod +x /usr/local/bin/gamescope-session-steam 2>/dev/null || true
-
-        # Entrada de sesión Wayland para SDDM / GDM
-        sudo tee "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" >/dev/null << 'EOF_ENTRY' || true
+        then
+            run_root chmod +x /usr/local/bin/gamescope-session-steam 2>/dev/null || true
+            run_root tee "${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop" >/dev/null << 'EOF_ENTRY' || true
 [Desktop Entry]
 Encoding=UTF-8
 Name=SteamOS Gaming Mode
-Comment=Sesión nativa de SteamOS en hardware directo sin entorno de escritorio
+Comment=Sesión nativa de SteamOS sobre Gamescope
 Exec=/usr/local/bin/gamescope-session-steam
 Type=Application
 DesktopNames=gamescope
 EOF_ENTRY
-
-        # Manejador invocado por Steam al pulsar "Cambiar al Escritorio" (Switch to Desktop)
-        sudo tee /usr/local/bin/steamos-session-select >/dev/null << 'EOF_SELECT' || true
+            run_root tee /usr/local/bin/steamos-session-select >/dev/null << 'EOF_SELECT' || true
 #!/usr/bin/env bash
-pkill -TERM -u "$USER" -x gamescope 2>/dev/null || true
+pkill -TERM -u "${USER:-$(id -un)}" -x gamescope 2>/dev/null || true
 steam -shutdown 2>/dev/null || true
 EOF_SELECT
-
-        sudo chmod +x /usr/local/bin/steamos-session-select 2>/dev/null || true
-        echo "  [✓] Sesión nativa registrada con éxito en ${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop."
-    else
-        echo "  [!] No se pudo escribir en /usr/local/bin o ${WAYLAND_SESSIONS_DIR} (sistema inmutable o sin permisos sudo). El lanzador de usuario 'return-to-gaming-mode' sigue disponible."
+            run_root chmod +x /usr/local/bin/steamos-session-select 2>/dev/null || true
+            echo "  [✓] Sesión Wayland registrada en ${WAYLAND_SESSIONS_DIR}/gamescope-session-steam.desktop"
+        fi
     fi
 fi
 
-echo "  [✓] Comando disponible en la terminal: 'return-to-gaming-mode' o 'gaming-mode'"
-echo "  [✓] Entrada en el menú de aplicaciones: 'Return to Gaming Mode'"
-echo "=========================================================="
-echo " [✓] ¡Configuración de Return to Gaming Mode completada!"
-echo "=========================================================="
+echo "  [✓] Comando listo: ${SCRIPT_TARGET} (alias 'gaming-mode')"

@@ -1,89 +1,70 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# install-steam.sh - Instalador de Steam (Nativo con opción Flatpak)
+# install-steam.sh - Instalador multi-distro de Steam
 # ==============================================================================
-set -euo pipefail
+set -uo pipefail
 
-PREFER_FLATPAK="${1:-false}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/common.sh"
 
-echo "=========================================================="
-echo "                Instalación de Steam                      "
-echo "=========================================================="
+echo "=== Steam ==="
 
-if command -v steam >/dev/null 2>&1; then
-    echo "[✓] Steam nativo ya está instalado en el sistema ($(command -v steam))."
-    exit 0
-elif flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
-    echo "[✓] Steam (Flatpak) ya está instalado."
+if command -v steam >/dev/null 2>&1 || [ -x /usr/games/steam ]; then
+    echo "  [✓] Steam ya está instalado."
     exit 0
 fi
 
-if [ "$PREFER_FLATPAK" = "true" ]; then
-    echo "[+] Instalando Steam vía Flatpak (Flathub)..."
-    flatpak install -y flathub com.valvesoftware.Steam
+if command -v flatpak >/dev/null 2>&1 && flatpak info com.valvesoftware.Steam >/dev/null 2>&1; then
+    echo "  [✓] Steam ya está instalado vía Flatpak."
     exit 0
 fi
 
-# Detectar sistema inmutable
-if [ -f /etc/os-release ]; then
-    # shellcheck source=/dev/null
-    . /etc/os-release
-    if [ "${ID:-}" = "bazzite" ] || [ "${ID:-}" = "steamos" ]; then
-        echo "[✓] En ${ID:-}, Steam ya viene integrado o se recomienda Flatpak si no está presente."
-        if ! command -v steam >/dev/null 2>&1; then
-            flatpak install -y flathub com.valvesoftware.Steam
+if [ "${ARCH}" != "x86_64" ]; then
+    echo "  [!] Steam requiere arquitectura x86_64 (actual: ${ARCH}). Omitiendo."
+    exit 0
+fi
+
+case "${PKG_MGR}" in
+    immutable)
+        flatpak_install_safe com.valvesoftware.Steam || true
+        ;;
+    apt)
+        echo "  [+] Instalando Steam vía APT (i386 + EULA no interactiva)..."
+        if command -v debconf-set-selections >/dev/null 2>&1; then
+            echo "steam steam/question select I AGREE" | run_root debconf-set-selections 2>/dev/null || true
+            echo "steam steam/license note ''" | run_root debconf-set-selections 2>/dev/null || true
         fi
-        exit 0
-    fi
+        if apt_has_candidate steam-installer; then
+            apt_install_list steam-installer
+        elif apt_has_candidate steam; then
+            apt_install_list steam
+        fi
+        ;;
+    dnf)
+        echo "  [+] Intentando instalar Steam vía DNF..."
+        if ! run_root dnf install -y --setopt=timeout=30 --setopt=retries=3 steam 2>/dev/null; then
+            echo "  [i] Steam no está en repos base de Fedora (requiere RPM Fusion). Usando Flatpak..."
+            flatpak_install_safe com.valvesoftware.Steam || true
+        fi
+        ;;
+    pacman)
+        echo "  [+] Instalando Steam vía Pacman ([multilib])..."
+        # Incluir mesa/vulkan para evitar preguntas interactivas de proveedor vulkan-driver
+        pacman_install_list vulkan-icd-loader lib32-vulkan-icd-loader mesa lib32-mesa steam
+        ;;
+    zypper)
+        echo "  [+] Instalando Steam vía Zypper..."
+        zypper_install_list steam
+        ;;
+esac
+
+if ! command -v steam >/dev/null 2>&1 && [ ! -x /usr/games/steam ]; then
+    flatpak_install_safe com.valvesoftware.Steam || true
 fi
 
-echo "[+] Intentando instalación de Steam nativo..."
-
-if command -v apt-get >/dev/null 2>&1; then
-    echo "[APT] Habilitando i386/multiverse e instalando Steam..."
-    export DEBIAN_FRONTEND=noninteractive
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install -qq software-properties-common debconf-utils 2>/dev/null || true
-    if grep -qiE '^ID=ubuntu|^ID_LIKE=.*ubuntu' /etc/os-release 2>/dev/null && command -v add-apt-repository >/dev/null 2>&1; then
-        sudo add-apt-repository -y multiverse >/dev/null 2>&1 || true
-    fi
-    sudo dpkg --add-architecture i386 2>/dev/null || true
-    sudo apt-get -o DPkg::Lock::Timeout=120 update -qq || sudo apt-get update -y || true
-    # Pre-aceptar EULA de Steam si debconf-set-selections está disponible (evita bloqueos interactivos)
-    if command -v debconf-set-selections >/dev/null 2>&1; then
-        echo "steam steam/question select I AGREE" | sudo debconf-set-selections 2>/dev/null || true
-        echo "steam steam/license note ''" | sudo debconf-set-selections 2>/dev/null || true
-    fi
-    if ! sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install steam-installer 2>/dev/null && \
-       ! sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o DPkg::Lock::Timeout=120 install steam 2>/dev/null; then
-        echo "[!] Falló instalación APT. Instalando Flatpak de Steam..."
-        flatpak install -y --noninteractive flathub com.valvesoftware.Steam || flatpak install --user -y --noninteractive flathub com.valvesoftware.Steam || true
-    fi
-
-elif command -v dnf >/dev/null 2>&1; then
-    echo "[DNF] Habilitando RPM Fusion e instalando Steam..."
-    sudo dnf install -y "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm" 2>/dev/null || true
-    sudo dnf install -y steam || {
-        echo "[!] Falló instalación DNF. Instalando Flatpak de Steam..."
-        flatpak install -y flathub com.valvesoftware.Steam
-    }
-
-elif command -v pacman >/dev/null 2>&1; then
-    echo "[PACMAN] Instalando Steam..."
-    if [ -f /etc/pacman.conf ] && grep -qE '^#\[multilib\]' /etc/pacman.conf; then
-        echo "[+] Habilitando repositorio [multilib] en /etc/pacman.conf..."
-        sudo sed -i '/^#\[multilib\]/,/^#Include/ s/^#//' /etc/pacman.conf 2>/dev/null || true
-        sudo pacman -Sy --noconfirm || true
-    fi
-    sudo pacman -S --needed --noconfirm steam || {
-        echo "[!] No se pudo instalar Steam nativo. Instalando vía Flatpak..."
-        if ! command -v flatpak >/dev/null 2>&1; then
-            sudo pacman -S --needed --noconfirm flatpak || true
-        fi
-        flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
-        flatpak install -y --noninteractive flathub com.valvesoftware.Steam || true
-    }
-
+if command -v steam >/dev/null 2>&1 || [ -x /usr/games/steam ] || (command -v flatpak >/dev/null 2>&1 && flatpak info com.valvesoftware.Steam >/dev/null 2>&1); then
+    echo "  [✓] Steam instalado correctamente."
 else
-    echo "[!] Distribución no soportada nativamente para Steam. Instalando versión Flatpak..."
-    flatpak install -y flathub com.valvesoftware.Steam
+    echo "  [!] No se pudo instalar Steam en este entorno."
 fi
