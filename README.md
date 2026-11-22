@@ -20,7 +20,7 @@ cd ~/linux-setup && ./setup.sh
 2. **Apps nativas:** Brave Origin, Mozilla Firefox (APT oficial sin Snap en Ubuntu), Visual Studio Code, Steam, Gamescope, Tailscale, 1Password (+ CLI `op`), Alacritty.
 3. **Gaming Mode universal:** comando `return-to-gaming-mode` (alias `gaming-mode`), acceso en el menú de aplicaciones y sesión Wayland `SteamOS Gaming Mode` (`/usr/share/wayland-sessions/gamescope-session-steam.desktop`).
 4. **Suite de Desarrollo:** `uv`, `Bun`, `Mise`, `Lazygit`, `Neovim v0.10+` con configuración Lua.
-5. **Suite de IA y Gaming de usuario:** `Ollama`, `Claude Code CLI`, `Google Antigravity`, `OpenBot`, `Grok Bot`, `Hex`, `lsfg-vk`, `RecompLauncher`, `Streaming Service Launcher`, motores de búsqueda para `qBittorrent` y atajos `agent` / `c`.
+5. **Suite de IA y Gaming de usuario:** `Ollama`, `Claude Code CLI`, `Google Antigravity`, `OpenBot`, `Grok Bot`, `Hex`, `lsfg-vk`, `Streaming Service Launcher`, motores de búsqueda para `qBittorrent` y atajos `agent` / `c`.
 6. **Apps Flatpak (Flathub):** lista curada en `packages/flatpak-apps.txt` + `ArtCraft Launcher` (omitiendo automáticamente lo ya instalado de forma nativa).
 7. **Optimizaciones de sistema y red:** `sysctl` gaming (`vm.max_map_count`, `swappiness=10`, TCP BBR), desactivación de WiFi Power Save y perfil AC automático para laptops.
 

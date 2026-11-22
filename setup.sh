@@ -80,7 +80,6 @@ echo -e "\n${BOLD}${CYAN}[5/7] Suite de Inteligencia Artificial y Utilidades Gam
 bash "${SCRIPTS_DIR}/install-ai-tools.sh" || true
 for script in \
     install-lsfg-vk.sh \
-    install-recomplauncher.sh \
     install-streaming-launcher.sh \
     configure-qbittorrent.sh; do
     if [ -f "${SCRIPTS_DIR}/${script}" ]; then
