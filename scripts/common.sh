@@ -25,6 +25,7 @@ fi
 
 export NONINTERACTIVE=1
 export DEBIAN_FRONTEND=noninteractive
+export USER="${USER:-$(id -un)}"
 export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:/usr/games:/usr/local/bin:${PATH}"
 
 # ------------------------------------------------------------------------------

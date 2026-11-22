@@ -139,9 +139,10 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Paso 7/7: Optimizaciones de Sistema y Red
+# Paso 7/7: Tema WhiteSur (solo si usa KDE Plasma) y Optimizaciones de Sistema
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}${CYAN}[7/7] Optimizaciones de Sistema, Red y Energía...${NC}"
+echo -e "\n${BOLD}${CYAN}[7/7] Tema KDE WhiteSur (si aplica) y Optimizaciones de Sistema...${NC}"
+bash "${SCRIPTS_DIR}/install-whitesur-kde.sh" || true
 if [ "${IN_CONTAINER}" = false ]; then
     run_root bash "${SCRIPTS_DIR}/optimize-system.sh" || bash "${SCRIPTS_DIR}/optimize-system.sh" || true
 else
@@ -181,6 +182,9 @@ echo -e "  ${GREEN}[✓] Disponibles (${#ok_list[@]}):${NC} ${ok_list[*]:-ningun
 echo -e "  ${CYAN}[i] Apps Flatpak:${NC} ${fp_count}"
 if [ -f /usr/share/wayland-sessions/gamescope-session-steam.desktop ]; then
     echo -e "  ${GREEN}[✓] Sesión Wayland Gaming Mode:${NC} /usr/share/wayland-sessions/gamescope-session-steam.desktop"
+fi
+if [ -d "${HOME}/.local/share/plasma/desktoptheme/WhiteSur" ] || [ -d /usr/share/plasma/desktoptheme/WhiteSur ]; then
+    echo -e "  ${GREEN}[✓] Tema KDE WhiteSur:${NC} instalado (Plasma + Iconos + Cursores + GTK + Kvantum)"
 fi
 if [ ${#miss_list[@]} -gt 0 ]; then
     echo -e "  ${YELLOW}[!] No presentes como binario nativo (${#miss_list[@]}):${NC} ${miss_list[*]}"
