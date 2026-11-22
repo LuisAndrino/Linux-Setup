@@ -7,6 +7,7 @@
 
 # --- DESARROLLO, PROGRAMACIÓN Y BASE DE DATOS ---
 com.visualstudio.code                # Visual Studio Code (Omitido si ya tienes VS Code nativo)
+org.apache.netbeans                  # Apache NetBeans IDE (Java / Web / PHP)
 io.dbeaver.DBeaverCommunity          # DBeaver Community (Gestor SQL Universal)
 io.github.DenysMb.Kontainer          # GUI ligera para contenedores Podman / Docker
 

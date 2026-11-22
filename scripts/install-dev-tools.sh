@@ -88,4 +88,14 @@ if [ -f "${SCRIPT_DIR}/install-neovim.sh" ]; then
     bash "${SCRIPT_DIR}/install-neovim.sh" || true
 fi
 
+# 6. Java 25 LTS (Eclipse Temurin OpenJDK 25)
+if [ -f "${SCRIPT_DIR}/install-java25.sh" ]; then
+    bash "${SCRIPT_DIR}/install-java25.sh" || true
+fi
+
+# 7. RunJS (JavaScript/TypeScript Desktop Playground)
+if [ -f "${SCRIPT_DIR}/install-runjs.sh" ]; then
+    bash "${SCRIPT_DIR}/install-runjs.sh" || true
+fi
+
 ensure_user_path_in_rc

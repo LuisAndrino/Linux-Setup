@@ -83,8 +83,8 @@ else
     fi
 fi
 
-# 3. Antigravity, OpenBot, GrokBot y Hex (secuenciales con timeouts para evitar bloqueos)
-for sub in install-antigravity.sh install-openbot.sh install-grokbot.sh install-hex.sh; do
+# 3. Claude Desktop App GUI, Google Antigravity App GUI, OpenBot, GrokBot y Hex
+for sub in install-claude-desktop.sh install-antigravity.sh install-openbot.sh install-grokbot.sh install-hex.sh; do
     if [ -f "${SCRIPT_DIR}/${sub}" ]; then
         bash "${SCRIPT_DIR}/${sub}" || true
     fi

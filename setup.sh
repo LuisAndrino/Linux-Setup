@@ -37,10 +37,11 @@ if [ "${EUID:-$(id -u)}" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
 fi
 
 # ------------------------------------------------------------------------------
-# Paso 1/7: Pre-requisitos del sistema, CLI, desarrollo base y Flatpak
+# Paso 1/7: Pre-requisitos del sistema, CLI, desarrollo base y Flatpak + Flathub
 # ------------------------------------------------------------------------------
-echo -e "\n${BOLD}${CYAN}[1/7] Pre-requisitos del sistema y paquetes CLI...${NC}"
+echo -e "\n${BOLD}${CYAN}[1/7] Pre-requisitos del sistema, Flatpak y paquetes CLI...${NC}"
 install_essential_cli
+ensure_flatpak_prereq
 ensure_user_path_in_rc
 
 # ------------------------------------------------------------------------------
@@ -157,7 +158,7 @@ export PATH="${HOME}/.local/bin:${HOME}/.bun/bin:/usr/games:/usr/local/bin:${PAT
 
 ok_list=()
 miss_list=()
-for cmd in curl git jq rg fzf bat fd zoxide gh nvim lazygit mise uv bun claude firefox code steam gamescope return-to-gaming-mode alacritty tailscale op flatpak; do
+for cmd in curl git jq rg fzf bat fd zoxide gh java nvim lazygit mise uv bun runjs claude claude-desktop antigravity firefox code steam gamescope return-to-gaming-mode alacritty tailscale op flatpak; do
     if command -v "$cmd" >/dev/null 2>&1; then
         ok_list+=("$cmd")
     else

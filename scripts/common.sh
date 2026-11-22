@@ -305,8 +305,26 @@ zypper_install_list() {
 }
 
 # ------------------------------------------------------------------------------
-# Helper de Flatpak (soporta sistema y fallback --user sin Polkit, con timeout)
+# Helper de Flatpak (pre-requisito garantizado + Flathub + fallback --user)
 # ------------------------------------------------------------------------------
+ensure_flatpak_prereq() {
+    if ! command -v flatpak >/dev/null 2>&1; then
+        echo "  [+] Instalando pre-requisito Flatpak..."
+        case "${PKG_MGR}" in
+            apt)    apt_install_list flatpak ;;
+            dnf)    dnf_install_list flatpak ;;
+            pacman) pacman_install_list flatpak ;;
+            zypper) zypper_install_list flatpak ;;
+        esac
+    fi
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak_setup_flathub
+        echo "  [✓] Pre-requisito Flatpak + Flathub listo."
+    else
+        echo "  [!] No se pudo instalar Flatpak en este sistema."
+    fi
+}
+
 flatpak_setup_flathub() {
     if ! command -v flatpak >/dev/null 2>&1; then
         return 1
